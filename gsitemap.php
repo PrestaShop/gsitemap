@@ -1,5 +1,4 @@
 <?php
-
 /*
  *  2007-2014 PrestaShop
  *
@@ -23,6 +22,7 @@
  *  @license    http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  *  International Registered Trademark & Property of PrestaShop SA
  */
+
 if (!defined('_PS_VERSION_'))
 	exit;
 
@@ -71,22 +71,7 @@ class Gsitemap extends Module
 				return false;
 
 		return parent::install() &&
-		Db::getInstance()->Execute('CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'gsitemap_sitemap` (`link` varchar(255) DEFAULT NULL, `id_shop` int(11) DEFAULT 0) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8;') &&
-		$this->_installOverride();
-	}
-
-	private function _installOverride()
-	{
-		if (_PS_VERSION_ != '1.4.11.0')
-			return true;
-		if (!is_dir(dirname(__FILE__).'/../../override/classes/'))
-			mkdir(dirname(__FILE__).'/../../override/classes/', 0777, true);
-		if (file_exists(dirname(__FILE__).'/../../override/classes/Shop.php'))
-			rename(dirname(__FILE__).'/../../override/classes/Shop.php', dirname(__FILE__).'/../../override/classes/Shop.origin.php');
-		if (!copy(dirname(__FILE__).'/override14/classes/Shop.php', dirname(__FILE__).'/../../override/classes/Shop.php'))
-			return false;
-
-		return true;
+		Db::getInstance()->Execute('CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'gsitemap_sitemap` (`link` varchar(255) DEFAULT NULL, `id_shop` int(11) DEFAULT 0) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8;');
 	}
 
 
@@ -154,10 +139,6 @@ class Gsitemap extends Module
 		elseif (Tools::getValue('continue'))
 			$this->createSitemap();
 
-		/* Backward compatibility */
-		if (_PS_VERSION_ < 1.5)
-			require(_PS_MODULE_DIR_.'gsitemap/backward_compatibility/backward.php');
-
 		/* Empty the Shop domain cache */
 		if (method_exists('ShopUrl', 'resetMainDomainCache'))
 			ShopUrl::resetMainDomainCache();
@@ -177,7 +158,6 @@ class Gsitemap extends Module
 					'max_exec_time' => (int)ini_get('max_execution_time'),
 					'memory_limit' => intval(ini_get('memory_limit'))
 				),
-				'prestashop_version' => _PS_VERSION_ >= 1.5 ? '1.5' : '1.4',
 				'prestashop_ssl' => Configuration::get('PS_SSL_ENABLED'),
 				'gsitemap_check_image_file' => Configuration::get('GSITEMAP_CHECK_IMAGE_FILE'),
 				'shop' => $this->context->shop
@@ -312,15 +292,10 @@ class Gsitemap extends Module
 			$url = '';
 			if (!in_array($meta['id_meta'], explode(',', Configuration::get('GSITEMAP_DISABLE_LINKS'))))
 			{
-				if (_PS_VERSION_ >= 1.5)
-				{
-					$url_rewrite = Db::getInstance()->getValue('SELECT url_rewrite, id_shop FROM `'._DB_PREFIX_.'meta_lang` WHERE `id_meta` = '.(int)$meta['id_meta'].' AND `id_shop` ='.(int)$this->context->shop->id.' AND `id_lang` = '.(int)$lang['id_lang']);
-					Dispatcher::getInstance()->addRoute($meta['page'], (isset($url_rewrite) ? $url_rewrite : $meta['page']), $meta['page'], $lang['id_lang']);
-					$uri_path = Dispatcher::getInstance()->createUrl($meta['page'], $lang['id_lang'], array(), (bool)Configuration::get('PS_REWRITING_SETTINGS'));
-					$url .= Tools::getShopDomainSsl(true).(($this->context->shop->virtual_uri) ? __PS_BASE_URI__.$this->context->shop->virtual_uri : __PS_BASE_URI__).(Language::isMultiLanguageActivated() ? $lang['iso_code'].'/' : '').ltrim($uri_path, '/');
-				}
-				else
-					$url = $link->getPageLink($meta['page'].'.php', true, $lang['id_lang']);
+				$url_rewrite = Db::getInstance()->getValue('SELECT url_rewrite, id_shop FROM `'._DB_PREFIX_.'meta_lang` WHERE `id_meta` = '.(int)$meta['id_meta'].' AND `id_shop` ='.(int)$this->context->shop->id.' AND `id_lang` = '.(int)$lang['id_lang']);
+				Dispatcher::getInstance()->addRoute($meta['page'], (isset($url_rewrite) ? $url_rewrite : $meta['page']), $meta['page'], $lang['id_lang']);
+				$uri_path = Dispatcher::getInstance()->createUrl($meta['page'], $lang['id_lang'], array(), (bool)Configuration::get('PS_REWRITING_SETTINGS'));
+				$url .= Tools::getShopDomainSsl(true).(($this->context->shop->virtual_uri) ? __PS_BASE_URI__.$this->context->shop->virtual_uri : __PS_BASE_URI__).(Language::isMultiLanguageActivated() ? $lang['iso_code'].'/' : '').ltrim($uri_path, '/');
 
 				if (!$this->_addLinkToSitemap(
 					$link_sitemap, array(
@@ -360,15 +335,8 @@ class Gsitemap extends Module
 		foreach ($products_id as $product_id)
 		{
 			$product = new Product((int)$product_id['id_product'], false, (int)$lang['id_lang']);
-			if (_PS_VERSION_ >= 1.5)
-			{
-				$url = $link->getProductLink($product, $product->link_rewrite, htmlspecialchars(strip_tags($product->category)), $product->ean13, (int)$lang['id_lang'], (int)$this->context->shop->id, 0, true);
-			}
-			else
-			{
-				$category = new Category((int)$product->id_category_default, (int)$lang['id_lang']);
-				$url = $link->getProductLink($product, Configuration::get('PS_REWRITING_SETTINGS') ? $product->link_rewrite : false, htmlspecialchars(strip_tags($category->name)), $product->ean13, (int)$lang['id_lang']);
-			}
+
+			$url = $link->getProductLink($product, $product->link_rewrite, htmlspecialchars(strip_tags($product->category)), $product->ean13, (int)$lang['id_lang'], (int)$this->context->shop->id, 0, true);
 
 			$id_image = Product::getCover((int)$product_id['id_product']);
 			if (isset($id_image['id_image']))
@@ -671,10 +639,6 @@ class Gsitemap extends Module
 
 		if ($id_shop != 0)
 			$this->context->shop = new Shop((int)$id_shop);
-
-		/* Backward compatibility */
-		if (_PS_VERSION_ < 1.5)
-			require(_PS_MODULE_DIR_.'gsitemap/backward_compatibility/backward.php');
 
 		$type = Tools::getValue('type') ? Tools::getValue('type') : '';
 		$languages = Language::getLanguages();

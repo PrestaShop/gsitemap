@@ -164,7 +164,7 @@ class Gsitemap extends Module
 			)
 		);
 
-		return $this->display(__FILE__, 'tpl/configuration.tpl');
+		return $this->display(__FILE__, 'views/templates/admin/configuration.tpl');
 	}
 
 	/**

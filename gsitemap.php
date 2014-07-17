@@ -44,6 +44,16 @@ class Gsitemap extends Module
 		
 		$this->displayName = $this->l('Google sitemap');
 		$this->description = $this->l('Generate your Google sitemap file');
+
+		$this->type_array = array('home', 'meta', 'product', 'category', 'manufacturer', 'supplier', 'cms');
+
+		$metas = Db::getInstance()->ExecuteS('SELECT * FROM `'._DB_PREFIX_.'meta` ORDER BY `id_meta` ASC');
+		$disabled_metas = explode(',', Configuration::get('GSITEMAP_DISABLE_LINKS'));
+		foreach ($metas as $meta)
+			if (in_array($meta['id_meta'], $disabled_metas))
+				if (($key = array_search($meta['page'], $this->type_array)) !== false)
+				    unset($this->type_array[$key]);
+
 	}
 
 	/**
@@ -644,8 +654,6 @@ class Gsitemap extends Module
 		$languages = Language::getLanguages();
 		$lang_stop = Tools::getValue('lang') ? true : false;
 		$id_obj = Tools::getValue('id') ? (int)Tools::getValue('id') : 0;
-		$type_array = array('home', 'meta', 'product', 'category', 'manufacturer', 'supplier', 'cms');
-		//$type_array = array('product', 'manufacturer', 'supplier', 'cms');
 		foreach ($languages as $lang)
 		{
 			$i = 0;
@@ -656,7 +664,7 @@ class Gsitemap extends Module
 				$lang_stop = false;
 
 			$link_sitemap = array();
-			foreach ($type_array as $type_val)
+			foreach ($this->type_array as $type_val)
 			{
 				if ($type == '' || $type == $type_val)
 				{
@@ -674,7 +682,6 @@ class Gsitemap extends Module
 
 		$this->_createIndexSitemap();
 		Configuration::updateValue('GSITEMAP_LAST_EXPORT', date('r'));
-
 		Tools::file_get_contents('http://www.google.com/webmasters/sitemaps/ping?sitemap='.urlencode('http'.(Configuration::get('PS_SSL_ENABLED') ? 's' : '').'://'.Tools::getShopDomain(false, true).$this->context->shop->physical_uri.$this->context->shop->virtual_uri.$this->context->shop->id.'_index_sitemap.xml'));
 
 		if ($this->cron)

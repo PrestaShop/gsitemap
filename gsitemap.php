@@ -42,7 +42,7 @@ class Gsitemap extends Module
 		$this->need_instance = 0;
 
 		parent::__construct();
-		
+
 		$this->displayName = $this->l('Google sitemap');
 		$this->description = $this->l('Generate your Google sitemap file');
 
@@ -308,7 +308,7 @@ class Gsitemap extends Module
 		if (method_exists('ShopUrl', 'resetMainDomainCache'))
 			ShopUrl::resetMainDomainCache();
 		$link = new Link();
-		if(version_compare(_PS_VERSION_, '1.6', '>='))
+		if (version_compare(_PS_VERSION_, '1.6', '>='))
 			$metas = Db::getInstance()->ExecuteS('SELECT * FROM `'._DB_PREFIX_.'meta` WHERE `configurable` > 0 AND `id_meta` >= '.(int)$id_meta.' ORDER BY `id_meta` ASC');
 		else
 			$metas = Db::getInstance()->ExecuteS('SELECT * FROM `'._DB_PREFIX_.'meta` WHERE `id_meta` >= '.(int)$id_meta.' ORDER BY `id_meta` ASC');
@@ -329,8 +329,7 @@ class Gsitemap extends Module
 						'link' => $url,
 						'image' => false
 					), $lang['iso_code'], $index, $i, $meta['id_meta']
-				)
-				)
+				))
 					return false;
 			}
 		}
@@ -393,8 +392,7 @@ class Gsitemap extends Module
 					'link' => $url,
 					'image' => $image_product
 				), $lang['iso_code'], $index, $i, $product_id['id_product']
-			)
-			)
+			))
 				return false;
 
 			unset($image_link);
@@ -460,8 +458,7 @@ class Gsitemap extends Module
 					'link' => $url,
 					'image' => $image_category
 				), $lang['iso_code'], $index, $i, (int)$category_id['id_category']
-			)
-			)
+			))
 				return false;
 
 			unset($image_link);
@@ -527,9 +524,8 @@ class Gsitemap extends Module
 					'link' => $url,
 					'image' => $manifacturer_image
 				), $lang['iso_code'], $index, $i, $manufacturer_id['id_manufacturer']
-			)
-			)
-				return false;;
+			))
+				return false;
 		}
 
 		return true;
@@ -589,8 +585,7 @@ class Gsitemap extends Module
 					'link' => $url,
 					'image' => $supplier_image
 				), $lang['iso_code'], $index, $i, $supplier_id['id_supplier']
-			)
-			)
+			))
 				return false;
 		}
 
@@ -636,8 +631,7 @@ class Gsitemap extends Module
 					'link' => $url,
 					'image' => false
 				), $lang['iso_code'], $index, $i, $cms_id['id_cms']
-			)
-			)
+			))
 				return false;
 		}
 

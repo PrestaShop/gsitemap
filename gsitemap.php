@@ -126,7 +126,7 @@ class Gsitemap extends Module
 			if (!Configuration::deleteByName($key))
 				return false;
 
-		$hook = new Hook(Hook::getIdByName($hook_name));
+		$hook = new Hook(Hook::getIdByName(self::HOOK_ADD_URLS));
 		if (Validate::isLoadedObject($hook))
 			$hook->delete();
 

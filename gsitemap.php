@@ -28,6 +28,7 @@ if (!defined('_PS_VERSION_'))
 
 class Gsitemap extends Module
 {
+	const HOOK_ADD_URLS = 'gSitemapAppendUrls';
 
 	public $cron = false;
 	private $sql_checks = array();
@@ -45,14 +46,14 @@ class Gsitemap extends Module
 		$this->displayName = $this->l('Google sitemap');
 		$this->description = $this->l('Generate your Google sitemap file');
 
-		$this->type_array = array('home', 'meta', 'product', 'category', 'manufacturer', 'supplier', 'cms');
+		$this->type_array = array('home', 'meta', 'product', 'category', 'manufacturer', 'supplier', 'cms', 'module');
 
 		$metas = Db::getInstance()->ExecuteS('SELECT * FROM `'._DB_PREFIX_.'meta` ORDER BY `id_meta` ASC');
 		$disabled_metas = explode(',', Configuration::get('GSITEMAP_DISABLE_LINKS'));
 		foreach ($metas as $meta)
 			if (in_array($meta['id_meta'], $disabled_metas))
 				if (($key = array_search($meta['page'], $this->type_array)) !== false)
-				    unset($this->type_array[$key]);
+					unset($this->type_array[$key]);
 
 	}
 
@@ -81,9 +82,19 @@ class Gsitemap extends Module
 				return false;
 
 		return parent::install() &&
-		Db::getInstance()->Execute('CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'gsitemap_sitemap` (`link` varchar(255) DEFAULT NULL, `id_shop` int(11) DEFAULT 0) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8;');
+		Db::getInstance()->Execute('CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'gsitemap_sitemap` (`link` varchar(255) DEFAULT NULL, `id_shop` int(11) DEFAULT 0) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8;') &&
+		$this->_installHook();
 	}
 
+	private function _installHook()
+	{
+		$hook = new Hook();
+		$hook->name = self::HOOK_ADD_URLS;
+		$hook->title = 'GSitemap Append URLs';
+		$hook->description = 'This hook allows a module to add URLs to a generated sitemap';
+		$hook->position = true;
+		return $hook->save();
+	}
 
 	/**
 	 * Google Sitemap uninstallation process:
@@ -109,6 +120,10 @@ class Gsitemap extends Module
 		) as $key => $val)
 			if (!Configuration::deleteByName($key))
 				return false;
+
+		$hook = new Hook(Hook::getIdByName($hook_name));
+		if (Validate::isLoadedObject($hook))
+			$hook->delete();
 
 		return parent::uninstall() && $this->removeSitemap();
 	}
@@ -626,6 +641,25 @@ class Gsitemap extends Module
 				return false;
 		}
 
+		return true;
+	}
+
+	private function _getModuleLink(&$link_sitemap, $lang, &$index, &$i, $num_link = 0)
+	{
+		$modules_links = Hook::exec(self::HOOK_ADD_URLS, array('lang' => $lang), null, true);
+		if (empty($modules_links) || !is_array($modules_links))
+			return true;
+		$links = array();
+		foreach ($modules_links as $module_links)
+			$links = array_merge($links, $module_links);
+		foreach ($module_links as $n => $link)
+		{
+			if ($num_link > $n)
+				continue;
+			$link['type'] = 'module';
+			if (!$this->_addLinkToSitemap($link_sitemap, $link, $lang['iso_code'], $index, $i, $n))
+				return false;
+		}
 		return true;
 	}
 

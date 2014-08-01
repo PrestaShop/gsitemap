@@ -76,7 +76,7 @@
 		<label for="ggsitemap_check_all" style="width: 526px;"><span>{l s='check all' mod='gsitemap'}</span>
 			<input type="checkbox" name="gsitemap_check_all" value="1" class="check"></label>
 		<br class="clear" />
-		<p for="gsitemap_meta">{l s='Indicate the page that you do not want to include in your Sitemaps file:' mod='gsitemap'}</p>
+		<p for="gsitemap_meta">{l s='Indicate the pages that you do not want to include in your Sitemaps file:' mod='gsitemap'}</p>
 		<ul>
 			{foreach from=$store_metas item=store_meta}
 				<li style="float: left; width: 200px; margin: 1px;">

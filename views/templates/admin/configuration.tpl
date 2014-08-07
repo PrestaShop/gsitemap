@@ -76,7 +76,7 @@
 		<label for="ggsitemap_check_all" style="width: 526px;"><span>{l s='check all' mod='gsitemap'}</span>
 			<input type="checkbox" name="gsitemap_check_all" value="1" class="check"></label>
 		<br class="clear" />
-		<p for="gsitemap_meta">{l s='Indicate the page that you do not want to include in your Sitemaps file:' mod='gsitemap'}</p>
+		<p for="gsitemap_meta">{l s='Indicate the pages that you do not want to include in your Sitemaps file:' mod='gsitemap'}</p>
 		<ul>
 			{foreach from=$store_metas item=store_meta}
 				<li style="float: left; width: 200px; margin: 1px;">
@@ -92,7 +92,7 @@
 	</fieldset>
 </form><br />
 
-<p class="info" style="width: 680px; margin: 10px auto;{if $prestashop_version == '1.4'} background: url('../img/admin/help2.png') no-repeat scroll 6px 6px #BDE5F8; border: 1px solid #00529B; border-radius: 3px 3px 3px 3px; color: #00529B; font-family: Arial,Verdana,Helvetica,sans-serif; font-size: 12px; margin-bottom: 15px; min-height: 32px; padding: 10px 5px 5px 40px;{/if}">
+<p class="info" style="width: 680px; margin: 10px auto;">
 	<b style="display: block; margin-top: 5px; margin-left: 3px;">{l s='You have two ways to generate Sitemap:' mod='gsitemap'}</b><br /><br />
 	1. <b>{l s='Manually:' mod='gsitemap'}</b> {l s='using the form above (as often as needed)' mod='gsitemap'}<br />
 	<br /><span style="font-style: italic;">{l s='-or-' mod='gsitemap'}</span><br /><br />

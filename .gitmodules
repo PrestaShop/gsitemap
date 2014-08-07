@@ -1,3 +1,0 @@
-[submodule "backward_compatibility"]
-	path = backward_compatibility
-	url = https://github.com/PrestaShop/PrestaShop-backward_compatibility

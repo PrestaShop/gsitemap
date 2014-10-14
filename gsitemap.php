@@ -142,7 +142,7 @@ class Gsitemap extends Module
 		$links = Db::getInstance()->ExecuteS('SELECT * FROM `'._DB_PREFIX_.'gsitemap_sitemap`');
 		if ($links)
 			foreach ($links as $link)
-				if (!@unlink(_PS_ROOT_DIR_.$link['link']))
+				if (!@unlink($this->normalizeDirectory(_PS_ROOT_DIR_).$link['link']))
 					return false;
 		if (!Db::getInstance()->Execute('DROP TABLE `'._DB_PREFIX_.'gsitemap_sitemap`'))
 			return false;
@@ -177,7 +177,7 @@ class Gsitemap extends Module
 			array(
 				'gsitemap_form' => './index.php?tab=AdminModules&configure=gsitemap&token='.Tools::getAdminTokenLite('AdminModules').'&tab_module='.$this->tab.'&module_name=gsitemap',
 				'gsitemap_cron' => _PS_BASE_URL_._MODULE_DIR_.'gsitemap/gsitemap-cron.php?token='.substr(Tools::encrypt('gsitemap/cron'), 0, 10).'&id_shop='.$this->context->shop->id,
-				'gsitemap_feed_exists' => file_exists(_PS_ROOT_DIR_.'index_sitemap.xml'),
+				'gsitemap_feed_exists' => file_exists($this->normalizeDirectory(_PS_ROOT_DIR_).'index_sitemap.xml'),
 				'gsitemap_last_export' => Configuration::get('GSITEMAP_LAST_EXPORT'),
 				'gsitemap_frequency' => Configuration::get('GSITEMAP_FREQUENCY'),
 				'gsitemap_store_url' => 'http://'.Tools::getShopDomain(false, true).__PS_BASE_URI__,
@@ -214,7 +214,7 @@ class Gsitemap extends Module
 		if ($links)
 		{
 			foreach ($links as $link)
-				@unlink(_PS_ROOT_DIR_.$link['link']);
+				@unlink($this->normalizeDirectory(_PS_ROOT_DIR_).$link['link']);
 
 			return Db::getInstance()->Execute('DELETE FROM `'._DB_PREFIX_.'gsitemap_sitemap` WHERE id_shop = '.(int)$this->context->shop->id);
 		}
@@ -685,14 +685,14 @@ class Gsitemap extends Module
 	 */
 	public function createSitemap($id_shop = 0)
 	{
-		if (@fopen(_PS_ROOT_DIR_.'/test.txt', 'w') == false)
+		if (@fopen($this->normalizeDirectory(_PS_ROOT_DIR_).'/test.txt', 'w') == false)
 		{
 			$this->context->smarty->assign('google_maps_error', $this->l('An error occured while trying to check your file permissions. Please adjust your permissions to allow PrestaShop to write a file in your root directory.'));
 
 			return false;
 		}
 		else
-			@unlink(_PS_ROOT_DIR_.'test.txt');
+			@unlink($this->normalizeDirectory(_PS_ROOT_DIR_).'test.txt');
 
 		if ($id_shop != 0)
 			$this->context->shop = new Shop((int)$id_shop);
@@ -765,7 +765,7 @@ class Gsitemap extends Module
 			return false;
 
 		$sitemap_link = $this->context->shop->id.'_'.$lang.'_'.$index.'_sitemap.xml';
-		$write_fd = fopen(_PS_ROOT_DIR_.$sitemap_link, 'w');
+		$write_fd = fopen($this->normalizeDirectory(_PS_ROOT_DIR_).$sitemap_link, 'w');
 
 		fwrite($write_fd, '<?xml version="1.0" encoding="UTF-8"?>'."\r\n".'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">'."\r\n");
 		foreach ($link_sitemap as $key => $file)
@@ -855,7 +855,7 @@ class Gsitemap extends Module
 			$sitemap->addChild('loc', 'http://'.Tools::getShopDomain(false, true).__PS_BASE_URI__.$link['link']);
 			$sitemap->addChild('lastmod', date('c'));
 		}
-		file_put_contents(_PS_ROOT_DIR_.$this->context->shop->id.'_index_sitemap.xml', $xml_feed->asXML());
+		file_put_contents($this->normalizeDirectory(_PS_ROOT_DIR_).$this->context->shop->id.'_index_sitemap.xml', $xml_feed->asXML());
 
 		return true;
 	}
@@ -885,4 +885,17 @@ class Gsitemap extends Module
 		return true;
 	}
 
+	protected function normalizeDirectory($directory)
+	{
+		$last = $directory[strlen($directory) - 1];
+
+		if (in_array($last, array('/', '\\')))
+		{
+			$directory[strlen($directory) - 1] = DIRECTORY_SEPARATOR;
+			return $directory;
+		}
+
+		$directory .= DIRECTORY_SEPARATOR;
+		return $directory;
+	}
 }

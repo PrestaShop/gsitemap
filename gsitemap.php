@@ -698,7 +698,7 @@ class Gsitemap extends Module
 			$this->context->shop = new Shop((int)$id_shop);
 
 		$type = Tools::getValue('type') ? Tools::getValue('type') : '';
-		$languages = Language::getLanguages();
+		$languages = Language::getLanguages(true, $id_shop);
 		$lang_stop = Tools::getValue('lang') ? true : false;
 		$id_obj = Tools::getValue('id') ? (int)Tools::getValue('id') : 0;
 		foreach ($languages as $lang)

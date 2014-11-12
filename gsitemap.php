@@ -623,22 +623,23 @@ class Gsitemap extends Module
 			' ORDER BY c.`id_cms` ASC'
 		);
 
-		foreach ($cmss_id as $cms_id)
-		{
-			$cms = new CMS((int)$cms_id['id_cms'], $lang['id_lang']);
-			$cms->link_rewrite = urlencode((is_array($cms->link_rewrite) ? $cms->link_rewrite[(int)$lang['id_lang']] : $cms->link_rewrite));
-			$url = $link->getCMSLink($cms, null, null, $lang['id_lang']);
+		if (is_array($cmss_id))
+			foreach ($cmss_id as $cms_id)
+			{
+				$cms = new CMS((int)$cms_id['id_cms'], $lang['id_lang']);
+				$cms->link_rewrite = urlencode((is_array($cms->link_rewrite) ? $cms->link_rewrite[(int)$lang['id_lang']] : $cms->link_rewrite));
+				$url = $link->getCMSLink($cms, null, null, $lang['id_lang']);
 
-			if (!$this->_addLinkToSitemap(
-				$link_sitemap, array(
-					'type' => 'cms',
-					'page' => 'cms',
-					'link' => $url,
-					'image' => false
-				), $lang['iso_code'], $index, $i, $cms_id['id_cms']
-			))
-				return false;
-		}
+				if (!$this->_addLinkToSitemap(
+					$link_sitemap, array(
+						'type' => 'cms',
+						'page' => 'cms',
+						'link' => $url,
+						'image' => false
+					), $lang['iso_code'], $index, $i, $cms_id['id_cms']
+				))
+					return false;
+			}
 
 		return true;
 	}

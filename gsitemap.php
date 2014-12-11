@@ -176,11 +176,11 @@ class Gsitemap extends Module
 		$this->context->smarty->assign(
 			array(
 				'gsitemap_form' => './index.php?tab=AdminModules&configure=gsitemap&token='.Tools::getAdminTokenLite('AdminModules').'&tab_module='.$this->tab.'&module_name=gsitemap',
-				'gsitemap_cron' => _PS_BASE_URL_._MODULE_DIR_.'gsitemap/gsitemap-cron.php?token='.substr(Tools::encrypt('gsitemap/cron'), 0, 10).'&id_shop='.$this->context->shop->id,
+				'gsitemap_cron' => 'http'.(Configuration::get('PS_SSL_ENABLED') ? 's' : '').'://'.Tools::getShopDomain(false, true)._MODULE_DIR_.'gsitemap/gsitemap-cron.php?token='.substr(Tools::encrypt('gsitemap/cron'), 0, 10).'&id_shop='.$this->context->shop->id,
 				'gsitemap_feed_exists' => file_exists($this->normalizeDirectory(_PS_ROOT_DIR_).'index_sitemap.xml'),
 				'gsitemap_last_export' => Configuration::get('GSITEMAP_LAST_EXPORT'),
 				'gsitemap_frequency' => Configuration::get('GSITEMAP_FREQUENCY'),
-				'gsitemap_store_url' => 'http://'.Tools::getShopDomain(false, true).__PS_BASE_URI__,
+				'gsitemap_store_url' => 'http'.(Configuration::get('PS_SSL_ENABLED') ? 's' : '').'://'.Tools::getShopDomain(false, true).__PS_BASE_URI__,
 				'gsitemap_links' => Db::getInstance()->ExecuteS('SELECT * FROM `'._DB_PREFIX_.'gsitemap_sitemap` WHERE id_shop = '.(int)$this->context->shop->id),
 				'store_metas' => Meta::getMetasByIdLang((int)$this->context->cookie->id_lang),
 				'gsitemap_disable_metas' => explode(',', Configuration::get('GSITEMAP_DISABLE_LINKS')),
@@ -507,7 +507,7 @@ class Gsitemap extends Module
 			$manufacturer = new Manufacturer((int)$manufacturer_id['id_manufacturer'], $lang['id_lang']);
 			$url = $link->getManufacturerLink($manufacturer, $manufacturer->link_rewrite, $lang['id_lang']);
 
-			$image_link = 'http://'.Tools::getMediaServer(_THEME_MANU_DIR_)._THEME_MANU_DIR_.((!file_exists(_PS_MANU_IMG_DIR_.'/'.(int)$manufacturer->id.'-medium_default.jpg')) ? $lang['iso_code'].'-default' : (int)$manufacturer->id).'-medium_default.jpg';
+			$image_link = 'http'.(Configuration::get('PS_SSL_ENABLED') ? 's' : '').'://'.Tools::getMediaServer(_THEME_MANU_DIR_)._THEME_MANU_DIR_.((!file_exists(_PS_MANU_IMG_DIR_.'/'.(int)$manufacturer->id.'-medium_default.jpg')) ? $lang['iso_code'].'-default' : (int)$manufacturer->id).'-medium_default.jpg';
 			$image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace(
 				array(
 					'https',
@@ -569,7 +569,7 @@ class Gsitemap extends Module
 			$supplier = new Supplier((int)$supplier_id['id_supplier'], $lang['id_lang']);
 			$url = $link->getSupplierLink($supplier, $supplier->link_rewrite, $lang['id_lang']);
 
-			$image_link = 'http://'.Tools::getMediaServer(_THEME_SUP_DIR_)._THEME_SUP_DIR_.((!file_exists(_THEME_SUP_DIR_.'/'.(int)$supplier->id.'-medium_default.jpg')) ? $lang['iso_code'].'-default' : (int)$supplier->id).'-medium_default.jpg';
+			$image_link = 'http'.(Configuration::get('PS_SSL_ENABLED') ? 's' : '').'://'.Tools::getMediaServer(_THEME_SUP_DIR_)._THEME_SUP_DIR_.((!file_exists(_THEME_SUP_DIR_.'/'.(int)$supplier->id.'-medium_default.jpg')) ? $lang['iso_code'].'-default' : (int)$supplier->id).'-medium_default.jpg';
 			$image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace(
 				array(
 					'https',
@@ -858,7 +858,7 @@ class Gsitemap extends Module
 		foreach ($sitemaps as $link)
 		{
 			$sitemap = $xml_feed->addChild('sitemap');
-			$sitemap->addChild('loc', 'http://'.Tools::getShopDomain(false, true).__PS_BASE_URI__.$link['link']);
+			$sitemap->addChild('loc', 'http'.(Configuration::get('PS_SSL_ENABLED') ? 's' : '').'://'.Tools::getShopDomain(false, true).__PS_BASE_URI__.$link['link']);
 			$sitemap->addChild('lastmod', date('c'));
 		}
 		file_put_contents($this->normalizeDirectory(_PS_ROOT_DIR_).$this->context->shop->id.'_index_sitemap.xml', $xml_feed->asXML());

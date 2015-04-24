@@ -35,7 +35,7 @@ if (substr(Tools::encrypt('gsitemap/cron'), 0, 10) != Tools::getValue('token') |
 	die('Bad token');
 
 include(dirname(__FILE__).'/gsitemap.php');
-$gsitemap = new Gsitemap();
+$gsitemap = Module::getInstanceByName('gsitemap');
 /* Check if the module is enabled */
 if ($gsitemap->active)
 {

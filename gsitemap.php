@@ -364,13 +364,16 @@ class Gsitemap extends Module
 		if (method_exists('ShopUrl', 'resetMainDomainCache'))
 			ShopUrl::resetMainDomainCache();
 
+        // Check if friendly URLs are enabled
+        $use_routes = (bool)Configuration::get('PS_REWRITING_SETTINGS');
+
 		$products_id = Db::getInstance()->ExecuteS('SELECT `id_product` FROM `'._DB_PREFIX_.'product_shop` WHERE `id_product` >= '.intval($id_product).' AND `active` = 1 AND `id_shop`='.$this->context->shop->id.' ORDER BY `id_product` ASC');
 
 		foreach ($products_id as $product_id)
 		{
 			$product = new Product((int)$product_id['id_product'], false, (int)$lang['id_lang']);
 
-			$url = $link->getProductLink($product, $product->link_rewrite, htmlspecialchars(strip_tags($product->category)), $product->ean13, (int)$lang['id_lang'], (int)$this->context->shop->id, 0, true);
+			$url = $link->getProductLink($product, $product->link_rewrite, htmlspecialchars(strip_tags($product->category)), $product->ean13, (int)$lang['id_lang'], (int)$this->context->shop->id, 0, $use_routes);
 
 			$id_image = Product::getCover((int)$product_id['id_product']);
 			if (isset($id_image['id_image']))
@@ -834,8 +837,11 @@ class Gsitemap extends Module
 	 */
 	private function _addSitemapNode($fd, $loc, $priority, $change_freq, $last_mod = null)
 	{
-		fwrite($fd, '<loc>'.(Configuration::get('PS_REWRITING_SETTINGS') ? '<![CDATA['.$loc.']]>' : $loc).'</loc>'."\r\n".'<priority>'.number_format($priority, 1, '.', '').'</priority>'."\r\n".($last_mod ? '<lastmod>'.date('c', strtotime($last_mod)).'</lastmod>' : '')."\r\n".'<changefreq>'.$change_freq.'</changefreq>'."\r\n");
-	}
+        fwrite($fd, '<loc>'.$loc.'</loc>'."\r\n".
+        '<priority>'.number_format($priority, 1, '.', '').'</priority>'."\r\n".
+        ($last_mod ? '<lastmod>'.date('c', strtotime($last_mod)).'</lastmod>' : '')."\r\n".
+        '<changefreq>'.$change_freq.'</changefreq>'."\r\n");
+    }
 
 	private function _addSitemapNodeImage($fd, $link, $title, $caption)
 	{

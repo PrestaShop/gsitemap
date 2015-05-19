@@ -176,7 +176,7 @@ class Gsitemap extends Module
 		$this->context->smarty->assign(
 			array(
 				'gsitemap_form' => './index.php?tab=AdminModules&configure=gsitemap&token='.Tools::getAdminTokenLite('AdminModules').'&tab_module='.$this->tab.'&module_name=gsitemap',
-				'gsitemap_cron' => _PS_BASE_URL_._MODULE_DIR_.'gsitemap/gsitemap-cron.php?token='.substr(Tools::encrypt('gsitemap/cron'), 0, 10).'&id_shop='.$this->context->shop->id,
+				'gsitemap_cron' => $this->context->shop->getBaseURL()._MODULE_DIR_.'gsitemap/gsitemap-cron.php?token='.substr(Tools::encrypt('gsitemap/cron'), 0, 10).'&id_shop='.$this->context->shop->id,
 				'gsitemap_feed_exists' => file_exists($this->normalizeDirectory(_PS_ROOT_DIR_).'index_sitemap.xml'),
 				'gsitemap_last_export' => Configuration::get('GSITEMAP_LAST_EXPORT'),
 				'gsitemap_frequency' => Configuration::get('GSITEMAP_FREQUENCY'),

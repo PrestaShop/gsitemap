@@ -837,7 +837,7 @@ class Gsitemap extends Module
 	 */
 	private function _addSitemapNode($fd, $loc, $priority, $change_freq, $last_mod = null)
 	{
-        fwrite($fd, '<loc><![CDATA['.$loc.']]></loc>'."\r\n".
+        fwrite($fd, '<loc>'.$loc.'</loc>'."\r\n".
         '<priority>'.number_format($priority, 1, '.', '').'</priority>'."\r\n".
         ($last_mod ? '<lastmod>'.date('c', strtotime($last_mod)).'</lastmod>' : '')."\r\n".
         '<changefreq>'.$change_freq.'</changefreq>'."\r\n");

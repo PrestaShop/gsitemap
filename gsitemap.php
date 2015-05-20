@@ -370,7 +370,7 @@ class Gsitemap extends Module
 		{
 			$product = new Product((int)$product_id['id_product'], false, (int)$lang['id_lang']);
 
-			$url = $link->getProductLink($product, $product->link_rewrite, htmlspecialchars(strip_tags($product->category)), $product->ean13, (int)$lang['id_lang'], (int)$this->context->shop->id, 0, true);
+			$url = $link->getProductLink($product, $product->link_rewrite, htmlspecialchars(strip_tags($product->category)), $product->ean13, (int)$lang['id_lang'], (int)$this->context->shop->id, 0);
 
 			$id_image = Product::getCover((int)$product_id['id_product']);
 			if (isset($id_image['id_image']))

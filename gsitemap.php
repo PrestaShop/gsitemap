@@ -31,7 +31,7 @@ class Gsitemap extends Module
 	const HOOK_ADD_URLS = 'gSitemapAppendUrls';
 
 	public $cron = false;
-	private $sql_checks = array();
+	protected $sql_checks = array();
 
 	public function __construct()
 	{
@@ -91,7 +91,7 @@ class Gsitemap extends Module
 	 *
 	 * @return boolean
 	 */
-	private function _installHook()
+	protected function _installHook()
 	{
 		$hook = new Hook();
 		$hook->name = self::HOOK_ADD_URLS;
@@ -285,7 +285,7 @@ class Gsitemap extends Module
 	 *
 	 * @return bool
 	 */
-	private function _getHomeLink(&$link_sitemap, $lang, &$index, &$i)
+	protected function _getHomeLink(&$link_sitemap, $lang, &$index, &$i)
 	{
 		if (Configuration::get('PS_SSL_ENABLED') && Configuration::get('PS_SSL_ENABLED_EVERYWHERE'))
 			$protocol = 'https://';
@@ -313,7 +313,7 @@ class Gsitemap extends Module
 	 *
 	 * @return bool
 	 */
-	private function _getMetaLink(&$link_sitemap, $lang, &$index, &$i, $id_meta = 0)
+	protected function _getMetaLink(&$link_sitemap, $lang, &$index, &$i, $id_meta = 0)
 	{
 		if (method_exists('ShopUrl', 'resetMainDomainCache'))
 			ShopUrl::resetMainDomainCache();
@@ -358,7 +358,7 @@ class Gsitemap extends Module
 	 *
 	 * @return bool
 	 */
-	private function _getProductLink(&$link_sitemap, $lang, &$index, &$i, $id_product = 0)
+	protected function _getProductLink(&$link_sitemap, $lang, &$index, &$i, $id_product = 0)
 	{
 		$link = new Link();
 		if (method_exists('ShopUrl', 'resetMainDomainCache'))
@@ -422,7 +422,7 @@ class Gsitemap extends Module
 	 *
 	 * @return bool
 	 */
-	private function _getCategoryLink(&$link_sitemap, $lang, &$index, &$i, $id_category = 0)
+	protected function _getCategoryLink(&$link_sitemap, $lang, &$index, &$i, $id_category = 0)
 	{
 		$link = new Link();
 		if (method_exists('ShopUrl', 'resetMainDomainCache'))
@@ -488,7 +488,7 @@ class Gsitemap extends Module
 	 *
 	 * @return bool
 	 */
-	private function _getManufacturerLink(&$link_sitemap, $lang, &$index, &$i, $id_manufacturer = 0)
+	protected function _getManufacturerLink(&$link_sitemap, $lang, &$index, &$i, $id_manufacturer = 0)
 	{
 		$link = new Link();
 		if (method_exists('ShopUrl', 'resetMainDomainCache'))
@@ -550,7 +550,7 @@ class Gsitemap extends Module
 	 *
 	 * @return bool
 	 */
-	private function _getSupplierLink(&$link_sitemap, $lang, &$index, &$i, $id_supplier = 0)
+	protected function _getSupplierLink(&$link_sitemap, $lang, &$index, &$i, $id_supplier = 0)
 	{
 		$link = new Link();
 		if (method_exists('ShopUrl', 'resetMainDomainCache'))
@@ -613,7 +613,7 @@ class Gsitemap extends Module
 	 *
 	 * @return bool
 	 */
-	private function _getCmsLink(&$link_sitemap, $lang, &$index, &$i, $id_cms = 0)
+	protected function _getCmsLink(&$link_sitemap, $lang, &$index, &$i, $id_cms = 0)
 	{
 		$link = new Link();
 		if (method_exists('ShopUrl', 'resetMainDomainCache'))
@@ -663,7 +663,7 @@ class Gsitemap extends Module
 	 * @param int    $num_link     restart at link number #$num_link
 	 * @return boolean
 	 */
-	private function _getModuleLink(&$link_sitemap, $lang, &$index, &$i, $num_link = 0)
+	protected function _getModuleLink(&$link_sitemap, $lang, &$index, &$i, $num_link = 0)
 	{
 		$modules_links = Hook::exec(self::HOOK_ADD_URLS, array('lang' => $lang), null, true);
 		if (empty($modules_links) || !is_array($modules_links))
@@ -750,7 +750,7 @@ class Gsitemap extends Module
 	 *
 	 * @return bool
 	 */
-	private function _saveSitemapLink($sitemap)
+	protected function _saveSitemapLink($sitemap)
 	{
 		if ($sitemap)
 			return Db::getInstance()->Execute('INSERT INTO `'._DB_PREFIX_.'gsitemap_sitemap` (`link`, id_shop) VALUES (\''.pSQL($sitemap).'\', '.(int)$this->context->shop->id.')');
@@ -765,7 +765,7 @@ class Gsitemap extends Module
 	 *
 	 * @return bool
 	 */
-	private function _recursiveSitemapCreator($link_sitemap, $lang, &$index)
+	protected function _recursiveSitemapCreator($link_sitemap, $lang, &$index)
 	{
 		if (!count($link_sitemap))
 			return false;
@@ -818,7 +818,7 @@ class Gsitemap extends Module
 	 *
 	 * @return float|string|bool
 	 */
-	private function _getPriorityPage($page)
+	protected function _getPriorityPage($page)
 	{
 		return Configuration::get('GSITEMAP_PRIORITY_'.Tools::strtoupper($page)) ? Configuration::get('GSITEMAP_PRIORITY_'.Tools::strtoupper($page)) : 0.1;
 	}
@@ -832,12 +832,12 @@ class Gsitemap extends Module
 	 * @param string   $change_freq
 	 * @param int      $last_mod the last modification date/time as a timestamp
 	 */
-	private function _addSitemapNode($fd, $loc, $priority, $change_freq, $last_mod = null)
+	protected function _addSitemapNode($fd, $loc, $priority, $change_freq, $last_mod = null)
 	{
 		fwrite($fd, '<loc>'.(Configuration::get('PS_REWRITING_SETTINGS') ? '<![CDATA['.$loc.']]>' : $loc).'</loc>'."\r\n".'<priority>'.number_format($priority, 1, '.', '').'</priority>'."\r\n".($last_mod ? '<lastmod>'.date('c', strtotime($last_mod)).'</lastmod>' : '')."\r\n".'<changefreq>'.$change_freq.'</changefreq>'."\r\n");
 	}
 
-	private function _addSitemapNodeImage($fd, $link, $title, $caption)
+	protected function _addSitemapNodeImage($fd, $link, $title, $caption)
 	{
 		fwrite($fd, '<image:image>'."\r\n".'<image:loc>'.(Configuration::get('PS_REWRITING_SETTINGS') ? '<![CDATA['.$link.']]>' : $link).'</image:loc>'."\r\n".'<image:caption><![CDATA['.$caption.']]></image:caption>'."\r\n".'<image:title><![CDATA['.$title.']]></image:title>'."\r\n".'</image:image>'."\r\n");
 	}
@@ -846,7 +846,7 @@ class Gsitemap extends Module
 	 * Create the index file for all generated sitemaps
 	 * @return boolean
 	 */
-	private function _createIndexSitemap()
+	protected function _createIndexSitemap()
 	{
 		$sitemaps = Db::getInstance()->ExecuteS('SELECT `link` FROM `'._DB_PREFIX_.'gsitemap_sitemap` WHERE id_shop = '.$this->context->shop->id);
 		if (!$sitemaps)
@@ -866,7 +866,7 @@ class Gsitemap extends Module
 		return true;
 	}
 
-	private function tableColumnExists($table_name, $column = null)
+	protected function tableColumnExists($table_name, $column = null)
 	{
 		if (array_key_exists($table_name, $this->sql_checks))
 			if (!empty($column) && array_key_exists($column, $this->sql_checks[$table_name]))

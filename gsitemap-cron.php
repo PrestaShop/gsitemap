@@ -30,9 +30,11 @@
 
 include(dirname(__FILE__).'/../../config/config.inc.php');
 include(dirname(__FILE__).'/../../init.php');
-/* Check to security tocken */
-if (substr(Tools::encrypt('gsitemap/cron'), 0, 10) != Tools::getValue('token') || !Module::isInstalled('gsitemap'))
-	die('Bad token');
+/* Check security tocken if not running from cli */
+if ('cli' != php_sapi_name()) {
+    if (substr(Tools::encrypt('gsitemap/cron'), 0, 10) != Tools::getValue('token') || !Module::isInstalled('gsitemap'))
+	    die('Bad token');
+}
 
 $gsitemap = Module::getInstanceByName('gsitemap');
 /* Check if the module is enabled */

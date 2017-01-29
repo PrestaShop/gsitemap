@@ -322,6 +322,9 @@ class Gsitemap extends Module
 			$metas = Db::getInstance()->ExecuteS('SELECT * FROM `'._DB_PREFIX_.'meta` WHERE `configurable` > 0 AND `id_meta` >= '.(int)$id_meta.' ORDER BY `id_meta` ASC');
 		else
 			$metas = Db::getInstance()->ExecuteS('SELECT * FROM `'._DB_PREFIX_.'meta` WHERE `id_meta` >= '.(int)$id_meta.' ORDER BY `id_meta` ASC');
+	
+                $controllers = Dispatcher::getControllers(array(_PS_FRONT_CONTROLLER_DIR_, _PS_OVERRIDE_DIR_.'controllers/front/'));
+
 		foreach ($metas as $meta)
 		{
 			$url = '';
@@ -330,7 +333,16 @@ class Gsitemap extends Module
 				$url_rewrite = Db::getInstance()->getValue('SELECT url_rewrite, id_shop FROM `'._DB_PREFIX_.'meta_lang` WHERE `id_meta` = '.(int)$meta['id_meta'].' AND `id_shop` ='.(int)$this->context->shop->id.' AND `id_lang` = '.(int)$lang['id_lang']);
 				Dispatcher::getInstance()->addRoute($meta['page'], (isset($url_rewrite) ? $url_rewrite : $meta['page']), $meta['page'], $lang['id_lang']);
 				$uri_path = Dispatcher::getInstance()->createUrl($meta['page'], $lang['id_lang'], array(), (bool)Configuration::get('PS_REWRITING_SETTINGS'));
-				$url .= Tools::getShopDomainSsl(true).(($this->context->shop->virtual_uri) ? __PS_BASE_URI__.$this->context->shop->virtual_uri : __PS_BASE_URI__).(Language::isMultiLanguageActivated() ? $lang['iso_code'].'/' : '').ltrim($uri_path, '/');
+
+                                $vars = false;
+                                if(isset($controllers[strtolower(str_replace('-', '', $meta['page']))]))
+                                    $vars = get_class_vars($controllers[strtolower(str_replace('-', '', $meta['page']))]);
+                                if (Configuration::get('PS_SSL_ENABLED') && (Configuration::get('PS_SSL_ENABLED_EVERYWHERE') || (isset($vars['ssl']) && $vars['ssl'])))
+                                        $protocol = 'https://';
+                                else
+                                        $protocol = 'http://';
+
+				$url .= $protocol.Tools::getShopDomainSsl(false).(($this->context->shop->virtual_uri) ? __PS_BASE_URI__.$this->context->shop->virtual_uri : __PS_BASE_URI__).(Language::isMultiLanguageActivated() ? $lang['iso_code'].'/' : '').ltrim($uri_path, '/');
 
 				if (!$this->_addLinkToSitemap(
 					$link_sitemap, array(

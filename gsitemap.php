@@ -82,7 +82,7 @@ class Gsitemap extends Module
 				return false;
 
 		return parent::install() &&
-		Db::getInstance()->Execute('CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'gsitemap_sitemap` (`link` varchar(255) DEFAULT NULL, `id_shop` int(11) DEFAULT 0) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8;') &&
+		Db::getInstance()->Execute('CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'gsitemap_sitemap` (`link` varchar(255) DEFAULT NULL, `id_shop` int(11) DEFAULT 0, PRIMARY KEY ( `id_shop` )) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8;') &&
 		$this->_installHook();
 	}
 

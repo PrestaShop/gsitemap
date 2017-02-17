@@ -19,7 +19,7 @@
 		<br/>
 		<form action="{$gsitemap_refresh_page|escape:'htmlall':'UTF-8'}" method="post" id="gsitemap_generate_sitmap">
 			<img src="../img/loader.gif" alt=""/>
-			<input type="submit" class="button" value="{l s='Continue' d='Modules.Gsitemap.Admin'}" style="display: none;"/>
+			<input type="submit" class="button" value="{l s='Continue' d='Admin.Actions'}" style="display: none;"/>
 		</form>
 	</fieldset>
 {else}

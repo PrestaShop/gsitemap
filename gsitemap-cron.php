@@ -52,6 +52,6 @@ if ($gsitemap->active)
 		$gsitemap->emptySitemap((int)$id_shop);
 
 	/* Create the Google Sitemap's files */
-	p($gsitemap->createSitemap((int)$id_shop));
+	$gsitemap->createSitemap((int)$id_shop);
 	
 } 

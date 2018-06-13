@@ -671,7 +671,7 @@ class Gsitemap extends Module
 		$links = array();
 		foreach ($modules_links as $module_links)
 			$links = array_merge($links, $module_links);
-		foreach ($module_links as $n => $link)
+		foreach ($links as $n => $link)
 		{
 			if ($num_link > $n)
 				continue;

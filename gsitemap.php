@@ -287,16 +287,11 @@ class Gsitemap extends Module
 	 */
 	protected function _getHomeLink(&$link_sitemap, $lang, &$index, &$i)
 	{
-		if (Configuration::get('PS_SSL_ENABLED') && Configuration::get('PS_SSL_ENABLED_EVERYWHERE'))
-			$protocol = 'https://';
-		else
-			$protocol = 'http://';
-
 		return $this->_addLinkToSitemap(
 			$link_sitemap, array(
 				'type' => 'home',
 				'page' => 'home',
-				'link' => $protocol.Tools::getShopDomainSsl(false).$this->context->shop->getBaseURI().(method_exists('Language', 'isMultiLanguageActivated') ? Language::isMultiLanguageActivated() ? $lang['iso_code'].'/' : '' : ''),
+				'link' => $this->context->shop->getBaseURL(true).(method_exists('Language', 'isMultiLanguageActivated') ? Language::isMultiLanguageActivated() ? $lang['iso_code'].'/' : '' : ''),
 				'image' => false
 			), $lang['iso_code'], $index, $i, -1
 		);

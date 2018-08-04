@@ -788,7 +788,7 @@ class Gsitemap extends Module
 								"\r\n",
 								"\r",
 								"\n"
-							), '', strip_tags($file['image']['title_img'])
+							), '', $this->removeControlCharacters(strip_tags($file['image']['title_img']))
 						)
 					) : '', isset($file['image']['caption']) ? htmlspecialchars(
 						str_replace(
@@ -796,7 +796,7 @@ class Gsitemap extends Module
 								"\r\n",
 								"\r",
 								"\n"
-							), '', strip_tags($file['image']['caption'])
+							), '', $this->removeControlCharacters(strip_tags($file['image']['caption']))
 						)
 					) : ''
 				);
@@ -903,5 +903,17 @@ class Gsitemap extends Module
 
 		$directory .= DIRECTORY_SEPARATOR;
 		return $directory;
+	}
+
+	/**
+	 * Remove UTF-8 control characters to validate XML nodes
+	 * @param string $text
+	 * @return string
+	 */
+	protected function removeControlCharacters($text)
+	{
+		$text = (string)preg_replace('/[^\x{0009}\x{000a}\x{000d}\x{0020}-\x{D7FF}\x{E000}-\x{FFFD}]+/u', ' ', $text);
+		$text = (string)preg_replace('!\s+!', ' ', $text);
+		return $text;
 	}
 }

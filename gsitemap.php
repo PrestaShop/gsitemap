@@ -173,6 +173,9 @@ class Gsitemap extends Module
 		if (method_exists('ShopUrl', 'resetMainDomainCache'))
 			ShopUrl::resetMainDomainCache();
 
+		/* Get Meta pages and remove index page it's managed elsewhere (@see $this->_getHomeLink()) */
+		$store_metas = array_filter(Meta::getMetasByIdLang((int)$this->context->cookie->id_lang),function($meta){ return $meta['page'] != 'index' ;});
+
 		$this->context->smarty->assign(
 			array(
 				'gsitemap_form' => './index.php?tab=AdminModules&configure=gsitemap&token='.Tools::getAdminTokenLite('AdminModules').'&tab_module='.$this->tab.'&module_name=gsitemap',
@@ -182,7 +185,7 @@ class Gsitemap extends Module
 				'gsitemap_frequency' => Configuration::get('GSITEMAP_FREQUENCY'),
 				'gsitemap_store_url' => 'http://'.Tools::getShopDomain(false, true).__PS_BASE_URI__,
 				'gsitemap_links' => Db::getInstance()->ExecuteS('SELECT * FROM `'._DB_PREFIX_.'gsitemap_sitemap` WHERE id_shop = '.(int)$this->context->shop->id),
-				'store_metas' => Meta::getMetasByIdLang((int)$this->context->cookie->id_lang),
+				'store_metas' => $store_metas,
 				'gsitemap_disable_metas' => explode(',', Configuration::get('GSITEMAP_DISABLE_LINKS')),
 				'gsitemap_customer_limit' => array(
 					'max_exec_time' => (int)ini_get('max_execution_time'),
@@ -287,16 +290,12 @@ class Gsitemap extends Module
 	 */
 	protected function _getHomeLink(&$link_sitemap, $lang, &$index, &$i)
 	{
-		if (Configuration::get('PS_SSL_ENABLED') && Configuration::get('PS_SSL_ENABLED_EVERYWHERE'))
-			$protocol = 'https://';
-		else
-			$protocol = 'http://';
-
+		$link = new Link();
 		return $this->_addLinkToSitemap(
 			$link_sitemap, array(
 				'type' => 'home',
 				'page' => 'home',
-				'link' => $protocol.Tools::getShopDomainSsl(false).$this->context->shop->getBaseURI().(method_exists('Language', 'isMultiLanguageActivated') ? Language::isMultiLanguageActivated() ? $lang['iso_code'].'/' : '' : ''),
+				'link' => $link->getPageLink('index', null, $lang['id_lang']),
 				'image' => false
 			), $lang['iso_code'], $index, $i, -1
 		);
@@ -319,7 +318,7 @@ class Gsitemap extends Module
 			ShopUrl::resetMainDomainCache();
 		$link = new Link();
 		if (version_compare(_PS_VERSION_, '1.6', '>='))
-			$metas = Db::getInstance()->ExecuteS('SELECT * FROM `'._DB_PREFIX_.'meta` WHERE `configurable` > 0 AND `id_meta` >= '.(int)$id_meta.' ORDER BY `id_meta` ASC');
+			$metas = Db::getInstance()->ExecuteS('SELECT * FROM `'._DB_PREFIX_.'meta` WHERE `configurable` > 0 AND `id_meta` >= '.(int)$id_meta.' AND page <> \'index\' ORDER BY `id_meta` ASC');
 		else
 			$metas = Db::getInstance()->ExecuteS('SELECT * FROM `'._DB_PREFIX_.'meta` WHERE `id_meta` >= '.(int)$id_meta.' ORDER BY `id_meta` ASC');
 		foreach ($metas as $meta)
@@ -327,11 +326,7 @@ class Gsitemap extends Module
 			$url = '';
 			if (!in_array($meta['id_meta'], explode(',', Configuration::get('GSITEMAP_DISABLE_LINKS'))))
 			{
-				$url_rewrite = Db::getInstance()->getValue('SELECT url_rewrite, id_shop FROM `'._DB_PREFIX_.'meta_lang` WHERE `id_meta` = '.(int)$meta['id_meta'].' AND `id_shop` ='.(int)$this->context->shop->id.' AND `id_lang` = '.(int)$lang['id_lang']);
-				Dispatcher::getInstance()->addRoute($meta['page'], (isset($url_rewrite) ? $url_rewrite : $meta['page']), $meta['page'], $lang['id_lang']);
-				$uri_path = Dispatcher::getInstance()->createUrl($meta['page'], $lang['id_lang'], array(), (bool)Configuration::get('PS_REWRITING_SETTINGS'));
-				$url .= Tools::getShopDomainSsl(true).(($this->context->shop->virtual_uri) ? __PS_BASE_URI__.$this->context->shop->virtual_uri : __PS_BASE_URI__).(Language::isMultiLanguageActivated() ? $lang['iso_code'].'/' : '').ltrim($uri_path, '/');
-
+				$url = $link->getPageLink($meta['page'], null, $lang['id_lang']);
 				if (!$this->_addLinkToSitemap(
 					$link_sitemap, array(
 						'type' => 'meta',

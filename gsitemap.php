@@ -625,7 +625,7 @@ class Gsitemap extends Module
 				WHERE c.`active` =1 AND c.`indexation` =1 AND c.`id_cms` >= '.(int)$id_cms.
 			($this->tableColumnExists(_DB_PREFIX_.'supplier_shop') ? ' AND cs.id_shop = '.(int)$this->context->shop->id : '').
 			' AND cl.`id_lang` = '.(int)$lang['id_lang'].
-			' ORDER BY c.`id_cms` ASC'
+			' GROUP BY  c.`id_cms` ORDER BY c.`id_cms` ASC'
 		);
 
 		if (is_array($cmss_id))

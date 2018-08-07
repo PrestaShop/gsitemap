@@ -6,7 +6,7 @@
  * This source file is subject to the Academic Free License (AFL 3.0)
  * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
- * http://opensource.org/licenses/afl-3.0.php* If you did not receive a copy of the license and are unable to
+ * https://opensource.org/licenses/afl-3.0.php* If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@prestashop.com so we can send you a copy immediately.
  *
@@ -14,12 +14,12 @@
  *
  * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
  * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to http://www.prestashop.com for more information.
+ * needs please refer to https://www.prestashop.com for more information.
  *
  *  @author PrestaShop SA <contact@prestashop.com>
  *  @copyright  2007-2016 PrestaShop SA
  *  @version  Release: $Revision: 7515 $
- *  @license    http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ *  @license    https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  *  International Registered Trademark & Property of PrestaShop SA
  */
 
@@ -180,7 +180,7 @@ class Gsitemap extends Module
 				'gsitemap_feed_exists' => file_exists($this->normalizeDirectory(_PS_ROOT_DIR_).'index_sitemap.xml'),
 				'gsitemap_last_export' => Configuration::get('GSITEMAP_LAST_EXPORT'),
 				'gsitemap_frequency' => Configuration::get('GSITEMAP_FREQUENCY'),
-				'gsitemap_store_url' => 'http://'.Tools::getShopDomain(false, true).__PS_BASE_URI__,
+				'gsitemap_store_url' => 'http'.(Configuration::get('PS_SSL_ENABLED') && Configuration::get('PS_SSL_ENABLED_EVERYWHERE') ? 's' : '').'://'.Tools::getShopDomain(false, true).__PS_BASE_URI__,
 				'gsitemap_links' => Db::getInstance()->ExecuteS('SELECT * FROM `'._DB_PREFIX_.'gsitemap_sitemap` WHERE id_shop = '.(int)$this->context->shop->id),
 				'store_metas' => Meta::getMetasByIdLang((int)$this->context->cookie->id_lang),
 				'gsitemap_disable_metas' => explode(',', Configuration::get('GSITEMAP_DISABLE_LINKS')),
@@ -257,18 +257,18 @@ class Gsitemap extends Module
 			}
 			else if ($index % 20 == 0 && $this->cron)
 			{
-				header('Refresh: 5; url=http'.(Configuration::get('PS_SSL_ENABLED') ? 's' : '').'://'.Tools::getShopDomain(false, true).__PS_BASE_URI__.'modules/gsitemap/gsitemap-cron.php?continue=1&token='.substr(Tools::encrypt('gsitemap/cron'), 0, 10).'&type='.$new_link['type'].'&lang='.$lang.'&index='.$index.'&id='.intval($id_obj).'&id_shop='.$this->context->shop->id);
+				header('Refresh: 5; url=http'.(Configuration::get('PS_SSL_ENABLED') && Configuration::get('PS_SSL_ENABLED_EVERYWHERE') ? 's' : '').'://'.Tools::getShopDomain(false, true).__PS_BASE_URI__.'modules/gsitemap/gsitemap-cron.php?continue=1&token='.substr(Tools::encrypt('gsitemap/cron'), 0, 10).'&type='.$new_link['type'].'&lang='.$lang.'&index='.$index.'&id='.intval($id_obj).'&id_shop='.$this->context->shop->id);
 				die();
 			}
 			else
 			{
 				if ($this->cron)
-					header('location: http'.(Configuration::get('PS_SSL_ENABLED') ? 's' : '').'://'.Tools::getShopDomain(false, true).__PS_BASE_URI__.'modules/gsitemap/gsitemap-cron.php?continue=1&token='.substr(Tools::encrypt('gsitemap/cron'), 0, 10).'&type='.$new_link['type'].'&lang='.$lang.'&index='.$index.'&id='.intval($id_obj).'&id_shop='.$this->context->shop->id);
+					header('location: http'.(Configuration::get('PS_SSL_ENABLED') && Configuration::get('PS_SSL_ENABLED_EVERYWHERE') ? 's' : '').'://'.Tools::getShopDomain(false, true).__PS_BASE_URI__.'modules/gsitemap/gsitemap-cron.php?continue=1&token='.substr(Tools::encrypt('gsitemap/cron'), 0, 10).'&type='.$new_link['type'].'&lang='.$lang.'&index='.$index.'&id='.intval($id_obj).'&id_shop='.$this->context->shop->id);
 				else
 				{
 					$admin_folder = str_replace(_PS_ROOT_DIR_, '', _PS_ADMIN_DIR_);
 					$admin_folder = substr($admin_folder, 1);
-					header('location: http'.(Configuration::get('PS_SSL_ENABLED') ? 's' : '').'://'.Tools::getShopDomain(false, true).__PS_BASE_URI__.$admin_folder.'/index.php?tab=AdminModules&configure=gsitemap&token='.Tools::getAdminTokenLite('AdminModules').'&tab_module='.$this->tab.'&module_name=gsitemap&continue=1&type='.$new_link['type'].'&lang='.$lang.'&index='.$index.'&id='.intval($id_obj).'&id_shop='.$this->context->shop->id);
+					header('location: http'.(Configuration::get('PS_SSL_ENABLED') && Configuration::get('PS_SSL_ENABLED_EVERYWHERE') ? 's' : '').'://'.Tools::getShopDomain(false, true).__PS_BASE_URI__.$admin_folder.'/index.php?tab=AdminModules&configure=gsitemap&token='.Tools::getAdminTokenLite('AdminModules').'&tab_module='.$this->tab.'&module_name=gsitemap&continue=1&type='.$new_link['type'].'&lang='.$lang.'&index='.$index.'&id='.intval($id_obj).'&id_shop='.$this->context->shop->id);
 				}
 				die();
 			}
@@ -287,10 +287,7 @@ class Gsitemap extends Module
 	 */
 	protected function _getHomeLink(&$link_sitemap, $lang, &$index, &$i)
 	{
-		if (Configuration::get('PS_SSL_ENABLED') && Configuration::get('PS_SSL_ENABLED_EVERYWHERE'))
-			$protocol = 'https://';
-		else
-			$protocol = 'http://';
+		$protocol = 'http' . ((Configuration::get('PS_SSL_ENABLED') && Configuration::get('PS_SSL_ENABLED_EVERYWHERE')) ? 's' : '') . '://';
 
 		return $this->_addLinkToSitemap(
 			$link_sitemap, array(
@@ -569,7 +566,7 @@ class Gsitemap extends Module
 			$supplier = new Supplier((int)$supplier_id['id_supplier'], $lang['id_lang']);
 			$url = $link->getSupplierLink($supplier, $supplier->link_rewrite, $lang['id_lang']);
 
-			$image_link = 'http://'.Tools::getMediaServer(_THEME_SUP_DIR_)._THEME_SUP_DIR_.((!file_exists(_THEME_SUP_DIR_.'/'.(int)$supplier->id.'-medium_default.jpg')) ? $lang['iso_code'].'-default' : (int)$supplier->id).'-medium_default.jpg';
+			$image_link = 'http'.(Configuration::get('PS_SSL_ENABLED') && Configuration::get('PS_SSL_ENABLED_EVERYWHERE') ? 's' : '').'://'.Tools::getMediaServer(_THEME_SUP_DIR_)._THEME_SUP_DIR_.((!file_exists(_THEME_SUP_DIR_.'/'.(int)$supplier->id.'-medium_default.jpg')) ? $lang['iso_code'].'-default' : (int)$supplier->id).'-medium_default.jpg';
 			$image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace(
 				array(
 					'https',
@@ -585,7 +582,7 @@ class Gsitemap extends Module
 			if ($file_headers[0] != 'HTTP/1.1 404 Not Found' || $file_headers === true)
 				$supplier_image = array(
 					'title_img' => htmlspecialchars(strip_tags($supplier->name)),
-					'link' => 'http'.(Configuration::get('PS_SSL_ENABLED') ? 's' : '').'://'.Tools::getMediaServer(_THEME_SUP_DIR_)._THEME_SUP_DIR_.((!file_exists(_THEME_SUP_DIR_.'/'.(int)$supplier->id.'-medium_default.jpg')) ? $lang['iso_code'].'-default' : (int)$supplier->id).'-medium_default.jpg'
+					'link' => 'http'.(Configuration::get('PS_SSL_ENABLED') && Configuration::get('PS_SSL_ENABLED_EVERYWHERE') ? 's' : '').'://'.Tools::getMediaServer(_THEME_SUP_DIR_)._THEME_SUP_DIR_.((!file_exists(_THEME_SUP_DIR_.'/'.(int)$supplier->id.'-medium_default.jpg')) ? $lang['iso_code'].'-default' : (int)$supplier->id).'-medium_default.jpg'
 				);
 			if (!$this->_addLinkToSitemap(
 				$link_sitemap, array(
@@ -735,7 +732,7 @@ class Gsitemap extends Module
 
 		$this->_createIndexSitemap();
 		Configuration::updateValue('GSITEMAP_LAST_EXPORT', date('r'));
-		Tools::file_get_contents('http://www.google.com/webmasters/sitemaps/ping?sitemap='.urlencode('http'.(Configuration::get('PS_SSL_ENABLED') ? 's' : '').'://'.Tools::getShopDomain(false, true).$this->context->shop->physical_uri.$this->context->shop->virtual_uri.$this->context->shop->id.'_index_sitemap.xml'));
+		Tools::file_get_contents('https://www.google.com/webmasters/sitemaps/ping?sitemap='.urlencode('http'.(Configuration::get('PS_SSL_ENABLED') && Configuration::get('PS_SSL_ENABLED_EVERYWHERE') ? 's' : '').'://'.Tools::getShopDomain(false, true).$this->context->shop->physical_uri.$this->context->shop->virtual_uri.$this->context->shop->id.'_index_sitemap.xml'));
 
 		if ($this->cron)
 			die();
@@ -773,7 +770,7 @@ class Gsitemap extends Module
 		$sitemap_link = $this->context->shop->id.'_'.$lang.'_'.$index.'_sitemap.xml';
 		$write_fd = fopen($this->normalizeDirectory(_PS_ROOT_DIR_).$sitemap_link, 'w');
 
-		fwrite($write_fd, '<?xml version="1.0" encoding="UTF-8"?>'."\r\n".'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">'."\r\n");
+		fwrite($write_fd, '<?xml version="1.0" encoding="UTF-8"?>'."\r\n".'<urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="https://www.google.com/schemas/sitemap-image/1.1">'."\r\n");
 		foreach ($link_sitemap as $key => $file)
 		{
 			fwrite($write_fd, '<url>'."\r\n");
@@ -852,7 +849,7 @@ class Gsitemap extends Module
 		if (!$sitemaps)
 			return false;
 
-		$xml = '<?xml version="1.0" encoding="UTF-8"?><sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></sitemapindex>';
+		$xml = '<?xml version="1.0" encoding="UTF-8"?><sitemapindex xmlns="https://www.sitemaps.org/schemas/sitemap/0.9"></sitemapindex>';
 		$xml_feed = new SimpleXMLElement($xml);
 
 		foreach ($sitemaps as $link)

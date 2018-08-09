@@ -196,7 +196,7 @@ class Gsitemap extends Module
         $this->context->smarty->assign(
             array(
                 'gsitemap_form' => './index.php?tab=AdminModules&configure=gsitemap&token='.Tools::getAdminTokenLite('AdminModules').'&tab_module='.$this->tab.'&module_name=gsitemap',
-                'gsitemap_cron' => 'http'.(Configuration::get('PS_SSL_ENABLED') ? 's' : '').'://'.Tools::getShopDomain(false, true)._MODULE_DIR_.'gsitemap/gsitemap-cron.php?token='.Tools::substr(Tools::encrypt('gsitemap/cron'), 0, 10).'&id_shop='.$this->context->shop->id,
+                'gsitemap_cron' => $this->context->link->getBaseLink().'modules/gsitemap/gsitemap-cron.php?token='.Tools::substr(Tools::encrypt('gsitemap/cron'), 0, 10).'&id_shop='.$this->context->shop->id,
                 'gsitemap_feed_exists' => file_exists($this->normalizeDirectory(_PS_ROOT_DIR_).'index_sitemap.xml'),
                 'gsitemap_last_export' => Configuration::get('GSITEMAP_LAST_EXPORT'),
                 'gsitemap_frequency' => Configuration::get('GSITEMAP_FREQUENCY'),
@@ -277,11 +277,9 @@ class Gsitemap extends Module
                 die();
             } else {
                 if ($this->cron) {
-                    Tools::redirectAdmin('http'.(Configuration::get('PS_SSL_ENABLED') ? 's' : '').'://'.Tools::getShopDomain(false, true).__PS_BASE_URI__.'modules/gsitemap/gsitemap-cron.php?continue=1&token='.Tools::substr(Tools::encrypt('gsitemap/cron'), 0, 10).'&type='.$new_link['type'].'&lang='.$lang.'&index='.$index.'&id='.(int)$id_obj.'&id_shop='.$this->context->shop->id);
+                    Tools::redirectAdmin($this->context->link->getBaseLink().'modules/gsitemap/gsitemap-cron.php?continue=1&token='.Tools::substr(Tools::encrypt('gsitemap/cron'), 0, 10).'&type='.$new_link['type'].'&lang='.$lang.'&index='.$index.'&id='.(int)$id_obj.'&id_shop='.$this->context->shop->id);
                 } else {
-                    $admin_folder = str_replace(_PS_ROOT_DIR_, '', _PS_ADMIN_DIR_);
-                    $admin_folder = Tools::substr($admin_folder, 1);
-                    Tools::redirectAdmin('http'.(Configuration::get('PS_SSL_ENABLED') ? 's' : '').'://'.Tools::getShopDomain(false, true).__PS_BASE_URI__.$admin_folder.'/index.php?tab=AdminModules&configure=gsitemap&token='.Tools::getAdminTokenLite('AdminModules').'&tab_module='.$this->tab.'&module_name=gsitemap&continue=1&type='.$new_link['type'].'&lang='.$lang.'&index='.$index.'&id='.(int)$id_obj.'&id_shop='.$this->context->shop->id);
+                    Tools::redirectAdmin($this->context->link->getBaseLink().'index.php?tab=AdminModules&configure=gsitemap&token='.Tools::getAdminTokenLite('AdminModules').'&tab_module='.$this->tab.'&module_name=gsitemap&continue=1&type='.$new_link['type'].'&lang='.$lang.'&index='.$index.'&id='.(int)$id_obj.'&id_shop='.$this->context->shop->id);
                 }
                 die();
             }

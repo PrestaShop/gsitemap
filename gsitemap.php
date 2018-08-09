@@ -300,13 +300,13 @@ class Gsitemap extends Module
      */
     protected function _getHomeLink(&$link_sitemap, $lang, &$index, &$i)
     {
-        $link = new Link();
+        $this->context->link = new Link();
         return $this->_addLinkToSitemap(
             $link_sitemap,
             array(
                 'type' => 'home',
                 'page' => 'home',
-                'link' => $link->getPageLink('index', null, $lang['id_lang']),
+                'link' => $this->context->link->getPageLink('index', null, $lang['id_lang']),
                 'image' => false
             ),
             $lang['iso_code'],
@@ -333,7 +333,7 @@ class Gsitemap extends Module
             ShopUrl::resetMainDomainCache();
         }
         $link = new Link();
-        
+        $metas = Db::getInstance()->ExecuteS('SELECT * FROM `'._DB_PREFIX_.'meta` WHERE `configurable` > 0 AND `id_meta` >= '.(int)$id_meta.' AND page <> \'index\' ORDER BY `id_meta` ASC');
         foreach ($metas as $meta) {
             $url = '';
             if (!in_array($meta['id_meta'], explode(',', Configuration::get('GSITEMAP_DISABLE_LINKS')))) {

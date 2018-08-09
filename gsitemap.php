@@ -300,13 +300,13 @@ class Gsitemap extends Module
      */
     protected function _getHomeLink(&$link_sitemap, $lang, &$index, &$i)
     {
-        $this->context->link = new Link();
+        $link = new Link();
         return $this->_addLinkToSitemap(
             $link_sitemap,
             array(
                 'type' => 'home',
                 'page' => 'home',
-                'link' => $this->context->link->getPageLink('index', null, $lang['id_lang']),
+                'link' => $link->getPageLink('index', null, $lang['id_lang']),
                 'image' => false
             ),
             $lang['iso_code'],

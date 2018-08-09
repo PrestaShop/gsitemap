@@ -24,7 +24,7 @@
  *}
 
 {if isset($smarty.get.validation)}
-<div class="alert alert-info" role="alert">
+<div class="alert alert-success" role="alert">
    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
    <span aria-hidden="true">&times;</span>
    </button>
@@ -98,17 +98,16 @@
          <option{if $gsitemap_frequency == 'never'} selected="selected"{/if} value='never'>{l s='never' d='Modules.Gsitemap.Admin'}</option>
          </select></label>
       </div>
-      <label for="ggsitemap_check_image_file">{l s='Check this box if you wish to check the presence of the image files on the server' d='Modules.Gsitemap.Admin'}
-      <input type="checkbox" name="gsitemap_check_image_file" value="1" {if $gsitemap_check_image_file}checked{/if}></label>
+      <label><input type="checkbox" name="gsitemap_check_image_file" value="1" {if $gsitemap_check_image_file}checked{/if}>{l s='Check this box if you wish to check the presence of the image files on the server' d='Modules.Gsitemap.Admin'}</label>
       <br>
-      <label for="ggsitemap_check_all"><span>{l s='check all' d='Modules.Gsitemap.Admin'}</span>
-      <input type="checkbox" name="gsitemap_check_all" value="1" class="check"></label>
+      <label><input type="checkbox" name="gsitemap_check_all" value="1" class="check"><span>{l s='check all' d='Modules.Gsitemap.Admin'}</span>
+      </label>
       <br class="clear" />
       <p for="gsitemap_meta">{l s='Indicate the pages that you do not want to include in your Sitemaps file:' d='Modules.Gsitemap.Admin'}</p>
       <ul>
          {foreach from=$store_metas item=store_meta}
          <li style="float: left; width: 400px; margin-bottom: 15px">
-            <input type="checkbox" class="gsitemap_metas" name="gsitemap_meta[]"{if in_array($store_meta.id_meta, $gsitemap_disable_metas)} checked="checked"{/if} value="{$store_meta.id_meta|intval}" /> {$store_meta.title|escape:'htmlall':'UTF-8'} [{$store_meta.page|escape:'htmlall':'UTF-8'}]
+            <label><input type="checkbox" class="gsitemap_metas" name="gsitemap_meta[]"{if in_array($store_meta.id_meta, $gsitemap_disable_metas)} checked="checked"{/if} value="{$store_meta.id_meta|intval}"> {$store_meta.title|escape:'htmlall':'UTF-8'} [{$store_meta.page|escape:'htmlall':'UTF-8'}]</label>
          </li>
          {/foreach}
       </ul>

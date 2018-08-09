@@ -277,7 +277,7 @@ class Gsitemap extends Module
                 die();
             } else {
                 if ($this->cron) {
-                    Tools::redirectAdmin($this->context->link->getBaseLink().'modules/gsitemap/gsitemap-cron.php?continue=1&token='.Tools::substr(Tools::encrypt('gsitemap/cron'), 0, 10).'&type='.$new_link['type'].'&lang='.$lang.'&index='.$index.'&id='.(int)$id_obj.'&id_shop='.$this->context->shop->id);
+                    Tools::redirect($this->context->link->getBaseLink().'modules/gsitemap/gsitemap-cron.php?continue=1&token='.Tools::substr(Tools::encrypt('gsitemap/cron'), 0, 10).'&type='.$new_link['type'].'&lang='.$lang.'&index='.$index.'&id='.(int)$id_obj.'&id_shop='.$this->context->shop->id);
                 } else {
                     Tools::redirectAdmin($this->context->link->getBaseLink().'index.php?tab=AdminModules&configure=gsitemap&token='.Tools::getAdminTokenLite('AdminModules').'&tab_module='.$this->tab.'&module_name=gsitemap&continue=1&type='.$new_link['type'].'&lang='.$lang.'&index='.$index.'&id='.(int)$id_obj.'&id_shop='.$this->context->shop->id);
                 }
@@ -381,7 +381,7 @@ class Gsitemap extends Module
         foreach ($products_id as $product_id) {
             $product = new Product((int)$product_id['id_product'], false, (int)$lang['id_lang']);
 
-            $url = $link->getProductLink($product, $product->link_rewrite, htmlspecialchars(strip_tags($product->category)), $product->ean13, (int)$lang['id_lang'], (int)$this->context->shop->id, 0, true);
+            $url = $link->getProductLink($product, $product->link_rewrite, htmlspecialchars(strip_tags($product->category)), $product->ean13, (int)$lang['id_lang'], (int)$this->context->shop->id, 0);
 
             $id_image = Product::getCover((int)$product_id['id_product']);
             if (isset($id_image['id_image'])) {

@@ -4,7 +4,7 @@
     <displayName><![CDATA[Google sitemap]]></displayName>
     <version><![CDATA[4.0.0]]></version>
     <description><![CDATA[Generate your Google sitemap file]]></description>
-    <author><![CDATA[Prestashop]]></author>
+    <author><![CDATA[PrestaShop]]></author>
     <tab><![CDATA[seo]]></tab>
 	<confirmUninstall><![CDATA[Are you sure you want to uninstall this module?]]></confirmUninstall>
     <is_configurable>1</is_configurable>

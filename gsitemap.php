@@ -4,10 +4,10 @@
  *
  * NOTICE OF LICENSE
  *
- * This source file is subject to the Open Software License (OSL 3.0)
+ * This source file is subject to the Academic Free License (AFL 3.0)
  * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
- * https://opensource.org/licenses/OSL-3.0
+ * https://opensource.org/licenses/afl-3.0.php
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@prestashop.com so we can send you a copy immediately.
@@ -20,7 +20,7 @@
  *
  * @author    PrestaShop SA <contact@prestashop.com>
  * @copyright 2007-2018 PrestaShop SA
- * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
+ * @license   https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
 
@@ -40,19 +40,14 @@ class Gsitemap extends Module
         $this->name = 'gsitemap';
         $this->tab = 'seo';
         $this->version = '4.0.0';
-        $this->author = 'Prestashop';
+        $this->author = 'PrestaShop';
         $this->need_instance = 0;
-        $this->module_key = '';
         $this->bootstrap = true;
-
         parent::__construct();
-
         $this->displayName = $this->trans('Google sitemap', array(), 'Modules.Gsitemap.Admin');
         $this->description = $this->trans('Generate your Google sitemap file', array(), 'Modules.Gsitemap.Admin');
-        
-        $this->confirmUninstall = $this->l('Are you sure you want to uninstall this module?');
-        $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
-
+        $this->confirmUninstall = $this->trans('Are you sure you want to uninstall this module?', array(), 'Admin.Notifications.Warning');
+        $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
         $this->type_array = array('home', 'meta', 'product', 'category', 'manufacturer', 'supplier', 'cms', 'module');
 
         $metas = Db::getInstance()->ExecuteS('SELECT * FROM `'._DB_PREFIX_.'meta` ORDER BY `id_meta` ASC');
@@ -205,7 +200,7 @@ class Gsitemap extends Module
                 'gsitemap_feed_exists' => file_exists($this->normalizeDirectory(_PS_ROOT_DIR_).'index_sitemap.xml'),
                 'gsitemap_last_export' => Configuration::get('GSITEMAP_LAST_EXPORT'),
                 'gsitemap_frequency' => Configuration::get('GSITEMAP_FREQUENCY'),
-                'gsitemap_store_url' => 'http'.(Configuration::get('PS_SSL_ENABLED') ? 's' : '').'://'.Tools::getShopDomain(false, true).__PS_BASE_URI__,
+                'gsitemap_store_url' => $this->context->link->getBaseLink(),
                 'gsitemap_links' => Db::getInstance()->ExecuteS('SELECT * FROM `'._DB_PREFIX_.'gsitemap_sitemap` WHERE id_shop = '.(int)$this->context->shop->id),
                 'store_metas' => $store_metas,
                 'gsitemap_disable_metas' => explode(',', Configuration::get('GSITEMAP_DISABLE_LINKS')),
@@ -338,11 +333,7 @@ class Gsitemap extends Module
             ShopUrl::resetMainDomainCache();
         }
         $link = new Link();
-        if (version_compare(_PS_VERSION_, '1.6', '>=')) {
-            $metas = Db::getInstance()->ExecuteS('SELECT * FROM `'._DB_PREFIX_.'meta` WHERE `configurable` > 0 AND `id_meta` >= '.(int)$id_meta.' AND page <> \'index\' ORDER BY `id_meta` ASC');
-        } else {
-            $metas = Db::getInstance()->ExecuteS('SELECT * FROM `'._DB_PREFIX_.'meta` WHERE `id_meta` >= '.(int)$id_meta.' ORDER BY `id_meta` ASC');
-        }
+        
         foreach ($metas as $meta) {
             $url = '';
             if (!in_array($meta['id_meta'], explode(',', Configuration::get('GSITEMAP_DISABLE_LINKS')))) {

@@ -32,5 +32,5 @@ Contributors wishing to edit a module's files should follow the following proces
 That's it: you have contributed to this open-source project! Congratulations!
 
 [1]: https://devdocs.prestashop.com/1.7/development/coding-standards
-[2]: https://devdocs.prestashop.com/1.7/documentation/
+[2]: https://devdocs.prestashop.com/1.7/contribute/contribution-guidelines/
 [3]: https://help.github.com/articles/about-pull-requests/

@@ -277,7 +277,7 @@ class Gsitemap extends Module
                 die();
             } else {
                 if ($this->cron) {
-                    Tools::redirect($this->context->link->getBaseLink().'modules/gsitemap/gsitemap-cron.php?continue=1&token='.Tools::substr(Tools::encrypt('gsitemap/cron'), 0, 10).'&type='.$new_link['type'].'&lang='.$lang.'&index='.$index.'&id='.(int)$id_obj.'&id_shop='.$this->context->shop->id);
+                    Tools::redirectAdmin($this->context->link->getBaseLink().'modules/gsitemap/gsitemap-cron.php?continue=1&token='.Tools::substr(Tools::encrypt('gsitemap/cron'), 0, 10).'&type='.$new_link['type'].'&lang='.$lang.'&index='.$index.'&id='.(int)$id_obj.'&id_shop='.$this->context->shop->id);
                 } else {
                     Tools::redirectAdmin($this->context->link->getBaseLink().'index.php?tab=AdminModules&configure=gsitemap&token='.Tools::getAdminTokenLite('AdminModules').'&tab_module='.$this->tab.'&module_name=gsitemap&continue=1&type='.$new_link['type'].'&lang='.$lang.'&index='.$index.'&id='.(int)$id_obj.'&id_shop='.$this->context->shop->id);
                 }
@@ -386,17 +386,6 @@ class Gsitemap extends Module
             $id_image = Product::getCover((int)$product_id['id_product']);
             if (isset($id_image['id_image'])) {
                 $image_link = $this->context->link->getImageLink($product->link_rewrite, $product->id.'-'.(int)$id_image['id_image'], ImageType::getFormattedName('large'));
-                $image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace(
-                    array(
-                        'https',
-                        Context::getContext()->shop->domain.Context::getContext()->shop->physical_uri
-                    ),
-                    array(
-                        'http',
-                        Context::getContext()->shop->domain.Context::getContext()->shop->physical_uri.Context::getContext()->shop->virtual_uri
-                    ),
-                    $image_link
-                ) : $image_link;
             }
             $file_headers = (Configuration::get('GSITEMAP_CHECK_IMAGE_FILE')) ? @get_headers($image_link) : true;
             $image_product = array();
@@ -460,17 +449,6 @@ class Gsitemap extends Module
 
             if ($category->id_image) {
                 $image_link = $this->context->link->getCatImageLink($category->link_rewrite, (int)$category->id_image, ImageType::getFormattedName('category'));
-                $image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace(
-                    array(
-                        'https',
-                        Context::getContext()->shop->domain.Context::getContext()->shop->physical_uri
-                    ),
-                    array(
-                        'http',
-                        Context::getContext()->shop->domain.Context::getContext()->shop->physical_uri.Context::getContext()->shop->virtual_uri
-                    ),
-                    $image_link
-                ) : $image_link;
             }
             $file_headers = (Configuration::get('GSITEMAP_CHECK_IMAGE_FILE')) ? @get_headers($image_link) : true;
             $image_category = array();
@@ -534,18 +512,7 @@ class Gsitemap extends Module
             $manufacturer = new Manufacturer((int)$manufacturer_id['id_manufacturer'], $lang['id_lang']);
             $url = $link->getManufacturerLink($manufacturer, $manufacturer->link_rewrite, $lang['id_lang']);
 
-            $image_link = 'http'.(Configuration::get('PS_SSL_ENABLED') && Configuration::get('PS_SSL_ENABLED_EVERYWHERE') ? 's' : '').'://'.Tools::getMediaServer(_THEME_MANU_DIR_)._THEME_MANU_DIR_.((!file_exists(_PS_MANU_IMG_DIR_.'/'.(int)$manufacturer->id.'-'.ImageType::getFormattedName('medium').'.jpg')) ? $lang['iso_code'].'-default' : (int)$manufacturer->id).'-'.ImageType::getFormattedName('medium').'.jpg';
-            $image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace(
-                array(
-                    'https',
-                    Context::getContext()->shop->domain.Context::getContext()->shop->physical_uri
-                ),
-                array(
-                    'http',
-                    Context::getContext()->shop->domain.Context::getContext()->shop->physical_uri.Context::getContext()->shop->virtual_uri
-                ),
-                $image_link
-            ) : $image_link;
+            $image_link = $this->context->link->getBaseLink().Tools::getMediaServer(_THEME_MANU_DIR_)._THEME_MANU_DIR_.((!file_exists(_PS_MANU_IMG_DIR_.'/'.(int)$manufacturer->id.'-'.ImageType::getFormattedName('medium').'.jpg')) ? $lang['iso_code'].'-default' : (int)$manufacturer->id).'-'.ImageType::getFormattedName('medium').'.jpg';
 
             $file_headers = (Configuration::get('GSITEMAP_CHECK_IMAGE_FILE')) ? @get_headers($image_link) : true;
             $manifacturer_image = array();
@@ -605,18 +572,7 @@ class Gsitemap extends Module
             $supplier = new Supplier((int)$supplier_id['id_supplier'], $lang['id_lang']);
             $url = $link->getSupplierLink($supplier, $supplier->link_rewrite, $lang['id_lang']);
 
-            $image_link = 'http'.(Configuration::get('PS_SSL_ENABLED') && Configuration::get('PS_SSL_ENABLED_EVERYWHERE') ? 's' : '').'://'.Tools::getMediaServer(_THEME_SUP_DIR_)._THEME_SUP_DIR_.((!file_exists(_THEME_SUP_DIR_.'/'.(int)$supplier->id.'-'.ImageType::getFormattedName('medium').'.jpg')) ? $lang['iso_code'].'-default' : (int)$supplier->id).'-'.ImageType::getFormattedName('medium').'.jpg';
-            $image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace(
-                array(
-                    'https',
-                    Context::getContext()->shop->domain.Context::getContext()->shop->physical_uri
-                ),
-                array(
-                    'https',
-                    Context::getContext()->shop->domain.Context::getContext()->shop->physical_uri.Context::getContext()->shop->virtual_uri
-                ),
-                $image_link
-            ) : $image_link;
+            $image_link = $this->context->link->getBaseLink().Tools::getMediaServer(_THEME_SUP_DIR_)._THEME_SUP_DIR_.((!file_exists(_THEME_SUP_DIR_.'/'.(int)$supplier->id.'-'.ImageType::getFormattedName('medium').'.jpg')) ? $lang['iso_code'].'-default' : (int)$supplier->id).'-'.ImageType::getFormattedName('medium').'.jpg';
 
             $file_headers = (Configuration::get('GSITEMAP_CHECK_IMAGE_FILE')) ? @get_headers($image_link) : true;
             $supplier_image = array();
@@ -789,7 +745,7 @@ class Gsitemap extends Module
 
         $this->_createIndexSitemap();
         Configuration::updateValue('GSITEMAP_LAST_EXPORT', date('r'));
-        Tools::file_get_contents('https://www.google.com/webmasters/sitemaps/ping?sitemap='.urlencode('http'.(Configuration::get('PS_SSL_ENABLED') ? 's' : '').'://'.Tools::getShopDomain(false, true).$this->context->shop->physical_uri.$this->context->shop->virtual_uri.$this->context->shop->id.'_index_sitemap.xml'));
+        Tools::file_get_contents('https://www.google.com/webmasters/sitemaps/ping?sitemap='.urlencode($this->context->link->getBaseLink().$this->context->shop->physical_uri.$this->context->shop->virtual_uri.$this->context->shop->id.''));
 
         if ($this->cron) {
             die();
@@ -915,12 +871,12 @@ class Gsitemap extends Module
             return false;
         }
 
-        $xml = '<?xml version="1.0" encoding="UTF-8"?><sitemapindex xmlns="https://www.sitemaps.org/schemas/sitemap/0.9/"></sitemapindex>';
+        $xml = '<?xml version="1.0" encoding="UTF-8"?><sitemapindex xmlns="https://www.sitemaps.org/schemas/sitemap/0.9"></sitemapindex>';
         $xml_feed = new SimpleXMLElement($xml);
 
         foreach ($sitemaps as $link) {
             $sitemap = $xml_feed->addChild('sitemap');
-            $sitemap->addChild('loc', 'http'.(Configuration::get('PS_SSL_ENABLED') && Configuration::get('PS_SSL_ENABLED_EVERYWHERE') ? 's' : '').'://'.Tools::getShopDomain(false, true).__PS_BASE_URI__.$link['link']);
+            $sitemap->addChild('loc', $this->context->link->getBaseLink().$link['link']);
             $sitemap->addChild('lastmod', date('c'));
         }
         file_put_contents($this->normalizeDirectory(_PS_ROOT_DIR_).$this->context->shop->id.'_index_sitemap.xml', $xml_feed->asXML());

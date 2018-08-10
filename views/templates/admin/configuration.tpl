@@ -98,12 +98,12 @@
          <option{if $gsitemap_frequency == 'never'} selected="selected"{/if} value='never'>{l s='never' d='Modules.Gsitemap.Admin'}</option>
          </select></label>
       </div>
-      <label><input type="checkbox" name="gsitemap_check_image_file" value="1" {if $gsitemap_check_image_file}checked{/if}>{l s='Check this box if you wish to check the presence of the image files on the server' d='Modules.Gsitemap.Admin'}</label>
+      <label><input type="checkbox" name="gsitemap_check_image_file" value="1" {if $gsitemap_check_image_file}checked{/if}> {l s='Check this box if you wish to check the presence of the image files on the server' d='Modules.Gsitemap.Admin'}</label>
       <br>
-      <label><input type="checkbox" name="gsitemap_check_all" value="1" class="check"><span>{l s='check all' d='Modules.Gsitemap.Admin'}</span>
+      <label><input type="checkbox" name="gsitemap_check_all" value="1" class="check"><span> {l s='Check all' d='Modules.Gsitemap.Admin'}</span>
       </label>
       <br class="clear" />
-      <p for="gsitemap_meta">{l s='Indicate the pages that you do not want to include in your Sitemaps file:' d='Modules.Gsitemap.Admin'}</p>
+      <p for="gsitemap_meta"> {l s='Indicate the pages that you do not want to include in your sitemap files:' d='Modules.Gsitemap.Admin'}</p>
       <ul>
          {foreach from=$store_metas item=store_meta}
          <li style="float: left; width: 400px; margin-bottom: 15px">
@@ -141,13 +141,13 @@
 <script type="text/javascript">
    $(document).ready(function() {
       if ($('.gsitemap_metas:checked').length == $('.gsitemap_metas').length)
-         $('.check').parent('label').children('span').html("{l s='uncheck all' d='Modules.Gsitemap.Admin'}");
+         $('.check').parent('label').children('span').html(" {l s='Uncheck all' d='Modules.Gsitemap.Admin'}");
       $('.check').toggle(function() {
          $('.gsitemap_metas').attr('checked', 'checked');
-         $(this).parent('label').children('span').html("{l s='uncheck all' d='Modules.Gsitemap.Admin'}");
+         $(this).parent('label').children('span').html(" {l s='Uncheck all' d='Modules.Gsitemap.Admin'}");
       }, function() {
          $('.gsitemap_metas').removeAttr('checked');
-         $(this).parent('label').children('span').html("{l s='check all' d='Modules.Gsitemap.Admin'}");
+         $(this).parent('label').children('span').html(" {l s='Check all' d='Modules.Gsitemap.Admin'}");
       });
    });
 </script>

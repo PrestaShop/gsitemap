@@ -512,7 +512,7 @@ class Gsitemap extends Module
             $manufacturer = new Manufacturer((int)$manufacturer_id['id_manufacturer'], $lang['id_lang']);
             $url = $link->getManufacturerLink($manufacturer, $manufacturer->link_rewrite, $lang['id_lang']);
 
-            $image_link = $this->context->link->getBaseLink().Tools::getMediaServer(_THEME_MANU_DIR_)._THEME_MANU_DIR_.((!file_exists(_PS_MANU_IMG_DIR_.'/'.(int)$manufacturer->id.'-'.ImageType::getFormattedName('medium').'.jpg')) ? $lang['iso_code'].'-default' : (int)$manufacturer->id).'-'.ImageType::getFormattedName('medium').'.jpg';
+            $image_link = $this->context->link->getBaseLink().Tools::getMediaServer(_THEME_MANU_DIR_)._THEME_MANU_DIR_.((!file_exists(_PS_MANU_IMG_DIR_.'/'.(int)$manufacturer->id.'-'.ImageType::getFormattedName('medium'))) ? $lang['iso_code'].'-default' : (int)$manufacturer->id).'-'.ImageType::getFormattedName('medium');
 
             $file_headers = (Configuration::get('GSITEMAP_CHECK_IMAGE_FILE')) ? @get_headers($image_link) : true;
             $manifacturer_image = array();
@@ -572,14 +572,14 @@ class Gsitemap extends Module
             $supplier = new Supplier((int)$supplier_id['id_supplier'], $lang['id_lang']);
             $url = $link->getSupplierLink($supplier, $supplier->link_rewrite, $lang['id_lang']);
 
-            $image_link = $this->context->link->getBaseLink().Tools::getMediaServer(_THEME_SUP_DIR_)._THEME_SUP_DIR_.((!file_exists(_THEME_SUP_DIR_.'/'.(int)$supplier->id.'-'.ImageType::getFormattedName('medium').'.jpg')) ? $lang['iso_code'].'-default' : (int)$supplier->id).'-'.ImageType::getFormattedName('medium').'.jpg';
+            $image_link = $this->context->link->getBaseLink().Tools::getMediaServer(_THEME_SUP_DIR_)._THEME_SUP_DIR_.((!file_exists(_THEME_SUP_DIR_.'/'.(int)$supplier->id.'-'.ImageType::getFormattedName('medium'))) ? $lang['iso_code'].'-default' : (int)$supplier->id).'-'.ImageType::getFormattedName('medium');
 
             $file_headers = (Configuration::get('GSITEMAP_CHECK_IMAGE_FILE')) ? @get_headers($image_link) : true;
             $supplier_image = array();
             if ($file_headers[0] != 'HTTP/1.1 404 Not Found' || $file_headers === true) {
                 $supplier_image = array(
                     'title_img' => htmlspecialchars(strip_tags($supplier->name)),
-                    'link' => 'http'.(Configuration::get('PS_SSL_ENABLED') ? 's' : '').'://'.Tools::getMediaServer(_THEME_SUP_DIR_)._THEME_SUP_DIR_.((!file_exists(_THEME_SUP_DIR_.'/'.(int)$supplier->id.'-'.ImageType::getFormattedName('medium').'.jpg')) ? $lang['iso_code'].'-default' : (int)$supplier->id).'-'.ImageType::getFormattedName('medium').'.jpg'
+                    'link' => 'http'.(Configuration::get('PS_SSL_ENABLED') ? 's' : '').'://'.Tools::getMediaServer(_THEME_SUP_DIR_)._THEME_SUP_DIR_.((!file_exists(_THEME_SUP_DIR_.'/'.(int)$supplier->id.'-'.ImageType::getFormattedName('medium'))) ? $lang['iso_code'].'-default' : (int)$supplier->id).'-'.ImageType::getFormattedName('medium')
                 );
             }
             if (!$this->_addLinkToSitemap(
@@ -624,7 +624,7 @@ class Gsitemap extends Module
             'SELECT c.`id_cms` FROM `'._DB_PREFIX_.'cms` c INNER JOIN `'._DB_PREFIX_.'cms_lang` cl ON c.`id_cms` = cl.`id_cms` '.
             ($this->tableColumnExists(_DB_PREFIX_.'supplier_shop') ? 'INNER JOIN `'._DB_PREFIX_.'cms_shop` cs ON c.`id_cms` = cs.`id_cms` ' : '').
             'INNER JOIN `'._DB_PREFIX_.'cms_category` cc ON c.id_cms_category = cc.id_cms_category AND cc.active = 1
-				WHERE c.`active` =1 AND c.`indexation` =1 AND c.`id_cms` >= '.(int)$id_cms.
+            WHERE c.`active` =1 AND c.`indexation` =1 AND c.`id_cms` >= '.(int)$id_cms.
             ($this->tableColumnExists(_DB_PREFIX_.'supplier_shop') ? ' AND cs.id_shop = '.(int)$this->context->shop->id : '').
             ' AND cl.`id_lang` = '.(int)$lang['id_lang'].
             ' GROUP BY  c.`id_cms` ORDER BY c.`id_cms` ASC'
@@ -745,7 +745,7 @@ class Gsitemap extends Module
 
         $this->_createIndexSitemap();
         Configuration::updateValue('GSITEMAP_LAST_EXPORT', date('r'));
-        Tools::file_get_contents('https://www.google.com/webmasters/sitemaps/ping?sitemap='.urlencode($this->context->link->getBaseLink().$this->context->shop->physical_uri.$this->context->shop->virtual_uri.$this->context->shop->id.''));
+        Tools::file_get_contents('https://www.google.com/webmasters/sitemaps/ping?sitemap='.urlencode($this->context->link->getBaseLink().$this->context->shop->physical_uri.$this->context->shop->virtual_uri.$this->context->shop->id));
 
         if ($this->cron) {
             die();

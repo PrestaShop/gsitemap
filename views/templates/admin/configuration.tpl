@@ -45,7 +45,7 @@
    <br>
    <form action="{$gsitemap_refresh_page|escape:'htmlall':'UTF-8'}" method="post" id="gsitemap_generate_sitmap">
       <img src="../img/loader.gif" alt=""/>
-      <input type="submit" class="button" value="{l s='Continue' d='Modules.Gsitemap.Admin'}" style="display: none;"/>
+      <input type="submit" class="button" value="{l s='Continue' d='Admin.Actions'}" style="display: none;"/>
    </form>
    {else}
    {if $gsitemap_links}
@@ -61,6 +61,10 @@
       </ul>
    </div>
    <p>{l s='Your last update was made on this date:' d='Modules.Gsitemap.Admin'} {$gsitemap_last_export|escape:'htmlall':'UTF-8'}</p>
+      {else}
+   <h3><i class="icon icon-sitemap"></i> {l s='Your Sitemaps' d='Modules.Gsitemap.Admin'}</h3>
+   <p>{l s='Below you can easily create sitemap(s) for your store(s). Indicate the pages that you do not want to include in your sitemap files and click on the GENERATE SITEMAP button.' d='Modules.Gsitemap.Admin'}<br>
+   </p>
    {/if}
    {if ($gsitemap_customer_limit.max_exec_time < 30 && $gsitemap_customer_limit.max_exec_time > 0) || ($gsitemap_customer_limit.memory_limit < 128 && $gsitemap_customer_limit.memory_limit > 0)}
    <br>
@@ -100,10 +104,12 @@
       </div>
       <label><input type="checkbox" name="gsitemap_check_image_file" value="1" {if $gsitemap_check_image_file}checked{/if}> {l s='Check this box if you wish to check the presence of the image files on the server' d='Modules.Gsitemap.Admin'}</label>
       <br>
-      <label><input type="checkbox" name="gsitemap_check_all" value="1" class="check"><span> {l s='Check all' d='Modules.Gsitemap.Admin'}</span>
-      </label>
+      <p>{l s='Indicate the pages that you do not want to include in your sitemap files:' d='Modules.Gsitemap.Admin'}</p>
+      
+      <button class="btn btn-secondary" id="check">{l s='Check all' d='Modules.Gsitemap.Admin'}</button>
+      <br>
       <br class="clear" />
-      <p for="gsitemap_meta"> {l s='Indicate the pages that you do not want to include in your sitemap files:' d='Modules.Gsitemap.Admin'}</p>
+
       <ul>
          {foreach from=$store_metas item=store_meta}
          <li style="float: left; width: 400px; margin-bottom: 15px">
@@ -141,13 +147,13 @@
 <script type="text/javascript">
    $(document).ready(function() {
       if ($('.gsitemap_metas:checked').length == $('.gsitemap_metas').length)
-         $('.check').parent('label').children('span').html(" {l s='Uncheck all' d='Modules.Gsitemap.Admin'}");
-      $('.check').toggle(function() {
+         $('#check').html("{l s='Uncheck all' d='Modules.Gsitemap.Admin'}");
+      $('#check').toggle(function() {
          $('.gsitemap_metas').attr('checked', 'checked');
-         $(this).parent('label').children('span').html(" {l s='Uncheck all' d='Modules.Gsitemap.Admin'}");
+         $(this).html("{l s='Uncheck all' d='Modules.Gsitemap.Admin'}");
       }, function() {
          $('.gsitemap_metas').removeAttr('checked');
-         $(this).parent('label').children('span').html(" {l s='Check all' d='Modules.Gsitemap.Admin'}");
+         $(this).html("{l s='Check all' d='Modules.Gsitemap.Admin'}");
       });
    });
 </script>

@@ -192,15 +192,15 @@ class Gsitemap extends Module
         $store_metas = array_filter(Meta::getMetasByIdLang((int)$this->context->cookie->id_lang), function ($meta) {
             return $meta['page'] != 'index' ;
         });
-
+        $store_url = $this->context->link->getBaseLink();
         $this->context->smarty->assign(
             array(
                 'gsitemap_form' => './index.php?tab=AdminModules&configure=gsitemap&token='.Tools::getAdminTokenLite('AdminModules').'&tab_module='.$this->tab.'&module_name=gsitemap',
-                'gsitemap_cron' => $this->context->link->getBaseLink().'modules/gsitemap/gsitemap-cron.php?token='.Tools::substr(Tools::encrypt('gsitemap/cron'), 0, 10).'&id_shop='.$this->context->shop->id,
+                'gsitemap_cron' => $store_url.'modules/gsitemap/gsitemap-cron.php?token='.Tools::substr(Tools::encrypt('gsitemap/cron'), 0, 10).'&id_shop='.$this->context->shop->id,
                 'gsitemap_feed_exists' => file_exists($this->normalizeDirectory(_PS_ROOT_DIR_).'index_sitemap.xml'),
                 'gsitemap_last_export' => Configuration::get('GSITEMAP_LAST_EXPORT'),
                 'gsitemap_frequency' => Configuration::get('GSITEMAP_FREQUENCY'),
-                'gsitemap_store_url' => $this->context->link->getBaseLink(),
+                'gsitemap_store_url' => $store_url,
                 'gsitemap_links' => Db::getInstance()->ExecuteS('SELECT * FROM `'._DB_PREFIX_.'gsitemap_sitemap` WHERE id_shop = '.(int)$this->context->shop->id),
                 'store_metas' => $store_metas,
                 'gsitemap_disable_metas' => explode(',', Configuration::get('GSITEMAP_DISABLE_LINKS')),

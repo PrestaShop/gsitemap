@@ -61,7 +61,7 @@
       </ul>
    </div>
    <p>{l s='Your last update was made on this date:' d='Modules.Gsitemap.Admin'} {$gsitemap_last_export|escape:'htmlall':'UTF-8'}</p>
-      {else}
+   {else}
    <h3><i class="icon icon-sitemap"></i> {l s='Your Sitemaps' d='Modules.Gsitemap.Admin'}</h3>
    <p>{l s='Below you can easily create sitemap(s) for your store(s). Indicate the pages that you do not want to include in your sitemap files and click on the GENERATE SITEMAP button.' d='Modules.Gsitemap.Admin'}<br>
    </p>
@@ -105,11 +105,9 @@
       <label><input type="checkbox" name="gsitemap_check_image_file" value="1" {if $gsitemap_check_image_file}checked{/if}> {l s='Check this box if you wish to check the presence of the image files on the server' d='Modules.Gsitemap.Admin'}</label>
       <br>
       <p>{l s='Indicate the pages that you do not want to include in your sitemap files:' d='Modules.Gsitemap.Admin'}</p>
-      
       <button class="btn btn-secondary" id="check">{l s='Check all' d='Modules.Gsitemap.Admin'}</button>
       <br>
       <br class="clear" />
-
       <ul>
          {foreach from=$store_metas item=store_meta}
          <li style="float: left; width: 400px; margin-bottom: 15px">

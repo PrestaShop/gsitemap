@@ -146,6 +146,9 @@
       if ($('.gsitemap_metas:checked').length == $('.gsitemap_metas').length)
          $('#check').html("{l s='Uncheck all' d='Modules.Gsitemap.Admin'}");
       $('#check').toggle(function() {
+         $('.gsitemap_metas').removeAttr('checked');
+         $(this).html("{l s='check all' d='Modules.Gsitemap.Admin'}");
+      }, function() {
          $('.gsitemap_metas').attr('checked', 'checked');
          $(this).html("{l s='Uncheck all' d='Modules.Gsitemap.Admin'}");
       });

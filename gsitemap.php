@@ -386,6 +386,17 @@ class Gsitemap extends Module
             $id_image = Product::getCover((int)$product_id['id_product']);
             if (isset($id_image['id_image'])) {
                 $image_link = $this->context->link->getImageLink($product->link_rewrite, $product->id.'-'.(int)$id_image['id_image'], ImageType::getFormattedName('large'));
+                $image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace(
+                    array(
+                        'https',
+                        Context::getContext()->shop->domain.Context::getContext()->shop->physical_uri
+                    ),
+                    array(
+                        'http',
+                        Context::getContext()->shop->domain.Context::getContext()->shop->physical_uri.Context::getContext()->shop->virtual_uri
+                    ),
+                    $image_link
+                ) : $image_link;
             }
             $file_headers = (Configuration::get('GSITEMAP_CHECK_IMAGE_FILE')) ? @get_headers($image_link) : true;
             $image_product = array();
@@ -449,6 +460,17 @@ class Gsitemap extends Module
 
             if ($category->id_image) {
                 $image_link = $this->context->link->getCatImageLink($category->link_rewrite, (int)$category->id_image, ImageType::getFormattedName('category'));
+                $image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace(
+                    array(
+                        'https',
+                        Context::getContext()->shop->domain.Context::getContext()->shop->physical_uri
+                    ),
+                    array(
+                        'http',
+                        Context::getContext()->shop->domain.Context::getContext()->shop->physical_uri.Context::getContext()->shop->virtual_uri
+                    ),
+                    $image_link
+                ) : $image_link;
             }
             $file_headers = (Configuration::get('GSITEMAP_CHECK_IMAGE_FILE')) ? @get_headers($image_link) : true;
             $image_category = array();
@@ -511,8 +533,18 @@ class Gsitemap extends Module
         foreach ($manufacturers_id as $manufacturer_id) {
             $manufacturer = new Manufacturer((int)$manufacturer_id['id_manufacturer'], $lang['id_lang']);
             $url = $link->getManufacturerLink($manufacturer, $manufacturer->link_rewrite, $lang['id_lang']);
-
             $image_link = $this->context->link->getBaseLink().Tools::getMediaServer(_THEME_MANU_DIR_)._THEME_MANU_DIR_.((!file_exists(_PS_MANU_IMG_DIR_.'/'.(int)$manufacturer->id.'-'.ImageType::getFormattedName('medium'))) ? $lang['iso_code'].'-default' : (int)$manufacturer->id).'-'.ImageType::getFormattedName('medium');
+            $image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace(
+                array(
+                    'https',
+                    Context::getContext()->shop->domain.Context::getContext()->shop->physical_uri
+                ),
+                array(
+                    'http',
+                    Context::getContext()->shop->domain.Context::getContext()->shop->physical_uri.Context::getContext()->shop->virtual_uri
+                ),
+                $image_link
+            ) : $image_link;
 
             $file_headers = (Configuration::get('GSITEMAP_CHECK_IMAGE_FILE')) ? @get_headers($image_link) : true;
             $manifacturer_image = array();
@@ -573,6 +605,18 @@ class Gsitemap extends Module
             $url = $link->getSupplierLink($supplier, $supplier->link_rewrite, $lang['id_lang']);
 
             $image_link = $this->context->link->getBaseLink().Tools::getMediaServer(_THEME_SUP_DIR_)._THEME_SUP_DIR_.((!file_exists(_THEME_SUP_DIR_.'/'.(int)$supplier->id.'-'.ImageType::getFormattedName('medium'))) ? $lang['iso_code'].'-default' : (int)$supplier->id).'-'.ImageType::getFormattedName('medium');
+            $image_link = 'http'.(Configuration::get('PS_SSL_ENABLED') && Configuration::get('PS_SSL_ENABLED_EVERYWHERE') ? 's' : '').'://'.Tools::getMediaServer(_THEME_SUP_DIR_)._THEME_SUP_DIR_.((!file_exists(_THEME_SUP_DIR_.'/'.(int)$supplier->id.'-'.ImageType::getFormattedName('medium').'.jpg')) ? $lang['iso_code'].'-default' : (int)$supplier->id).'-'.ImageType::getFormattedName('medium').'.jpg';
+            $image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace(
+                array(
+                    'https',
+                    Context::getContext()->shop->domain.Context::getContext()->shop->physical_uri
+                ),
+                array(
+                    'https',
+                    Context::getContext()->shop->domain.Context::getContext()->shop->physical_uri.Context::getContext()->shop->virtual_uri
+                ),
+                $image_link
+            ) : $image_link;
 
             $file_headers = (Configuration::get('GSITEMAP_CHECK_IMAGE_FILE')) ? @get_headers($image_link) : true;
             $supplier_image = array();

@@ -40,9 +40,8 @@
    {/if}
    {if isset($gsitemap_refresh_page)}
    <h3><i class="icon icon-sitemap"></i> {l s='Your Sitemaps' d='Modules.Gsitemap.Admin'}</h3>
-   <p>{$gsitemap_number|intval} {l s='Sitemaps were already created.' d='Modules.Gsitemap.Admin'}<br>
-   </p>
-   <br>
+   <p>{$gsitemap_number|intval} {l s='Sitemaps were already created.' d='Modules.Gsitemap.Admin'}</p>
+   <br><br>
    <form action="{$gsitemap_refresh_page|escape:'htmlall':'UTF-8'}" method="post" id="gsitemap_generate_sitmap">
       <img src="../img/loader.gif" alt=""/>
       <input type="submit" class="button" value="{l s='Continue' d='Admin.Actions'}" style="display: none;"/>
@@ -52,7 +51,7 @@
    <h3><i class="icon icon-sitemap"></i> {l s='Your Sitemaps' d='Modules.Gsitemap.Admin'}</h3>
    {l s='Please set up the following Sitemap URL in your Google Webmaster account:' d='Modules.Gsitemap.Admin'}<br> 
    <a href="{$gsitemap_store_url|escape:'htmlall':'UTF-8'}{$shop->id|intval}_index_sitemap.xml" target="_blank">{$gsitemap_store_url|escape:'htmlall':'UTF-8'}{$shop->id|intval}_index_sitemap.xml</a><br><br>
-   {l s='This URL is the master Sitemaps file. It refers to the following sub-sitemap files:' d='Modules.Gsitemap.Admin'}
+   {l s='The above URL is the master sitemap file. It refers to the following sub-sitemap files:' d='Modules.Gsitemap.Admin'}
    <div style="max-height: 220px; overflow: auto;">
       <ul>
          {foreach from=$gsitemap_links item=gsitemap_link}
@@ -63,7 +62,7 @@
    <p>{l s='Your last update was made on this date:' d='Modules.Gsitemap.Admin'} {$gsitemap_last_export|escape:'htmlall':'UTF-8'}</p>
    {else}
    <h3><i class="icon icon-sitemap"></i> {l s='Your Sitemaps' d='Modules.Gsitemap.Admin'}</h3>
-   <p>{l s='Below you can easily create sitemap(s) for your store(s). Indicate the pages that you do not want to include in your sitemap files and click on the GENERATE SITEMAP button.' d='Modules.Gsitemap.Admin'}<br>
+   <p>{l s='This shop has no sitemap yet.' d='Modules.Gsitemap.Admin'}<br>
    </p>
    {/if}
    {if ($gsitemap_customer_limit.max_exec_time < 30 && $gsitemap_customer_limit.max_exec_time > 0) || ($gsitemap_customer_limit.memory_limit < 128 && $gsitemap_customer_limit.memory_limit > 0)}
@@ -105,13 +104,13 @@
       <label><input type="checkbox" name="gsitemap_check_image_file" value="1" {if $gsitemap_check_image_file}checked{/if}> {l s='Check this box if you wish to check the presence of the image files on the server' d='Modules.Gsitemap.Admin'}</label>
       <br>
       <p>{l s='Indicate the pages that you do not want to include in your sitemap files:' d='Modules.Gsitemap.Admin'}</p>
-      <button class="btn btn-secondary" id="check">{l s='Check all' d='Modules.Gsitemap.Admin'}</button>
+      <button class="btn btn-secondary" id="check">{l s='Uncheck all' d='Modules.Gsitemap.Admin'}</button>
       <br>
       <br class="clear" />
       <ul>
          {foreach from=$store_metas item=store_meta}
          <li style="float: left; width: 400px; margin-bottom: 15px">
-            <label><input type="checkbox" class="gsitemap_metas" name="gsitemap_meta[]"{if in_array($store_meta.id_meta, $gsitemap_disable_metas)} checked="checked"{/if} value="{$store_meta.id_meta|intval}"> {$store_meta.title|escape:'htmlall':'UTF-8'} [{$store_meta.page|escape:'htmlall':'UTF-8'}]</label>
+            <label><input type="checkbox" class="gsitemap_metas" name="gsitemap_meta[]" {if in_array($store_meta.id_meta, $gsitemap_disable_metas)} checked="checked"{/if} value="{$store_meta.id_meta|intval}"> {$store_meta.title|escape:'htmlall':'UTF-8'} [{$store_meta.page|escape:'htmlall':'UTF-8'}]</label>
          </li>
          {/foreach}
       </ul>
@@ -131,11 +130,11 @@
 <div class="panel">
    <h3><i class="icon icon-tags"></i> {l s='Informations' d='Modules.Gsitemap.Admin'}</h3>
    <p>
-      <strong>{l s='You have two ways to generate Sitemap:' d='Modules.Gsitemap.Admin'}</strong><br><br>
-      1. <strong>{l s='Manually:' d='Modules.Gsitemap.Admin'}</strong> {l s='using the form above (as often as needed)' d='Modules.Gsitemap.Admin'}<br>
+      <strong>{l s='You have two ways to generate sitemaps:' d='Modules.Gsitemap.Admin'}</strong><br><br>
+      1. <strong>{l s='Manually:' d='Modules.Gsitemap.Admin'}</strong> {l s='Using the form above (as often as needed)' d='Modules.Gsitemap.Admin'}<br>
       <br><span style="font-style: italic;">{l s='-or-' d='Modules.Gsitemap.Admin'}</span><br><br>
-      2. <strong>{l s='Automatically:' d='Modules.Gsitemap.Admin'}</strong> {l s='Ask your hosting provider to setup a "Cron task" to load the following URL at the time you would like:' d='Modules.Gsitemap.Admin'}
-      <a href="{$gsitemap_cron|escape:'htmlall':'UTF-8'}" target="_blank">{$gsitemap_cron|escape:'htmlall':'UTF-8'}</a><br><br>
+      2. <strong>{l s='Automatically:' d='Modules.Gsitemap.Admin'}</strong> {l s='Ask your hosting provider to setup a "Cron job" to load the following URL at the time you would like:' d='Modules.Gsitemap.Admin'}
+      <a href="{$gsitemap_cron|escape:'htmlall':'UTF-8'}" target="_blank">{$gsitemap_cron|escape:'htmlall':'UTF-8'}</a><br>
       {l s='It will automatically generate your XML Sitemaps.' d='Modules.Gsitemap.Admin'}
    </p>
    {/if}
@@ -149,9 +148,6 @@
       $('#check').toggle(function() {
          $('.gsitemap_metas').attr('checked', 'checked');
          $(this).html("{l s='Uncheck all' d='Modules.Gsitemap.Admin'}");
-      }, function() {
-         $('.gsitemap_metas').removeAttr('checked');
-         $(this).html("{l s='Check all' d='Modules.Gsitemap.Admin'}");
       });
    });
 </script>

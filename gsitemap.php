@@ -579,7 +579,7 @@ class Gsitemap extends Module
             if ($file_headers[0] != 'HTTP/1.1 404 Not Found' || $file_headers === true) {
                 $supplier_image = array(
                     'title_img' => htmlspecialchars(strip_tags($supplier->name)),
-                    'link' => 'http'.(Configuration::get('PS_SSL_ENABLED') ? 's' : '').'://'.Tools::getMediaServer(_THEME_SUP_DIR_)._THEME_SUP_DIR_.((!file_exists(_THEME_SUP_DIR_.'/'.(int)$supplier->id.'-'.ImageType::getFormattedName('medium'))) ? $lang['iso_code'].'-default' : (int)$supplier->id).'-'.ImageType::getFormattedName('medium')
+                    'link' => $this->context->link->getBaseLink().Tools::getMediaServer(_THEME_SUP_DIR_)._THEME_SUP_DIR_.((!file_exists(_THEME_SUP_DIR_.'/'.(int)$supplier->id.'-'.ImageType::getFormattedName('medium'))) ? $lang['iso_code'].'-default' : (int)$supplier->id).'-'.ImageType::getFormattedName('medium')
                 );
             }
             if (!$this->_addLinkToSitemap(

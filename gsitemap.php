@@ -279,7 +279,23 @@ class Gsitemap extends Module
                 if ($this->cron) {
                     Tools::redirectAdmin($this->context->link->getBaseLink().'modules/gsitemap/gsitemap-cron.php?continue=1&token='.Tools::substr(Tools::encrypt('gsitemap/cron'), 0, 10).'&type='.$new_link['type'].'&lang='.$lang.'&index='.$index.'&id='.(int)$id_obj.'&id_shop='.$this->context->shop->id);
                 } else {
-                    Tools::redirectAdmin($this->context->link->getBaseLink().'index.php?tab=AdminModules&configure=gsitemap&token='.Tools::getAdminTokenLite('AdminModules').'&tab_module='.$this->tab.'&module_name=gsitemap&continue=1&type='.$new_link['type'].'&lang='.$lang.'&index='.$index.'&id='.(int)$id_obj.'&id_shop='.$this->context->shop->id);
+					Tools::redirectAdmin(
+					  $this->context->link->getAdminLink(
+					    'AdminModules',
+					    true,
+					    array(),
+					    array(
+					      'tab_module' => $this->tab,
+					      'module_name' => $this->name,
+					      'continue' => 1,
+					      'type' => $new_link['type'],
+					      'lang' => $lang,
+					      'index' => $index,
+					      'id' => (int)$id_obj,
+					      'id_shop' => $this->context->shop->id
+					    )
+					  )
+					);
                 }
                 die();
             }

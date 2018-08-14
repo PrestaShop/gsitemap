@@ -185,7 +185,7 @@ class Gsitemap extends Module
 
         /* Get Meta pages and remove index page it's managed elsewhere (@see $this->_getHomeLink()) */
         $store_metas = array_filter(Meta::getMetasByIdLang((int)$this->context->cookie->id_lang), function ($meta) {
-            return $meta['page'] != 'index' && $meta['page'] != 'supplier' && $meta['page'] != 'manufacturer';
+            return $meta['page'] != 'index';
         });
         $store_url = $this->context->link->getBaseLink();
         $this->context->smarty->assign(

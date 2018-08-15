@@ -262,7 +262,22 @@ class Gsitemap extends Module
                 $this->context->smarty->assign(
                     array(
                         'gsitemap_number' => (int)$index,
-                        'gsitemap_refresh_page' => './index.php?tab=AdminModules&configure=gsitemap&token='.Tools::getAdminTokenLite('AdminModules').'&tab_module='.$this->tab.'&module_name=gsitemap&continue=1&type='.$new_link['type'].'&lang='.$lang.'&index='.$index.'&id='.(int)$id_obj.'&id_shop='.$this->context->shop->id
+                        'gsitemap_refresh_page' => 
+                           $this->context->link->getAdminLink(
+                           'AdminModules',
+                           true,
+                           array(),
+                           array(
+                             'tab_module' => $this->tab,
+                             'module_name' => $this->name,
+                             'continue' => 1,
+                             'type' => $new_link['type'],
+                             'lang' => $lang,
+                             'index' => $index,
+                             'id' => (int)$id_obj,
+                             'id_shop' => $this->context->shop->id
+                        )
+                      )
                     )
                 );
 
@@ -272,7 +287,7 @@ class Gsitemap extends Module
                 die();
             } else {
                 if ($this->cron) {
-                    Tools::redirectAdmin($this->context->link->getBaseLink().'modules/gsitemap/gsitemap-cron.php?continue=1&token='.Tools::substr(Tools::encrypt('gsitemap/cron'), 0, 10).'&type='.$new_link['type'].'&lang='.$lang.'&index='.$index.'&id='.(int)$id_obj.'&id_shop='.$this->context->shop->id);
+                    Tools::redirect($this->context->link->getBaseLink().'modules/gsitemap/gsitemap-cron.php?continue=1&token='.Tools::substr(Tools::encrypt('gsitemap/cron'), 0, 10).'&type='.$new_link['type'].'&lang='.$lang.'&index='.$index.'&id='.(int)$id_obj.'&id_shop='.$this->context->shop->id);
                 } else {
                     Tools::redirectAdmin(
                       $this->context->link->getAdminLink(
@@ -488,6 +503,7 @@ class Gsitemap extends Module
             if (isset($image_link) && ($file_headers[0] != 'HTTP/1.1 404 Not Found' || $file_headers === true)) {
                 $image_category = array(
                     'title_img' => htmlspecialchars(strip_tags($category->name)),
+                    'caption' => substr(htmlspecialchars(strip_tags($category->description)), 0, 350),
                     'link' => $image_link
                 );
             }

@@ -48,7 +48,7 @@ class Gsitemap extends Module
         $this->description = $this->trans('Generate your Google sitemap file', array(), 'Modules.Gsitemap.Admin');
         $this->confirmUninstall = $this->trans('Are you sure you want to uninstall this module?', array(), 'Admin.Notifications.Warning');
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
-        $this->type_array = array('home', 'meta', 'product', 'category', 'cms', 'module');
+        $this->type_array = array('home', 'meta', 'product', 'category', 'manufacturer', 'supplier', 'cms', 'module');
 
         $metas = Db::getInstance()->ExecuteS('SELECT * FROM `'._DB_PREFIX_.'meta` ORDER BY `id_meta` ASC');
         $disabled_metas = explode(',', Configuration::get('GSITEMAP_DISABLE_LINKS'));

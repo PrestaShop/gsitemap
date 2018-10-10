@@ -45,6 +45,10 @@ class Gsitemap extends Module
 
 		$this->displayName = $this->l('Google sitemap');
 		$this->description = $this->l('Generate your Google sitemap file');
+        $this->ps_versions_compliancy = array(
+            'min' => '1.7.1.0',
+            'max' => _PS_VERSION_
+        );
 
 		$this->type_array = array('home', 'meta', 'product', 'category', 'manufacturer', 'supplier', 'cms', 'module');
 

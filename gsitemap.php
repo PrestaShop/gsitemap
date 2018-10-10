@@ -119,6 +119,7 @@ class Gsitemap extends Module
         foreach (array(
             'GSITEMAP_PRIORITY_HOME' => '',
             'GSITEMAP_PRIORITY_PRODUCT' => '',
+            'GSITEMAP_PRIORITY_CATEGORY' => '',
             'GSITEMAP_PRIORITY_CMS' => '',
             'GSITEMAP_FREQUENCY' => '',
             'GSITEMAP_CHECK_IMAGE_FILE' => '',

@@ -43,8 +43,8 @@ class Gsitemap extends Module
 
 		parent::__construct();
 
-		$this->displayName = $this->l('Google sitemap');
-		$this->description = $this->l('Generate your Google sitemap file');
+		$this->displayName = $this->trans('Google sitemap', array(), 'Modules.Gsitemap.Admin');
+		$this->description = $this->trans('Generate your Google sitemap file', array(), 'Modules.Gsitemap.Admin');
         $this->ps_versions_compliancy = array(
             'min' => '1.7.1.0',
             'max' => _PS_VERSION_
@@ -697,7 +697,7 @@ class Gsitemap extends Module
 	{
 		if (@fopen($this->normalizeDirectory(_PS_ROOT_DIR_).'/test.txt', 'w') == false)
 		{
-			$this->context->smarty->assign('google_maps_error', $this->l('An error occured while trying to check your file permissions. Please adjust your permissions to allow PrestaShop to write a file in your root directory.'));
+			$this->context->smarty->assign('google_maps_error', $this->trans('An error occured while trying to check your file permissions. Please adjust your permissions to allow PrestaShop to write a file in your root directory.', array(), 'Modules.Gsitemap.Admin'));
 
 			return false;
 		}

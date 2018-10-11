@@ -263,7 +263,7 @@ class Gsitemap extends Module
                 $this->context->smarty->assign(
                     array(
                         'gsitemap_number' => (int)$index,
-                        'gsitemap_refresh_page' => 
+                        'gsitemap_refresh_page' =>
                            $this->context->link->getAdminLink(
                            'AdminModules',
                            true,

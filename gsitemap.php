@@ -46,8 +46,11 @@ class Gsitemap extends Module
         parent::__construct();
         $this->displayName = $this->trans('Google sitemap', array(), 'Modules.Gsitemap.Admin');
         $this->description = $this->trans('Generate your Google sitemap file', array(), 'Modules.Gsitemap.Admin');
+        $this->ps_versions_compliancy = array(
+            'min' => '1.7.1.0',
+            'max' => _PS_VERSION_
+        );
         $this->confirmUninstall = $this->trans('Are you sure you want to uninstall this module?', array(), 'Admin.Notifications.Warning');
-        $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
         $this->type_array = array('home', 'meta', 'product', 'category', 'manufacturer', 'supplier', 'cms', 'module');
 
         $metas = Db::getInstance()->ExecuteS('SELECT * FROM `'._DB_PREFIX_.'meta` ORDER BY `id_meta` ASC');

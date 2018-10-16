@@ -25,7 +25,7 @@
  */
 
 /*
- * This file can be called using a cron to generate Google Sitemap files automatically
+ * This file can be called using a cron to generate Google sitemap files automatically
  */
 
 include(dirname(__FILE__).'/../../config/config.inc.php');
@@ -57,6 +57,6 @@ if ($gsitemap->active) {
         $gsitemap->emptySitemap((int)$id_shop);
     }
 
-    /* Create the Google Sitemap's files */
+    /* Create the Google sitemap's files */
     $gsitemap->createSitemap((int)$id_shop);
 }

@@ -28,7 +28,7 @@
    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
    <span aria-hidden="true">&times;</span>
    </button>
-   <p class="alert-text">{l s='Your sitemaps were successfully created. Please do not forget to setup the URL' d='Modules.Gsitemap.Admin'} <a class="alert-link" href="{$gsitemap_store_url|escape:'htmlall':'UTF-8'}{$shop->id|intval}_index_sitemap.xml" target="_blank">{$gsitemap_store_url|escape:'htmlall':'UTF-8'}{$shop->id|intval}_index_sitemap.xml</a> {l s='in your Google Webmaster account.' d='Modules.Gsitemap.Admin'}</p>
+   <p class="alert-text">{l s='Your sitemaps were successfully created. Please don't forget to setup the URL' d='Modules.Gsitemap.Admin'} <a class="alert-link" href="{$gsitemap_store_url|escape:'htmlall':'UTF-8'}{$shop->id|intval}_index_sitemap.xml" target="_blank">{$gsitemap_store_url|escape:'htmlall':'UTF-8'}{$shop->id|intval}_index_sitemap.xml</a> {l s='in your Google Webmaster account.' d='Modules.Gsitemap.Admin'}</p>
 </div>
 {/if}
 
@@ -74,10 +74,10 @@
       <p>{l s='For a better use of the module, please make sure that you have' d='Modules.Gsitemap.Admin'}<br>
       <ul>
          {if $gsitemap_customer_limit.memory_limit < 128 && $gsitemap_customer_limit.memory_limit > 0}
-         <li>{l s='a minimum memory_limit value of 128 MB.' d='Modules.Gsitemap.Admin'}</li>
+         <li>{l s='A minimum memory_limit value of 128 MB.' d='Modules.Gsitemap.Admin'}</li>
          {/if}
          {if $gsitemap_customer_limit.max_exec_time < 30 && $gsitemap_customer_limit.max_exec_time > 0}
-         <li>{l s='a minimum max_execution_time value of 30 seconds.' d='Modules.Gsitemap.Admin'}</li>
+         <li>{l s='A minimum max_execution_time value of 30 seconds.' d='Modules.Gsitemap.Admin'}</li>
          {/if}
       </ul>
       {l s='You can edit these limits in your php.ini file. For more details, please contact your hosting provider.' d='Modules.Gsitemap.Admin'}</p>
@@ -88,7 +88,7 @@
 <div class="panel">
    <form action="{$gsitemap_form|escape:'htmlall':'UTF-8'}" method="post">
       <h3><i class="icon icon-wrench"></i> {l s='Configure your sitemap' d='Modules.Gsitemap.Admin'}</h3>
-      <p>{l s='Several sitemaps files will be generated depending on how your server is configured and on the number of activated products in your catalog.' d='Modules.Gsitemap.Admin'}<br></p>
+      <p>{l s='Several sitemap files will be generated depending on how your server is configured and on the number of activated products in your catalog.' d='Modules.Gsitemap.Admin'}<br></p>
       <div class="margin-form">
          <label for="gsitemap_frequency" >{l s='How often do you update your store?' d='Modules.Gsitemap.Admin'}
          <select name="gsitemap_frequency">
@@ -130,7 +130,7 @@
 <div class="panel">
    <h3><i class="icon icon-tags"></i> {l s='Informations' d='Modules.Gsitemap.Admin'}</h3>
    <p>
-      <strong>{l s='You have two ways to generate sitemaps:' d='Modules.Gsitemap.Admin'}</strong><br><br>
+      <strong>{l s='You have two ways to generate sitemaps.' d='Modules.Gsitemap.Admin'}</strong><br><br>
       1. <strong>{l s='Manually:' d='Modules.Gsitemap.Admin'}</strong> {l s='Using the form above (as often as needed)' d='Modules.Gsitemap.Admin'}<br>
       <br><span style="font-style: italic;">{l s='-or-' d='Modules.Gsitemap.Admin'}</span><br><br>
       2. <strong>{l s='Automatically:' d='Modules.Gsitemap.Admin'}</strong> {l s='Ask your hosting provider to setup a "Cron job" to load the following URL at the time you would like:' d='Modules.Gsitemap.Admin'}
@@ -147,7 +147,7 @@
          $('#check').html("{l s='Uncheck all' d='Modules.Gsitemap.Admin'}");
       $('#check').toggle(function() {
          $('.gsitemap_metas').removeAttr('checked');
-         $(this).html("{l s='check all' d='Modules.Gsitemap.Admin'}");
+         $(this).html("{l s='Check all' d='Modules.Gsitemap.Admin'}");
       }, function() {
          $('.gsitemap_metas').attr('checked', 'checked');
          $(this).html("{l s='Uncheck all' d='Modules.Gsitemap.Admin'}");

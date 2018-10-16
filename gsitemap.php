@@ -480,8 +480,8 @@ class Gsitemap extends Module
 
         $categories_id = Db::getInstance()->ExecuteS(
             'SELECT c.id_category FROM `'._DB_PREFIX_.'category` c
-				INNER JOIN `'._DB_PREFIX_.'category_shop` cs ON c.`id_category` = cs.`id_category`
-				WHERE c.`id_category` >= '.(int)$id_category.' AND c.`active` = 1 AND c.`id_category` != 1 AND c.id_parent > 0 AND c.`id_category` > 0 AND cs.`id_shop` = '.(int)$this->context->shop->id.' ORDER BY c.`id_category` ASC'
+                INNER JOIN `'._DB_PREFIX_.'category_shop` cs ON c.`id_category` = cs.`id_category`
+                WHERE c.`id_category` >= '.(int)$id_category.' AND c.`active` = 1 AND c.`id_category` != 1 AND c.id_parent > 0 AND c.`id_category` > 0 AND cs.`id_shop` = '.(int)$this->context->shop->id.' ORDER BY c.`id_category` ASC'
         );
 
         foreach ($categories_id as $category_id) {
@@ -718,7 +718,7 @@ class Gsitemap extends Module
         $sitemap_link = $this->context->shop->id.'_'.$lang.'_'.$index.'_sitemap.xml';
         $write_fd = fopen($this->normalizeDirectory(_PS_ROOT_DIR_).$sitemap_link, 'w');
 
-        fwrite($write_fd, '<?xml version="1.0" encoding="UTF-8"?>'."\r\n".'<urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="https://www.google.com/schemas/sitemap-image/1.1">'."\r\n");
+        fwrite($write_fd, '<?xml version="1.0" encoding="UTF-8"?>'."\r\n".'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">'."\r\n");
         foreach ($link_sitemap as $key => $file) {
             fwrite($write_fd, '<url>'."\r\n");
             $lastmod = (isset($file['lastmod']) && !empty($file['lastmod'])) ? date('c', strtotime($file['lastmod'])) : null;

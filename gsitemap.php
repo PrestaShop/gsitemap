@@ -95,7 +95,7 @@ class Gsitemap extends Module
             }
         }
         
-        return parent::install() && Db::getInstance()->Execute('CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'gsitemap_sitemap` (`link` varchar(255) DEFAULT NULL, `id_shop` int(11) DEFAULT 0) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;') && $this->_installHook();
+        return parent::install() && Db::getInstance()->Execute('CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'gsitemap_sitemap` (`link` varchar(255) DEFAULT NULL, `id_shop` int(11) DEFAULT 0) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;') && $this->installHook();
     }
     
     /**
@@ -103,7 +103,7 @@ class Gsitemap extends Module
      *
      * @return boolean
      */
-    protected function _installHook()
+    protected function installHook()
     {
         $hook = new Hook();
         $hook->name = self::HOOK_ADD_URLS;
@@ -192,7 +192,7 @@ class Gsitemap extends Module
             ShopUrl::resetMainDomainCache();
         }
         
-        /* Get Meta pages and remove index page it's managed elsewhere (@see $this->_getHomeLink()) */
+        /* Get Meta pages and remove index page it's managed elsewhere (@see $this->getHomeLink()) */
         $store_metas = array_filter(Meta::getMetasByIdLang((int) $this->context->cookie->id_lang), function ($meta) {
             return $meta['page'] != 'index';
         });
@@ -256,7 +256,7 @@ class Gsitemap extends Module
      *
      * @return bool
      */
-    public function _addLinkToSitemap(&$link_sitemap, $new_link, $lang, &$index, &$i, $id_obj)
+    public function addLinkToSitemap(&$link_sitemap, $new_link, $lang, &$index, &$i, $id_obj)
     {
         if ($i <= 25000 && memory_get_usage() < 100000000) {
             $link_sitemap[] = $new_link;
@@ -264,7 +264,7 @@ class Gsitemap extends Module
             
             return true;
         } else {
-            $this->_recursiveSitemapCreator($link_sitemap, $lang, $index);
+            $this->recursiveSitemapCreator($link_sitemap, $lang, $index);
             if ($index % 20 == 0 && !$this->cron) {
                 $this->context->smarty->assign(array(
                     'gsitemap_number' => (int) $index,
@@ -314,10 +314,10 @@ class Gsitemap extends Module
      *
      * @return bool
      */
-    protected function _getHomeLink(&$link_sitemap, $lang, &$index, &$i)
+    protected function getHomeLink(&$link_sitemap, $lang, &$index, &$i)
     {
         $link = new Link();
-        return $this->_addLinkToSitemap($link_sitemap, array(
+        return $this->addLinkToSitemap($link_sitemap, array(
             'type' => 'home',
             'page' => 'home',
             'link' => $link->getPageLink('index', null, $lang['id_lang']),
@@ -336,7 +336,7 @@ class Gsitemap extends Module
      *
      * @return bool
      */
-    protected function _getMetaLink(&$link_sitemap, $lang, &$index, &$i, $id_meta = 0)
+    protected function getMetaLink(&$link_sitemap, $lang, &$index, &$i, $id_meta = 0)
     {
         if (method_exists('ShopUrl', 'resetMainDomainCache')) {
             ShopUrl::resetMainDomainCache();
@@ -348,7 +348,7 @@ class Gsitemap extends Module
             if (!in_array($meta['id_meta'], explode(',', Configuration::get('GSITEMAP_DISABLE_LINKS')))) {
                 $url = $link->getPageLink($meta['page'], null, $lang['id_lang']);
                 
-                if (!$this->_addLinkToSitemap($link_sitemap, array(
+                if (!$this->addLinkToSitemap($link_sitemap, array(
                     'type' => 'meta',
                     'page' => $meta['page'],
                     'link' => $url,
@@ -373,7 +373,7 @@ class Gsitemap extends Module
      *
      * @return bool
      */
-    protected function _getProductLink(&$link_sitemap, $lang, &$index, &$i, $id_product = 0)
+    protected function getProductLink(&$link_sitemap, $lang, &$index, &$i, $id_product = 0)
     {
         $link = new Link();
         if (method_exists('ShopUrl', 'resetMainDomainCache')) {
@@ -407,7 +407,7 @@ class Gsitemap extends Module
                     'link' => $image_link
                 );
             }
-            if (!$this->_addLinkToSitemap($link_sitemap, array(
+            if (!$this->addLinkToSitemap($link_sitemap, array(
                 'type' => 'product',
                 'page' => 'product',
                 'lastmod' => $product->date_upd,
@@ -434,7 +434,7 @@ class Gsitemap extends Module
      *
      * @return bool
      */
-    protected function _getCategoryLink(&$link_sitemap, $lang, &$index, &$i, $id_category = 0)
+    protected function getCategoryLink(&$link_sitemap, $lang, &$index, &$i, $id_category = 0)
     {
         $link = new Link();
         if (method_exists('ShopUrl', 'resetMainDomainCache')) {
@@ -469,7 +469,7 @@ class Gsitemap extends Module
                 );
             }
             
-            if (!$this->_addLinkToSitemap($link_sitemap, array(
+            if (!$this->addLinkToSitemap($link_sitemap, array(
                 'type' => 'category',
                 'page' => 'category',
                 'lastmod' => $category->date_upd,
@@ -496,7 +496,7 @@ class Gsitemap extends Module
      *
      * @return bool
      */
-    protected function _getCmsLink(&$link_sitemap, $lang, &$index, &$i, $id_cms = 0)
+    protected function getCmsLink(&$link_sitemap, $lang, &$index, &$i, $id_cms = 0)
     {
         $link = new Link();
         if (method_exists('ShopUrl', 'resetMainDomainCache')) {
@@ -511,7 +511,7 @@ class Gsitemap extends Module
                 $cms->link_rewrite = urlencode((is_array($cms->link_rewrite) ? $cms->link_rewrite[(int) $lang['id_lang']] : $cms->link_rewrite));
                 $url = $link->getCMSLink($cms, null, null, $lang['id_lang']);
                 
-                if (!$this->_addLinkToSitemap($link_sitemap, array(
+                if (!$this->addLinkToSitemap($link_sitemap, array(
                     'type' => 'cms',
                     'page' => 'cms',
                     'link' => $url,
@@ -539,7 +539,7 @@ class Gsitemap extends Module
      * @param int    $num_link     restart at link number #$num_link
      * @return boolean
      */
-    protected function _getModuleLink(&$link_sitemap, $lang, &$index, &$i, $num_link = 0)
+    protected function getModuleLink(&$link_sitemap, $lang, &$index, &$i, $num_link = 0)
     {
         $modules_links = Hook::exec(self::HOOK_ADD_URLS, array(
             'lang' => $lang
@@ -556,7 +556,7 @@ class Gsitemap extends Module
                 continue;
             }
             $link['type'] = 'module';
-            if (!$this->_addLinkToSitemap($link_sitemap, $link, $lang['iso_code'], $index, $i, $n)) {
+            if (!$this->addLinkToSitemap($link_sitemap, $link, $lang['iso_code'], $index, $i, $n)) {
                 return false;
             }
         }
@@ -600,7 +600,7 @@ class Gsitemap extends Module
             $link_sitemap = array();
             foreach ($this->type_array as $type_val) {
                 if ($type == '' || $type == $type_val) {
-                    $function = '_get' . Tools::ucfirst($type_val) . 'Link';
+                    $function = 'get' . Tools::ucfirst($type_val) . 'Link';
                     if (!$this->$function($link_sitemap, $lang, $index, $i, $id_obj)) {
                         return false;
                     }
@@ -608,12 +608,12 @@ class Gsitemap extends Module
                     $id_obj = 0;
                 }
             }
-            $this->_recursiveSitemapCreator($link_sitemap, $lang['iso_code'], $index);
+            $this->recursiveSitemapCreator($link_sitemap, $lang['iso_code'], $index);
             $page = '';
             $index = 0;
         }
         
-        $this->_createIndexSitemap();
+        $this->createIndexSitemap();
         Configuration::updateValue('GSITEMAP_LAST_EXPORT', date('r'));
         Tools::file_get_contents('https://www.google.com/webmasters/sitemaps/ping?sitemap=' . urlencode($this->context->link->getBaseLink() . $this->context->shop->physical_uri . $this->context->shop->virtual_uri . $this->context->shop->id));
         
@@ -631,7 +631,7 @@ class Gsitemap extends Module
      *
      * @return bool
      */
-    protected function _saveSitemapLink($sitemap)
+    protected function saveSitemapLink($sitemap)
     {
         if ($sitemap) {
             return Db::getInstance()->Execute('INSERT INTO `' . _DB_PREFIX_ . 'gsitemap_sitemap` (`link`, id_shop) VALUES (\'' . pSQL($sitemap) . '\', ' . (int) $this->context->shop->id . ')');
@@ -647,7 +647,7 @@ class Gsitemap extends Module
      *
      * @return bool
      */
-    protected function _recursiveSitemapCreator($link_sitemap, $lang, &$index)
+    protected function recursiveSitemapCreator($link_sitemap, $lang, &$index)
     {
         if (!count($link_sitemap)) {
             return false;
@@ -660,9 +660,9 @@ class Gsitemap extends Module
         foreach ($link_sitemap as $key => $file) {
             fwrite($write_fd, '<url>' . "\r\n");
             $lastmod = (isset($file['lastmod']) && !empty($file['lastmod'])) ? date('c', strtotime($file['lastmod'])) : null;
-            $this->_addSitemapNode($write_fd, htmlspecialchars(strip_tags($file['link'])), $this->_getPriorityPage($file['page']), Configuration::get('GSITEMAP_FREQUENCY'), $lastmod);
+            $this->addSitemapNode($write_fd, htmlspecialchars(strip_tags($file['link'])), $this->getPriorityPage($file['page']), Configuration::get('GSITEMAP_FREQUENCY'), $lastmod);
             if ($file['image']) {
-                $this->_addSitemapNodeImage($write_fd, htmlspecialchars(strip_tags($file['image']['link'])), isset($file['image']['title_img']) ? htmlspecialchars(str_replace(array(
+                $this->addSitemapNodeImage($write_fd, htmlspecialchars(strip_tags($file['image']['link'])), isset($file['image']['title_img']) ? htmlspecialchars(str_replace(array(
                     "\r\n",
                     "\r",
                     "\n"
@@ -676,7 +676,7 @@ class Gsitemap extends Module
         }
         fwrite($write_fd, '</urlset>' . "\r\n");
         fclose($write_fd);
-        $this->_saveSitemapLink($sitemap_link);
+        $this->saveSitemapLink($sitemap_link);
         $index++;
         
         return true;
@@ -689,7 +689,7 @@ class Gsitemap extends Module
      *
      * @return float|string|bool
      */
-    protected function _getPriorityPage($page)
+    protected function getPriorityPage($page)
     {
         return Configuration::get('GSITEMAP_PRIORITY_' . Tools::strtoupper($page)) ? Configuration::get('GSITEMAP_PRIORITY_' . Tools::strtoupper($page)) : 0.1;
     }
@@ -703,12 +703,12 @@ class Gsitemap extends Module
      * @param string   $change_freq
      * @param int      $last_mod the last modification date/time as a timestamp
      */
-    protected function _addSitemapNode($fd, $loc, $priority, $change_freq, $last_mod = null)
+    protected function addSitemapNode($fd, $loc, $priority, $change_freq, $last_mod = null)
     {
         fwrite($fd, '<loc>' . (Configuration::get('PS_REWRITING_SETTINGS') ? '<![CDATA[' . $loc . ']]>' : $loc) . '</loc>' . "\r\n" . ($last_mod ? '<lastmod>' . date('c', strtotime($last_mod)) . '</lastmod>' : '') . "\r\n" . '<changefreq>' . $change_freq . '</changefreq>' . "\r\n" . '<priority>' . number_format($priority, 1, '.', '') . '</priority>' . "\r\n");
     }
     
-    protected function _addSitemapNodeImage($fd, $link, $title, $caption)
+    protected function addSitemapNodeImage($fd, $link, $title, $caption)
     {
         fwrite($fd, '<image:image>' . "\r\n" . '<image:loc>' . (Configuration::get('PS_REWRITING_SETTINGS') ? '<![CDATA[' . $link . ']]>' : $link) . '</image:loc>' . "\r\n" . '<image:caption><![CDATA[' . $caption . ']]></image:caption>' . "\r\n" . '<image:title><![CDATA[' . $title . ']]></image:title>' . "\r\n" . '</image:image>' . "\r\n");
     }
@@ -717,7 +717,7 @@ class Gsitemap extends Module
      * Create the index file for all generated sitemaps
      * @return boolean
      */
-    protected function _createIndexSitemap()
+    protected function createIndexSitemap()
     {
         $sitemaps = Db::getInstance()->ExecuteS('SELECT `link` FROM `' . _DB_PREFIX_ . 'gsitemap_sitemap` WHERE id_shop = ' . $this->context->shop->id);
         if (!$sitemaps) {

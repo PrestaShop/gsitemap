@@ -28,7 +28,7 @@
    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
    <span aria-hidden="true">&times;</span>
    </button>
-   <p class="alert-text">{l s='Your Sitemaps were successfully created. Please do not forget to setup the URL' d='Modules.Gsitemap.Admin'} <a class="alert-link" href="{$gsitemap_store_url|escape:'htmlall':'UTF-8'}{$shop->id|intval}_index_sitemap.xml" target="_blank">{$gsitemap_store_url|escape:'htmlall':'UTF-8'}{$shop->id|intval}_index_sitemap.xml</a> {l s='in your Google Webmaster account.' d='Modules.Gsitemap.Admin'}</p>
+   <p class="alert-text">{l s='Your sitemaps were successfully created. Please do not forget to setup the URL' d='Modules.Gsitemap.Admin'} <a class="alert-link" href="{$gsitemap_store_url|escape:'htmlall':'UTF-8'}{$shop->id|intval}_index_sitemap.xml" target="_blank">{$gsitemap_store_url|escape:'htmlall':'UTF-8'}{$shop->id|intval}_index_sitemap.xml</a> {l s='in your Google Webmaster account.' d='Modules.Gsitemap.Admin'}</p>
 </div>
 {/if}
 
@@ -39,7 +39,7 @@
    </div>
    {/if}
    {if isset($gsitemap_refresh_page)}
-   <h3><i class="icon icon-sitemap"></i> {l s='Your Sitemaps' d='Modules.Gsitemap.Admin'}</h3>
+   <h3><i class="icon icon-sitemap"></i> {l s='Your sitemaps' d='Modules.Gsitemap.Admin'}</h3>
    <p>{$gsitemap_number|intval} {l s='Sitemaps were already created.' d='Modules.Gsitemap.Admin'}</p>
    <br><br>
    <form action="{$gsitemap_refresh_page|escape:'htmlall':'UTF-8'}" method="post" id="gsitemap_generate_sitmap">
@@ -48,8 +48,8 @@
    </form>
    {else}
    {if $gsitemap_links}
-   <h3><i class="icon icon-sitemap"></i> {l s='Your Sitemaps' d='Modules.Gsitemap.Admin'}</h3>
-   {l s='Please set up the following Sitemap URL in your Google Webmaster account:' d='Modules.Gsitemap.Admin'}<br> 
+   <h3><i class="icon icon-sitemap"></i> {l s='Your sitemaps' d='Modules.Gsitemap.Admin'}</h3>
+   {l s='Please set up the following sitemap URL in your Google Webmaster account:' d='Modules.Gsitemap.Admin'}<br> 
    <a href="{$gsitemap_store_url|escape:'htmlall':'UTF-8'}{$shop->id|intval}_index_sitemap.xml" target="_blank">{$gsitemap_store_url|escape:'htmlall':'UTF-8'}{$shop->id|intval}_index_sitemap.xml</a><br><br>
    {l s='The above URL is the master sitemap file. It refers to the following sub-sitemap files:' d='Modules.Gsitemap.Admin'}
    <div style="max-height: 220px; overflow: auto;">
@@ -61,7 +61,7 @@
    </div>
    <p>{l s='Your last update was made on this date:' d='Modules.Gsitemap.Admin'} {$gsitemap_last_export|escape:'htmlall':'UTF-8'}</p>
    {else}
-   <h3><i class="icon icon-sitemap"></i> {l s='Your Sitemaps' d='Modules.Gsitemap.Admin'}</h3>
+   <h3><i class="icon icon-sitemap"></i> {l s='Your sitemaps' d='Modules.Gsitemap.Admin'}</h3>
    <p>{l s='This shop has no sitemap yet.' d='Modules.Gsitemap.Admin'}<br>
    </p>
    {/if}
@@ -87,8 +87,8 @@
 
 <div class="panel">
    <form action="{$gsitemap_form|escape:'htmlall':'UTF-8'}" method="post">
-      <h3><i class="icon icon-wrench"></i> {l s='Configure your Sitemap' d='Modules.Gsitemap.Admin'}</h3>
-      <p>{l s='Several Sitemaps files will be generated depending on how your server is configured and on the number of activated products in your catalog.' d='Modules.Gsitemap.Admin'}<br></p>
+      <h3><i class="icon icon-wrench"></i> {l s='Configure your sitemap' d='Modules.Gsitemap.Admin'}</h3>
+      <p>{l s='Several sitemaps files will be generated depending on how your server is configured and on the number of activated products in your catalog.' d='Modules.Gsitemap.Admin'}<br></p>
       <div class="margin-form">
          <label for="gsitemap_frequency" >{l s='How often do you update your store?' d='Modules.Gsitemap.Admin'}
          <select name="gsitemap_frequency">
@@ -117,7 +117,7 @@
       <br>
       <div class="margin-form" style="clear: both;">
          <br>
-         <button type="submit" class="btn btn-primary btn-lg" name="SubmitGsitemap" onclick="$('#gsitemap_loader').show();">{l s='Generate Sitemap' d='Modules.Gsitemap.Admin'}</button>
+         <button type="submit" class="btn btn-primary btn-lg" name="SubmitGsitemap" onclick="$('#gsitemap_loader').show();">{l s='Generate sitemap' d='Modules.Gsitemap.Admin'}</button>
          <br><br>
          <div class="alert alert-info" role="alert">
             {l s='Generating a sitemap can take several minutes' d='Modules.Gsitemap.Admin'}</p>
@@ -135,7 +135,7 @@
       <br><span style="font-style: italic;">{l s='-or-' d='Modules.Gsitemap.Admin'}</span><br><br>
       2. <strong>{l s='Automatically:' d='Modules.Gsitemap.Admin'}</strong> {l s='Ask your hosting provider to setup a "Cron job" to load the following URL at the time you would like:' d='Modules.Gsitemap.Admin'}
       <a href="{$gsitemap_cron|escape:'htmlall':'UTF-8'}" target="_blank">{$gsitemap_cron|escape:'htmlall':'UTF-8'}</a><br>
-      {l s='It will automatically generate your XML Sitemaps.' d='Modules.Gsitemap.Admin'}
+      {l s='It will automatically generate your XML sitemaps.' d='Modules.Gsitemap.Admin'}
    </p>
    {/if}
    </p>

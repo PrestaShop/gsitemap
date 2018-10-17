@@ -28,7 +28,7 @@
    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
    <span aria-hidden="true">&times;</span>
    </button>
-   <p class="alert-text">{l s='Your sitemaps were successfully created. Please don't forget to setup the URL' d='Modules.Gsitemap.Admin'} <a class="alert-link" href="{$gsitemap_store_url|escape:'htmlall':'UTF-8'}{$shop->id|intval}_index_sitemap.xml" target="_blank">{$gsitemap_store_url|escape:'htmlall':'UTF-8'}{$shop->id|intval}_index_sitemap.xml</a> {l s='in your Google Webmaster account.' d='Modules.Gsitemap.Admin'}</p>
+   <p class="alert-text">{l s='Your sitemaps were successfully created. Please do not forget to setup the URL' d='Modules.Gsitemap.Admin'} <a class="alert-link" href="{$gsitemap_store_url|escape:'htmlall':'UTF-8'}{$shop->id|intval}_index_sitemap.xml" target="_blank">{$gsitemap_store_url|escape:'htmlall':'UTF-8'}{$shop->id|intval}_index_sitemap.xml</a> {l s='in your Google Webmaster account.' d='Modules.Gsitemap.Admin'}</p>
 </div>
 {/if}
 

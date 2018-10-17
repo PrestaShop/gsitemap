@@ -23,7 +23,6 @@
  * @license   https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
-
 if (!defined('_PS_VERSION_')) {
     exit;
 }
@@ -31,10 +30,10 @@ if (!defined('_PS_VERSION_')) {
 class Gsitemap extends Module
 {
     const HOOK_ADD_URLS = 'gSitemapAppendUrls';
-    
+
     public $cron = false;
     protected $sql_checks = array();
-    
+
     public function __construct()
     {
         $this->name = 'gsitemap';
@@ -48,7 +47,7 @@ class Gsitemap extends Module
         $this->description = $this->trans('Generate your Google sitemap file', array(), 'Modules.Gsitemap.Admin');
         $this->ps_versions_compliancy = array(
             'min' => '1.7.1.0',
-            'max' => _PS_VERSION_
+            'max' => _PS_VERSION_,
         );
         $this->confirmUninstall = $this->trans('Are you sure you want to uninstall this module?', array(), 'Admin.Notifications.Warning');
         $this->type_array = array(
@@ -57,9 +56,9 @@ class Gsitemap extends Module
             'product',
             'category',
             'cms',
-            'module'
+            'module',
         );
-        
+
         $metas = Db::getInstance()->ExecuteS('SELECT * FROM `' . _DB_PREFIX_ . 'meta` ORDER BY `id_meta` ASC');
         $disabled_metas = explode(',', Configuration::get('GSITEMAP_DISABLE_LINKS'));
         foreach ($metas as $meta) {
@@ -70,14 +69,14 @@ class Gsitemap extends Module
             }
         }
     }
-    
+
     /**
      * Google sitemap installation process:
      *
      * Step 1 - Pre-set Configuration option values
      * Step 2 - Install the Addon and create a database table to store sitemap files name by shop
      *
-     * @return boolean Installation result
+     * @return bool Installation result
      */
     public function install()
     {
@@ -88,20 +87,20 @@ class Gsitemap extends Module
             'GSITEMAP_PRIORITY_CMS' => 0.7,
             'GSITEMAP_FREQUENCY' => 'weekly',
             'GSITEMAP_CHECK_IMAGE_FILE' => false,
-            'GSITEMAP_LAST_EXPORT' => false
+            'GSITEMAP_LAST_EXPORT' => false,
         ) as $key => $val) {
             if (!Configuration::updateValue($key, $val)) {
                 return false;
             }
         }
-        
+
         return parent::install() && Db::getInstance()->Execute('CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'gsitemap_sitemap` (`link` varchar(255) DEFAULT NULL, `id_shop` int(11) DEFAULT 0) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;') && $this->installHook();
     }
-    
+
     /**
      * Registers hook(s)
      *
-     * @return boolean
+     * @return bool
      */
     protected function installHook()
     {
@@ -110,9 +109,10 @@ class Gsitemap extends Module
         $hook->title = 'GSitemap Append URLs';
         $hook->description = 'This hook allows a module to add URLs to a generated sitemap';
         $hook->position = true;
+
         return $hook->save();
     }
-    
+
     /**
      * Google sitemap uninstallation process:
      *
@@ -120,7 +120,7 @@ class Gsitemap extends Module
      * Step 2 - Remove the database containing the generated sitemap files names
      * Step 3 - Uninstallation of the Addon itself
      *
-     * @return boolean Uninstallation result
+     * @return bool Uninstallation result
      */
     public function uninstall()
     {
@@ -131,24 +131,25 @@ class Gsitemap extends Module
             'GSITEMAP_PRIORITY_CMS' => '',
             'GSITEMAP_FREQUENCY' => '',
             'GSITEMAP_CHECK_IMAGE_FILE' => '',
-            'GSITEMAP_LAST_EXPORT' => ''
+            'GSITEMAP_LAST_EXPORT' => '',
         ) as $key => $val) {
             if (!Configuration::deleteByName($key)) {
                 return false;
             }
         }
-        
+
         $hook = new Hook(Hook::getIdByName(self::HOOK_ADD_URLS));
         if (Validate::isLoadedObject($hook)) {
             $hook->delete();
         }
-        
+
         return parent::uninstall() && $this->removeSitemap();
     }
-    
+
     /**
      * Delete all the generated sitemap files  and drop the addon table.
-     * @return boolean
+     *
+     * @return bool
      */
     public function removeSitemap()
     {
@@ -163,10 +164,10 @@ class Gsitemap extends Module
         if (!Db::getInstance()->Execute('DROP TABLE `' . _DB_PREFIX_ . 'gsitemap_sitemap`')) {
             return false;
         }
-        
+
         return true;
     }
-    
+
     public function getContent()
     {
         /* Store the posted parameters and generate a new Google sitemap files for the current Shop */
@@ -181,17 +182,17 @@ class Gsitemap extends Module
             Configuration::updateValue('GSITEMAP_DISABLE_LINKS', $meta);
             $this->emptySitemap();
             $this->createSitemap();
-            
+
         /* If no posted form and the variable [continue] is found in the HTTP request variable keep creating sitemap */
         } elseif (Tools::getValue('continue')) {
             $this->createSitemap();
         }
-        
+
         /* Empty the Shop domain cache */
         if (method_exists('ShopUrl', 'resetMainDomainCache')) {
             ShopUrl::resetMainDomainCache();
         }
-        
+
         /* Get Meta pages and remove index page it's managed elsewhere (@see $this->getHomeLink()) */
         $store_metas = array_filter(Meta::getMetasByIdLang((int) $this->context->cookie->id_lang), function ($meta) {
             return $meta['page'] != 'index';
@@ -209,16 +210,16 @@ class Gsitemap extends Module
             'gsitemap_disable_metas' => explode(',', Configuration::get('GSITEMAP_DISABLE_LINKS')),
             'gsitemap_customer_limit' => array(
                 'max_exec_time' => (int) ini_get('max_execution_time'),
-                'memory_limit' => (int) ini_get('memory_limit')
+                'memory_limit' => (int) ini_get('memory_limit'),
             ),
             'prestashop_ssl' => Configuration::get('PS_SSL_ENABLED'),
             'gsitemap_check_image_file' => Configuration::get('GSITEMAP_CHECK_IMAGE_FILE'),
-            'shop' => $this->context->shop
+            'shop' => $this->context->shop,
         ));
-        
+
         return $this->display(__FILE__, 'views/templates/admin/configuration.tpl');
     }
-    
+
     /**
      * Delete all the generated sitemap files from the files system and the database.
      *
@@ -239,20 +240,20 @@ class Gsitemap extends Module
             foreach ($links as $link) {
                 @unlink($this->normalizeDirectory(_PS_ROOT_DIR_) . $link['link']);
             }
-            
+
             return Db::getInstance()->Execute('DELETE FROM `' . _DB_PREFIX_ . 'gsitemap_sitemap` WHERE id_shop = ' . (int) $this->context->shop->id);
         }
-        
+
         return true;
     }
-    
+
     /**
-     * @param array  $link_sitemap contain all the links for the Google sitemap file to be generated
-     * @param array  $new_link     contain the link elements
-     * @param string $lang         language of link to add
-     * @param int    $index        index of the current Google sitemap file
-     * @param int    $i            count of elements added to sitemap main array
-     * @param int    $id_obj       identifier of the object of the link to be added to the Gogle sitemap file
+     * @param array $link_sitemap contain all the links for the Google sitemap file to be generated
+     * @param array $new_link contain the link elements
+     * @param string $lang language of link to add
+     * @param int $index index of the current Google sitemap file
+     * @param int $i count of elements added to sitemap main array
+     * @param int $id_obj identifier of the object of the link to be added to the Gogle sitemap file
      *
      * @return bool
      */
@@ -260,8 +261,8 @@ class Gsitemap extends Module
     {
         if ($i <= 25000 && memory_get_usage() < 100000000) {
             $link_sitemap[] = $new_link;
-            $i++;
-            
+            ++$i;
+
             return true;
         } else {
             $this->recursiveSitemapCreator($link_sitemap, $lang, $index);
@@ -276,10 +277,10 @@ class Gsitemap extends Module
                         'lang' => $lang,
                         'index' => $index,
                         'id' => (int) $id_obj,
-                        'id_shop' => $this->context->shop->id
-                    ))
+                        'id_shop' => $this->context->shop->id,
+                    )),
                 ));
-                
+
                 return false;
             } elseif ($index % 20 == 0 && $this->cron) {
                 header('Refresh: 5; url=http' . (Configuration::get('PS_SSL_ENABLED') ? 's' : '') . '://' . Tools::getShopDomain(false, true) . __PS_BASE_URI__ . 'modules/gsitemap/gsitemap-cron.php?continue=1&token=' . Tools::substr(Tools::encrypt('gsitemap/cron'), 0, 10) . '&type=' . $new_link['type'] . '&lang=' . $lang . '&index=' . $index . '&id=' . (int) $id_obj . '&id_shop=' . $this->context->shop->id);
@@ -296,43 +297,44 @@ class Gsitemap extends Module
                         'lang' => $lang,
                         'index' => $index,
                         'id' => (int) $id_obj,
-                        'id_shop' => $this->context->shop->id
+                        'id_shop' => $this->context->shop->id,
                     )));
                 }
                 die();
             }
         }
     }
-    
+
     /**
      * Hydrate $link_sitemap with home link
      *
-     * @param array  $link_sitemap contain all the links for the Google sitemap file to be generated
-     * @param string $lang         language of link to add
-     * @param int    $index        index of the current Google sitemap file
-     * @param int    $i            count of elements added to sitemap main array
+     * @param array $link_sitemap contain all the links for the Google sitemap file to be generated
+     * @param string $lang language of link to add
+     * @param int $index index of the current Google sitemap file
+     * @param int $i count of elements added to sitemap main array
      *
      * @return bool
      */
     protected function getHomeLink(&$link_sitemap, $lang, &$index, &$i)
     {
         $link = new Link();
+
         return $this->addLinkToSitemap($link_sitemap, array(
             'type' => 'home',
             'page' => 'home',
             'link' => $link->getPageLink('index', null, $lang['id_lang']),
-            'image' => false
+            'image' => false,
         ), $lang['iso_code'], $index, $i, -1);
     }
-    
+
     /**
      * Hydrate $link_sitemap with meta link
      *
-     * @param array  $link_sitemap contain all the links for the Google sitemap file to be generated
-     * @param string $lang         language of link to add
-     * @param int    $index        index of the current Google sitemap file
-     * @param int    $i            count of elements added to sitemap main array
-     * @param int    $id_meta      meta object identifier
+     * @param array $link_sitemap contain all the links for the Google sitemap file to be generated
+     * @param string $lang language of link to add
+     * @param int $index index of the current Google sitemap file
+     * @param int $i count of elements added to sitemap main array
+     * @param int $id_meta meta object identifier
      *
      * @return bool
      */
@@ -347,29 +349,29 @@ class Gsitemap extends Module
             $url = '';
             if (!in_array($meta['id_meta'], explode(',', Configuration::get('GSITEMAP_DISABLE_LINKS')))) {
                 $url = $link->getPageLink($meta['page'], null, $lang['id_lang']);
-                
+
                 if (!$this->addLinkToSitemap($link_sitemap, array(
                     'type' => 'meta',
                     'page' => $meta['page'],
                     'link' => $url,
-                    'image' => false
+                    'image' => false,
                 ), $lang['iso_code'], $index, $i, $meta['id_meta'])) {
                     return false;
                 }
             }
         }
-        
+
         return true;
     }
-    
+
     /**
      * Hydrate $link_sitemap with products link
      *
-     * @param array  $link_sitemap contain all the links for the Google sitemap file to be generated
-     * @param string $lang         language of link to add
-     * @param int    $index        index of the current Google sitemap file
-     * @param int    $i            count of elements added to sitemap main array
-     * @param int    $id_product   product object identifier
+     * @param array $link_sitemap contain all the links for the Google sitemap file to be generated
+     * @param string $lang language of link to add
+     * @param int $index index of the current Google sitemap file
+     * @param int $i count of elements added to sitemap main array
+     * @param int $id_product product object identifier
      *
      * @return bool
      */
@@ -379,23 +381,23 @@ class Gsitemap extends Module
         if (method_exists('ShopUrl', 'resetMainDomainCache')) {
             ShopUrl::resetMainDomainCache();
         }
-        
+
         $products_id = Db::getInstance()->ExecuteS('SELECT `id_product` FROM `' . _DB_PREFIX_ . 'product_shop` WHERE `id_product` >= ' . (int) $id_product . ' AND `active` = 1 AND `visibility` != \'none\' AND `id_shop`=' . $this->context->shop->id . ' ORDER BY `id_product` ASC');
-        
+
         foreach ($products_id as $product_id) {
             $product = new Product((int) $product_id['id_product'], false, (int) $lang['id_lang']);
-            
+
             $url = $link->getProductLink($product, $product->link_rewrite, htmlspecialchars(strip_tags($product->category)), $product->ean13, (int) $lang['id_lang'], (int) $this->context->shop->id, 0);
-            
+
             $id_image = Product::getCover((int) $product_id['id_product']);
             if (isset($id_image['id_image'])) {
                 $image_link = $this->context->link->getImageLink($product->link_rewrite, $product->id . '-' . (int) $id_image['id_image'], ImageType::getFormattedName('large'));
                 $image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace(array(
                     'https',
-                    Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri
+                    Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri,
                 ), array(
                     'http',
-                    Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri . Context::getContext()->shop->virtual_uri
+                    Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri . Context::getContext()->shop->virtual_uri,
                 ), $image_link) : $image_link;
             }
             $file_headers = (Configuration::get('GSITEMAP_CHECK_IMAGE_FILE')) ? @get_headers($image_link) : true;
@@ -404,7 +406,7 @@ class Gsitemap extends Module
                 $image_product = array(
                     'title_img' => htmlspecialchars(strip_tags($product->name)),
                     'caption' => htmlspecialchars(strip_tags($product->description_short)),
-                    'link' => $image_link
+                    'link' => $image_link,
                 );
             }
             if (!$this->addLinkToSitemap($link_sitemap, array(
@@ -412,25 +414,25 @@ class Gsitemap extends Module
                 'page' => 'product',
                 'lastmod' => $product->date_upd,
                 'link' => $url,
-                'image' => $image_product
+                'image' => $image_product,
             ), $lang['iso_code'], $index, $i, $product_id['id_product'])) {
                 return false;
             }
-            
+
             unset($image_link);
         }
-        
+
         return true;
     }
-    
+
     /**
      * Hydrate $link_sitemap with categories link
      *
-     * @param array  $link_sitemap contain all the links for the Google sitemap file to be generated
-     * @param string $lang         language of link to add
-     * @param int    $index        index of the current Google sitemap file
-     * @param int    $i            count of elements added to sitemap main array
-     * @param int    $id_category  category object identifier
+     * @param array $link_sitemap contain all the links for the Google sitemap file to be generated
+     * @param string $lang language of link to add
+     * @param int $index index of the current Google sitemap file
+     * @param int $i count of elements added to sitemap main array
+     * @param int $id_category category object identifier
      *
      * @return bool
      */
@@ -440,23 +442,23 @@ class Gsitemap extends Module
         if (method_exists('ShopUrl', 'resetMainDomainCache')) {
             ShopUrl::resetMainDomainCache();
         }
-        
+
         $categories_id = Db::getInstance()->ExecuteS('SELECT c.id_category FROM `' . _DB_PREFIX_ . 'category` c
                 INNER JOIN `' . _DB_PREFIX_ . 'category_shop` cs ON c.`id_category` = cs.`id_category`
                 WHERE c.`id_category` >= ' . (int) $id_category . ' AND c.`active` = 1 AND c.`id_category` != 1 AND c.id_parent > 0 AND c.`id_category` > 0 AND cs.`id_shop` = ' . (int) $this->context->shop->id . ' ORDER BY c.`id_category` ASC');
-        
+
         foreach ($categories_id as $category_id) {
             $category = new Category((int) $category_id['id_category'], (int) $lang['id_lang']);
             $url = $link->getCategoryLink($category, urlencode($category->link_rewrite), (int) $lang['id_lang']);
-            
+
             if ($category->id_image) {
                 $image_link = $this->context->link->getCatImageLink($category->link_rewrite, (int) $category->id_image, ImageType::getFormattedName('category'));
                 $image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace(array(
                     'https',
-                    Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri
+                    Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri,
                 ), array(
                     'http',
-                    Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri . Context::getContext()->shop->virtual_uri
+                    Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri . Context::getContext()->shop->virtual_uri,
                 ), $image_link) : $image_link;
             }
             $file_headers = (Configuration::get('GSITEMAP_CHECK_IMAGE_FILE')) ? @get_headers($image_link) : true;
@@ -465,34 +467,34 @@ class Gsitemap extends Module
                 $image_category = array(
                     'title_img' => htmlspecialchars(strip_tags($category->name)),
                     'caption' => Tools::substr(htmlspecialchars(strip_tags($category->description)), 0, 350),
-                    'link' => $image_link
+                    'link' => $image_link,
                 );
             }
-            
+
             if (!$this->addLinkToSitemap($link_sitemap, array(
                 'type' => 'category',
                 'page' => 'category',
                 'lastmod' => $category->date_upd,
                 'link' => $url,
-                'image' => $image_category
+                'image' => $image_category,
             ), $lang['iso_code'], $index, $i, (int) $category_id['id_category'])) {
                 return false;
             }
-            
+
             unset($image_link);
         }
-        
+
         return true;
     }
-    
+
     /**
      * return the link elements for the CMS object
      *
-     * @param array  $link_sitemap contain all the links for the Google sitemap file to be generated
-     * @param string $lang         the language of link to add
-     * @param int    $index        the index of the current Google sitemap file
-     * @param int    $i            the count of elements added to sitemap main array
-     * @param int    $id_cms       the CMS object identifier
+     * @param array $link_sitemap contain all the links for the Google sitemap file to be generated
+     * @param string $lang the language of link to add
+     * @param int $index the index of the current Google sitemap file
+     * @param int $i the count of elements added to sitemap main array
+     * @param int $id_cms the CMS object identifier
      *
      * @return bool
      */
@@ -504,27 +506,27 @@ class Gsitemap extends Module
         }
         $cmss_id = Db::getInstance()->ExecuteS('SELECT c.`id_cms` FROM `' . _DB_PREFIX_ . 'cms` c INNER JOIN `' . _DB_PREFIX_ . 'cms_lang` cl ON c.`id_cms` = cl.`id_cms` ' . ($this->tableColumnExists(_DB_PREFIX_ . 'supplier_shop') ? 'INNER JOIN `' . _DB_PREFIX_ . 'cms_shop` cs ON c.`id_cms` = cs.`id_cms` ' : '') . 'INNER JOIN `' . _DB_PREFIX_ . 'cms_category` cc ON c.id_cms_category = cc.id_cms_category AND cc.active = 1
             WHERE c.`active` =1 AND c.`indexation` =1 AND c.`id_cms` >= ' . (int) $id_cms . ($this->tableColumnExists(_DB_PREFIX_ . 'supplier_shop') ? ' AND cs.id_shop = ' . (int) $this->context->shop->id : '') . ' AND cl.`id_lang` = ' . (int) $lang['id_lang'] . ' GROUP BY  c.`id_cms` ORDER BY c.`id_cms` ASC');
-        
+
         if (is_array($cmss_id)) {
             foreach ($cmss_id as $cms_id) {
                 $cms = new CMS((int) $cms_id['id_cms'], $lang['id_lang']);
                 $cms->link_rewrite = urlencode((is_array($cms->link_rewrite) ? $cms->link_rewrite[(int) $lang['id_lang']] : $cms->link_rewrite));
                 $url = $link->getCMSLink($cms, null, null, $lang['id_lang']);
-                
+
                 if (!$this->addLinkToSitemap($link_sitemap, array(
                     'type' => 'cms',
                     'page' => 'cms',
                     'link' => $url,
-                    'image' => false
+                    'image' => false,
                 ), $lang['iso_code'], $index, $i, $cms_id['id_cms'])) {
                     return false;
                 }
             }
         }
-        
+
         return true;
     }
-    
+
     /**
      * Returns link elements generated by modules subscribes to hook gsitemap::HOOK_ADD_URLS
      *
@@ -532,17 +534,18 @@ class Gsitemap extends Module
      *   the gsitemap::_addLinkToSitemap() second attribute (minus the 'type' index).
      * The 'type' index is automatically set to 'module' (not sure here, should we be safe or trust modules?).
      *
-     * @param array  $link_sitemap by ref. accumulator for all the links for the Google sitemap file to be generated
-     * @param string $lang         the language being processed
-     * @param int    $index        the index of the current Google sitemap file
-     * @param int    $i            the count of elements added to sitemap main array
-     * @param int    $num_link     restart at link number #$num_link
-     * @return boolean
+     * @param array $link_sitemap by ref. accumulator for all the links for the Google sitemap file to be generated
+     * @param string $lang the language being processed
+     * @param int $index the index of the current Google sitemap file
+     * @param int $i the count of elements added to sitemap main array
+     * @param int $num_link restart at link number #$num_link
+     *
+     * @return bool
      */
     protected function getModuleLink(&$link_sitemap, $lang, &$index, &$i, $num_link = 0)
     {
         $modules_links = Hook::exec(self::HOOK_ADD_URLS, array(
-            'lang' => $lang
+            'lang' => $lang,
         ), null, true);
         if (empty($modules_links) || !is_array($modules_links)) {
             return true;
@@ -560,9 +563,10 @@ class Gsitemap extends Module
                 return false;
             }
         }
+
         return true;
     }
-    
+
     /**
      * Create the Google sitemap by Shop
      *
@@ -574,16 +578,16 @@ class Gsitemap extends Module
     {
         if (@fopen($this->normalizeDirectory(_PS_ROOT_DIR_) . '/test.txt', 'w') == false) {
             $this->context->smarty->assign('google_maps_error', $this->trans('An error occured while trying to check your file permissions. Please adjust your permissions to allow PrestaShop to write a file in your root directory.', array(), 'Modules.Gsitemap.Admin'));
-            
+
             return false;
         } else {
             @unlink($this->normalizeDirectory(_PS_ROOT_DIR_) . 'test.txt');
         }
-        
+
         if ($id_shop != 0) {
             $this->context->shop = new Shop((int) $id_shop);
         }
-        
+
         $type = Tools::getValue('type') ? Tools::getValue('type') : '';
         $languages = Language::getLanguages(true, $this->context->shop->id);
         $lang_stop = Tools::getValue('lang') ? true : false;
@@ -596,7 +600,7 @@ class Gsitemap extends Module
             } elseif ($lang_stop && $lang['iso_code'] == Tools::getValue('lang')) {
                 $lang_stop = false;
             }
-            
+
             $link_sitemap = array();
             foreach ($this->type_array as $type_val) {
                 if ($type == '' || $type == $type_val) {
@@ -612,18 +616,18 @@ class Gsitemap extends Module
             $page = '';
             $index = 0;
         }
-        
+
         $this->createIndexSitemap();
         Configuration::updateValue('GSITEMAP_LAST_EXPORT', date('r'));
         Tools::file_get_contents('https://www.google.com/webmasters/sitemaps/ping?sitemap=' . urlencode($this->context->link->getBaseLink() . $this->context->shop->physical_uri . $this->context->shop->virtual_uri . $this->context->shop->id));
-        
+
         if ($this->cron) {
             die();
         }
         Tools::redirectAdmin('index.php?tab=AdminModules&configure=gsitemap&token=' . Tools::getAdminTokenLite('AdminModules') . '&tab_module=' . $this->tab . '&module_name=gsitemap&validation');
         die();
     }
-    
+
     /**
      * Store the generated sitemap file to the database
      *
@@ -636,14 +640,14 @@ class Gsitemap extends Module
         if ($sitemap) {
             return Db::getInstance()->Execute('INSERT INTO `' . _DB_PREFIX_ . 'gsitemap_sitemap` (`link`, id_shop) VALUES (\'' . pSQL($sitemap) . '\', ' . (int) $this->context->shop->id . ')');
         }
-        
+
         return false;
     }
-    
+
     /**
-     * @param array  $link_sitemap contain all the links for the Google sitemap file to be generated
-     * @param string $lang         the language of link to add
-     * @param int    $index        the index of the current Google sitemap file
+     * @param array $link_sitemap contain all the links for the Google sitemap file to be generated
+     * @param string $lang the language of link to add
+     * @param int $index the index of the current Google sitemap file
      *
      * @return bool
      */
@@ -652,10 +656,10 @@ class Gsitemap extends Module
         if (!count($link_sitemap)) {
             return false;
         }
-        
+
         $sitemap_link = $this->context->shop->id . '_' . $lang . '_' . $index . '_sitemap.xml';
         $write_fd = fopen($this->normalizeDirectory(_PS_ROOT_DIR_) . $sitemap_link, 'w');
-        
+
         fwrite($write_fd, '<?xml version="1.0" encoding="UTF-8"?>' . "\r\n" . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">' . "\r\n");
         foreach ($link_sitemap as $key => $file) {
             fwrite($write_fd, '<url>' . "\r\n");
@@ -665,11 +669,11 @@ class Gsitemap extends Module
                 $this->addSitemapNodeImage($write_fd, htmlspecialchars(strip_tags($file['image']['link'])), isset($file['image']['title_img']) ? htmlspecialchars(str_replace(array(
                     "\r\n",
                     "\r",
-                    "\n"
+                    "\n",
                 ), '', $this->removeControlCharacters(strip_tags($file['image']['title_img'])))) : '', isset($file['image']['caption']) ? htmlspecialchars(str_replace(array(
                     "\r\n",
                     "\r",
-                    "\n"
+                    "\n",
                 ), '', strip_tags($file['image']['caption']))) : '');
             }
             fwrite($write_fd, '</url>' . "\r\n");
@@ -677,11 +681,11 @@ class Gsitemap extends Module
         fwrite($write_fd, '</urlset>' . "\r\n");
         fclose($write_fd);
         $this->saveSitemapLink($sitemap_link);
-        $index++;
-        
+        ++$index;
+
         return true;
     }
-    
+
     /**
      * return the priority value set in the configuration parameters
      *
@@ -693,29 +697,30 @@ class Gsitemap extends Module
     {
         return Configuration::get('GSITEMAP_PRIORITY_' . Tools::strtoupper($page)) ? Configuration::get('GSITEMAP_PRIORITY_' . Tools::strtoupper($page)) : 0.1;
     }
-    
+
     /**
      * Add a new line to the sitemap file
      *
-     * @param resource $fd       file system object resource
-     * @param string   $loc      string the URL of the object page
-     * @param string   $priority
-     * @param string   $change_freq
-     * @param int      $last_mod the last modification date/time as a timestamp
+     * @param resource $fd file system object resource
+     * @param string $loc string the URL of the object page
+     * @param string $priority
+     * @param string $change_freq
+     * @param int $last_mod the last modification date/time as a timestamp
      */
     protected function addSitemapNode($fd, $loc, $priority, $change_freq, $last_mod = null)
     {
         fwrite($fd, '<loc>' . (Configuration::get('PS_REWRITING_SETTINGS') ? '<![CDATA[' . $loc . ']]>' : $loc) . '</loc>' . "\r\n" . ($last_mod ? '<lastmod>' . date('c', strtotime($last_mod)) . '</lastmod>' : '') . "\r\n" . '<changefreq>' . $change_freq . '</changefreq>' . "\r\n" . '<priority>' . number_format($priority, 1, '.', '') . '</priority>' . "\r\n");
     }
-    
+
     protected function addSitemapNodeImage($fd, $link, $title, $caption)
     {
         fwrite($fd, '<image:image>' . "\r\n" . '<image:loc>' . (Configuration::get('PS_REWRITING_SETTINGS') ? '<![CDATA[' . $link . ']]>' : $link) . '</image:loc>' . "\r\n" . '<image:caption><![CDATA[' . $caption . ']]></image:caption>' . "\r\n" . '<image:title><![CDATA[' . $title . ']]></image:title>' . "\r\n" . '</image:image>' . "\r\n");
     }
-    
+
     /**
      * Create the index file for all generated sitemaps
-     * @return boolean
+     *
+     * @return bool
      */
     protected function createIndexSitemap()
     {
@@ -723,20 +728,20 @@ class Gsitemap extends Module
         if (!$sitemaps) {
             return false;
         }
-        
+
         $xml = '<?xml version="1.0" encoding="UTF-8"?><sitemapindex xmlns="https://www.sitemaps.org/schemas/sitemap/0.9"></sitemapindex>';
         $xml_feed = new SimpleXMLElement($xml);
-        
+
         foreach ($sitemaps as $link) {
             $sitemap = $xml_feed->addChild('sitemap');
             $sitemap->addChild('loc', $this->context->link->getBaseLink() . $link['link']);
             $sitemap->addChild('lastmod', date('c'));
         }
         file_put_contents($this->normalizeDirectory(_PS_ROOT_DIR_) . $this->context->shop->id . '_index_sitemap.xml', $xml_feed->asXML());
-        
+
         return true;
     }
-    
+
     protected function tableColumnExists($table_name, $column = null)
     {
         if (array_key_exists($table_name, $this->sql_checks)) {
@@ -746,7 +751,7 @@ class Gsitemap extends Module
                 return $this->sql_checks[$table_name];
             }
         }
-        
+
         $table = Db::getInstance()->ExecuteS('SHOW TABLES LIKE \'' . $table_name . '\'');
         if (empty($column)) {
             if (count($table) < 1) {
@@ -756,33 +761,36 @@ class Gsitemap extends Module
             }
         } else {
             $table = Db::getInstance()->ExecuteS('SELECT * FROM `' . $table_name . '` LIMIT 1');
-            
+
             return $this->sql_checks[$table_name][$column] = array_key_exists($column, current($table));
         }
-        
+
         return true;
     }
-    
+
     protected function normalizeDirectory($directory)
     {
         $last = $directory[Tools::strlen($directory) - 1];
-        
+
         if (in_array($last, array(
             '/',
-            '\\'
+            '\\',
         ))) {
             $directory[Tools::strlen($directory) - 1] = DIRECTORY_SEPARATOR;
+
             return $directory;
         }
-        
+
         $directory .= DIRECTORY_SEPARATOR;
+
         return $directory;
     }
-    
+
     protected function removeControlCharacters($text)
     {
         $text = (string) preg_replace('/[^\x{0009}\x{000a}\x{000d}\x{0020}-\x{D7FF}\x{E000}-\x{FFFD}]+/u', ' ', $text);
         $text = (string) preg_replace('!\s+!', ' ', $text);
+
         return $text;
     }
 }

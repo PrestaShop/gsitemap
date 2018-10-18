@@ -34,8 +34,8 @@
 
 <div class="panel">
    {if isset($google_maps_error)}
-   <div class="error">		
-      {$google_maps_error|escape:'htmlall':'UTF-8'}<br>	
+   <div class="error">
+      {$google_maps_error|escape:'htmlall':'UTF-8'}<br>
    </div>
    {/if}
    {if isset($gsitemap_refresh_page)}
@@ -49,7 +49,7 @@
    {else}
    {if $gsitemap_links}
    <h3><i class="icon icon-sitemap"></i> {l s='Your sitemaps' d='Modules.Gsitemap.Admin'}</h3>
-   {l s='Please set up the following sitemap URL in your Google Webmaster account:' d='Modules.Gsitemap.Admin'}<br> 
+   {l s='Please set up the following sitemap URL in your Google Webmaster account:' d='Modules.Gsitemap.Admin'}<br>
    <a href="{$gsitemap_store_url|escape:'htmlall':'UTF-8'}{$shop->id|intval}_index_sitemap.xml" target="_blank">{$gsitemap_store_url|escape:'htmlall':'UTF-8'}{$shop->id|intval}_index_sitemap.xml</a><br><br>
    {l s='The above URL is the master sitemap file. It refers to the following sub-sitemap files:' d='Modules.Gsitemap.Admin'}
    <div style="max-height: 220px; overflow: auto;">
@@ -128,7 +128,7 @@
 </div>
 
 <div class="panel">
-   <h3><i class="icon icon-tags"></i> {l s='Informations' d='Modules.Gsitemap.Admin'}</h3>
+   <h3><i class="icon icon-tags"></i> {l s='Information' d='Modules.Gsitemap.Admin'}</h3>
    <p>
       <strong>{l s='You have two ways to generate sitemaps.' d='Modules.Gsitemap.Admin'}</strong><br><br>
       1. <strong>{l s='Manually:' d='Modules.Gsitemap.Admin'}</strong> {l s='Using the form above (as often as needed)' d='Modules.Gsitemap.Admin'}<br>

@@ -729,7 +729,7 @@ class Gsitemap extends Module
             return false;
         }
 
-        $xml = '<?xml version="1.0" encoding="UTF-8"?><sitemapindex xmlns="https://www.sitemaps.org/schemas/sitemap/0.9"></sitemapindex>';
+        $xml = '<?xml version="1.0" encoding="UTF-8"?><sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></sitemapindex>';
         $xml_feed = new SimpleXMLElement($xml);
 
         foreach ($sitemaps as $link) {

@@ -466,7 +466,7 @@ class Gsitemap extends Module
             if (isset($image_link) && ($file_headers[0] != 'HTTP/1.1 404 Not Found' || $file_headers === true)) {
                 $image_category = array(
                     'title_img' => htmlspecialchars(strip_tags($category->name)),
-                    'caption' => Tools::substr(htmlspecialchars(strip_tags($category->description)), 0, 350),
+                    'caption' => Tools::substr(htmlspecialchars(strip_tags($category->meta_description)), 0, 500),
                     'link' => $image_link,
                 );
             }

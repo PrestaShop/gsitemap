@@ -27,8 +27,9 @@
 /*
  * This file can be called using a cron to generate Google sitemap files automatically
  */
-include(_PS_CONFIG_DIR_ . '/config.inc.php');
-include(_PS_CONFIG_DIR_ . '/../init.php');
+
+include(dirname(__FILE__) . '/../../config/config.inc.php');
+include(dirname(__FILE__) . '/../../init.php');
 
 /* Check security token */
 if (!Tools::isPHPCLI()) {

@@ -576,7 +576,7 @@ class Gsitemap extends Module
      */
     public function createSitemap($id_shop = 0)
     {
-        if (@fopen($this->normalizeDirectory(_PS_ROOT_DIR_) . '/test.txt', 'w') == false) {
+        if (@fopen($this->normalizeDirectory(_PS_ROOT_DIR_) . '/test.txt', 'wb') == false) {
             $this->context->smarty->assign('google_maps_error', $this->trans('An error occured while trying to check your file permissions. Please adjust your permissions to allow PrestaShop to write a file in your root directory.', array(), 'Modules.Gsitemap.Admin'));
 
             return false;
@@ -658,7 +658,7 @@ class Gsitemap extends Module
         }
 
         $sitemap_link = $this->context->shop->id . '_' . $lang . '_' . $index . '_sitemap.xml';
-        $write_fd = fopen($this->normalizeDirectory(_PS_ROOT_DIR_) . $sitemap_link, 'w');
+        $write_fd = fopen($this->normalizeDirectory(_PS_ROOT_DIR_) . $sitemap_link, 'wb');
 
         fwrite($write_fd, '<?xml version="1.0" encoding="UTF-8"?>' . "\r\n" . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">' . "\r\n");
         foreach ($link_sitemap as $key => $file) {

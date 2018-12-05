@@ -667,11 +667,11 @@ class Gsitemap extends Module
             $this->addSitemapNode($write_fd, htmlspecialchars(strip_tags($file['link'])), $this->getPriorityPage($file['page']), Configuration::get('GSITEMAP_FREQUENCY'), $lastmod);
             if ($file['image']) {
                 $this->addSitemapNodeImage($write_fd, htmlspecialchars(strip_tags($file['image']['link'])), isset($file['image']['title_img']) ? htmlspecialchars(str_replace(array(
-                    PHP_EOL,
+                    "\r\n",
                     "\r",
                     "\n",
                 ), '', $this->removeControlCharacters(strip_tags($file['image']['title_img'])))) : '', isset($file['image']['caption']) ? htmlspecialchars(str_replace(array(
-                    PHP_EOL,
+                    "\r\n",
                     "\r",
                     "\n",
                 ), '', strip_tags($file['image']['caption']))) : '');

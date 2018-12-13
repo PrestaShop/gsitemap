@@ -1,13 +1,13 @@
 <?php
 /**
- * 2007-2018 PrestaShop
+ * 2007-2018 PrestaShop.
  *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Academic Free License (AFL 3.0)
  * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
- * https://opensource.org/licenses/afl-3.0.php
+ * https://opensource.org/licenses/AFL-3.0
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@prestashop.com so we can send you a copy immediately.
@@ -20,9 +20,10 @@
  *
  * @author    PrestaShop SA <contact@prestashop.com>
  * @copyright 2007-2018 PrestaShop SA
- * @license   https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License (AFL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
@@ -576,7 +577,7 @@ class Gsitemap extends Module
      */
     public function createSitemap($id_shop = 0)
     {
-        if (@fopen($this->normalizeDirectory(_PS_ROOT_DIR_) . '/test.txt', 'w') == false) {
+        if (@fopen($this->normalizeDirectory(_PS_ROOT_DIR_) . '/test.txt', 'wb') == false) {
             $this->context->smarty->assign('google_maps_error', $this->trans('An error occured while trying to check your file permissions. Please adjust your permissions to allow PrestaShop to write a file in your root directory.', array(), 'Modules.Gsitemap.Admin'));
 
             return false;
@@ -658,11 +659,11 @@ class Gsitemap extends Module
         }
 
         $sitemap_link = $this->context->shop->id . '_' . $lang . '_' . $index . '_sitemap.xml';
-        $write_fd = fopen($this->normalizeDirectory(_PS_ROOT_DIR_) . $sitemap_link, 'w');
+        $write_fd = fopen($this->normalizeDirectory(_PS_ROOT_DIR_) . $sitemap_link, 'wb');
 
-        fwrite($write_fd, '<?xml version="1.0" encoding="UTF-8"?>' . "\r\n" . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">' . "\r\n");
+        fwrite($write_fd, '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">' . PHP_EOL);
         foreach ($link_sitemap as $key => $file) {
-            fwrite($write_fd, '<url>' . "\r\n");
+            fwrite($write_fd, '<url>' . PHP_EOL);
             $lastmod = (isset($file['lastmod']) && !empty($file['lastmod'])) ? date('c', strtotime($file['lastmod'])) : null;
             $this->addSitemapNode($write_fd, htmlspecialchars(strip_tags($file['link'])), $this->getPriorityPage($file['page']), Configuration::get('GSITEMAP_FREQUENCY'), $lastmod);
             if ($file['image']) {
@@ -676,9 +677,9 @@ class Gsitemap extends Module
                     "\n",
                 ), '', strip_tags($file['image']['caption']))) : '');
             }
-            fwrite($write_fd, '</url>' . "\r\n");
+            fwrite($write_fd, '</url>' . PHP_EOL);
         }
-        fwrite($write_fd, '</urlset>' . "\r\n");
+        fwrite($write_fd, '</urlset>' . PHP_EOL);
         fclose($write_fd);
         $this->saveSitemapLink($sitemap_link);
         ++$index;
@@ -709,12 +710,12 @@ class Gsitemap extends Module
      */
     protected function addSitemapNode($fd, $loc, $priority, $change_freq, $last_mod = null)
     {
-        fwrite($fd, '<loc>' . (Configuration::get('PS_REWRITING_SETTINGS') ? '<![CDATA[' . $loc . ']]>' : $loc) . '</loc>' . "\r\n" . ($last_mod ? '<lastmod>' . date('c', strtotime($last_mod)) . '</lastmod>' : '') . "\r\n" . '<changefreq>' . $change_freq . '</changefreq>' . "\r\n" . '<priority>' . number_format($priority, 1, '.', '') . '</priority>' . "\r\n");
+        fwrite($fd, '<loc>' . (Configuration::get('PS_REWRITING_SETTINGS') ? '<![CDATA[' . $loc . ']]>' : $loc) . '</loc>' . PHP_EOL . ($last_mod ? '<lastmod>' . date('c', strtotime($last_mod)) . '</lastmod>' : '') . PHP_EOL . '<changefreq>' . $change_freq . '</changefreq>' . PHP_EOL . '<priority>' . number_format($priority, 1, '.', '') . '</priority>' . PHP_EOL);
     }
 
     protected function addSitemapNodeImage($fd, $link, $title, $caption)
     {
-        fwrite($fd, '<image:image>' . "\r\n" . '<image:loc>' . (Configuration::get('PS_REWRITING_SETTINGS') ? '<![CDATA[' . $link . ']]>' : $link) . '</image:loc>' . "\r\n" . '<image:caption><![CDATA[' . $caption . ']]></image:caption>' . "\r\n" . '<image:title><![CDATA[' . $title . ']]></image:title>' . "\r\n" . '</image:image>' . "\r\n");
+        fwrite($fd, '<image:image>' . PHP_EOL . '<image:loc>' . (Configuration::get('PS_REWRITING_SETTINGS') ? '<![CDATA[' . $link . ']]>' : $link) . '</image:loc>' . PHP_EOL . '<image:caption><![CDATA[' . $caption . ']]></image:caption>' . PHP_EOL . '<image:title><![CDATA[' . $title . ']]></image:title>' . PHP_EOL . '</image:image>' . PHP_EOL);
     }
 
     /**

@@ -44,7 +44,7 @@ $gsitemap = Module::getInstanceByName('gsitemap');
 if ($gsitemap->active) {
     /* Check if the requested shop exists */
     $shops = Db::getInstance()->ExecuteS('SELECT id_shop FROM `' . _DB_PREFIX_ . 'shop`');
-    $list_id_shop = array();
+    $list_id_shop = [];
     foreach ($shops as $shop) {
         $list_id_shop[] = (int) $shop['id_shop'];
     }

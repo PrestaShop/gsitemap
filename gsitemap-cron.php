@@ -59,4 +59,5 @@ if ($gsitemap->active) {
     
     /* Create the Google sitemap's files */
     $gsitemap->createSitemap((int) $id_shop);
+    $gsitemap->indentXml();
 }

@@ -217,6 +217,7 @@ class Gsitemap extends Module
             'gsitemap_check_image_file' => Configuration::get('GSITEMAP_CHECK_IMAGE_FILE'),
             'shop' => $this->context->shop,
         ));
+        
 
         return $this->display(__FILE__, 'views/templates/admin/configuration.tpl');
     }
@@ -619,6 +620,7 @@ class Gsitemap extends Module
         }
 
         $this->createIndexSitemap();
+        $this->indentXml();
         Configuration::updateValue('GSITEMAP_LAST_EXPORT', date('r'));
         Tools::file_get_contents('https://www.google.com/webmasters/sitemaps/ping?sitemap=' . urlencode($this->context->link->getBaseLink() . $this->context->shop->physical_uri . $this->context->shop->virtual_uri . $this->context->shop->id));
 
@@ -627,6 +629,19 @@ class Gsitemap extends Module
         }
         Tools::redirectAdmin('index.php?tab=AdminModules&configure=gsitemap&token=' . Tools::getAdminTokenLite('AdminModules') . '&tab_module=' . $this->tab . '&module_name=gsitemap&validation');
         die();
+    }
+
+    public function indentXml()
+    {
+        $files = Db::getInstance()->ExecuteS('SELECT * FROM `' . _DB_PREFIX_ . 'gsitemap_sitemap` WHERE id_shop = ' . (int) $this->context->shop->id);
+        foreach($files as $f)
+        {
+            $content = file_get_contents(_PS_ROOT_DIR_.'/'.$f['link']);
+            $sxe = new SimpleXMLElement($content);
+            $format = $this->formatXml($sxe);
+            file_put_contents(_PS_ROOT_DIR_.'/'.$f['link'],$format);
+        }
+
     }
 
     /**
@@ -657,7 +672,7 @@ class Gsitemap extends Module
         if (!count($link_sitemap)) {
             return false;
         }
-
+        // dump($index);
         $sitemap_link = $this->context->shop->id . '_' . $lang . '_' . $index . '_sitemap.xml';
         $write_fd = fopen($this->normalizeDirectory(_PS_ROOT_DIR_) . $sitemap_link, 'wb');
 
@@ -717,6 +732,21 @@ class Gsitemap extends Module
     {
         fwrite($fd, '<image:image>' . PHP_EOL . '<image:loc>' . (Configuration::get('PS_REWRITING_SETTINGS') ? '<![CDATA[' . $link . ']]>' : $link) . '</image:loc>' . PHP_EOL . '<image:caption><![CDATA[' . $caption . ']]></image:caption>' . PHP_EOL . '<image:title><![CDATA[' . $title . ']]></image:title>' . PHP_EOL . '</image:image>' . PHP_EOL);
     }
+    /**
+     * Return indent XML
+     *
+     * @param [object] SimpleXMLElement
+     * @return xml
+     */
+    public function formatXml($simpleXMLElement)
+    {
+        $xmlDocument = new DOMDocument('1.0');
+        $xmlDocument->preserveWhiteSpace = false;
+        $xmlDocument->formatOutput = true;
+        $xmlDocument->loadXML($simpleXMLElement->asXML());
+
+        return $xmlDocument->saveXML();
+    }
 
     /**
      * Create the index file for all generated sitemaps
@@ -738,7 +768,8 @@ class Gsitemap extends Module
             $sitemap->addChild('loc', $this->context->link->getBaseLink() . $link['link']);
             $sitemap->addChild('lastmod', date('c'));
         }
-        file_put_contents($this->normalizeDirectory(_PS_ROOT_DIR_) . $this->context->shop->id . '_index_sitemap.xml', $xml_feed->asXML());
+
+        file_put_contents($this->normalizeDirectory(_PS_ROOT_DIR_) . $this->context->shop->id . '_index_sitemap.xml', $this->formatXml($xml_feed));
 
         return true;
     }

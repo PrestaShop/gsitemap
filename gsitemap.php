@@ -735,7 +735,7 @@ class Gsitemap extends Module
      * Return indent XML
      *
      * @param [object] SimpleXMLElement
-     * @return xml
+      * @return string XML
      */
     public function formatXml($simpleXMLElement)
     {

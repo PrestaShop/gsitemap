@@ -26,8 +26,8 @@
 
 // This file can be called using a cron to generate Google sitemap files automatically
 
-include(__DIR__ . '/../../config/config.inc.php');
-include(__DIR__ . '/../../init.php');
+include __DIR__ . '/../../config/config.inc.php';
+include __DIR__ . '/../../init.php';
 
 // Check security token
 if ( ! Tools::isPHPCLI()) {

@@ -282,7 +282,8 @@ class Gsitemap extends Module
                 ]);
 
                 return false;
-            } elseif ($index % 20 == 0 && $this->cron) {
+            }
+            if ($index % 20 == 0 && $this->cron) {
                 header('Refresh: 5; url=http' . (Configuration::get('PS_SSL_ENABLED') ? 's' : '') . '://' . Tools::getShopDomain(false, true) . __PS_BASE_URI__ . 'modules/gsitemap/gsitemap-cron.php?continue=1&token=' . Tools::substr(Tools::encrypt('gsitemap/cron'), 0, 10) . '&type=' . $new_link['type'] . '&lang=' . $lang . '&index=' . $index . '&id=' . (int) $id_obj . '&id_shop=' . $this->context->shop->id);
                 die();
             } else {
@@ -597,7 +598,8 @@ class Gsitemap extends Module
             $index = (Tools::getValue('index') && Tools::getValue('lang') == $lang['iso_code']) ? (int) Tools::getValue('index') : 0;
             if ($lang_stop && $lang['iso_code'] != Tools::getValue('lang')) {
                 continue;
-            } elseif ($lang_stop && $lang['iso_code'] == Tools::getValue('lang')) {
+            }
+            if ($lang_stop && $lang['iso_code'] == Tools::getValue('lang')) {
                 $lang_stop = false;
             }
 

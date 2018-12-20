@@ -672,7 +672,6 @@ class Gsitemap extends Module
         if (!count($link_sitemap)) {
             return false;
         }
-        // dump($index);
         $sitemap_link = $this->context->shop->id . '_' . $lang . '_' . $index . '_sitemap.xml';
         $write_fd = fopen($this->normalizeDirectory(_PS_ROOT_DIR_) . $sitemap_link, 'wb');
 

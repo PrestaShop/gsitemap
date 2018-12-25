@@ -33,6 +33,7 @@ class Gsitemap extends Module
     const HOOK_ADD_URLS = 'gSitemapAppendUrls';
 
     public $cron = false;
+
     protected $sql_checks = array();
 
     public function __construct()

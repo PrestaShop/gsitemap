@@ -171,7 +171,7 @@ class Gsitemap extends Module
 
     public function getContent()
     {
-        /* Store the posted parameters and generate a new Google sitemap files for the current Shop */
+        // Store the posted parameters and generate a new Google sitemap files for the current Shop
         if (Tools::isSubmit('SubmitGsitemap')) {
             Configuration::updateValue('GSITEMAP_FREQUENCY', pSQL(Tools::getValue('gsitemap_frequency')));
             Configuration::updateValue('GSITEMAP_INDEX_CHECK', '');
@@ -184,17 +184,17 @@ class Gsitemap extends Module
             $this->emptySitemap();
             $this->createSitemap();
 
-        /* If no posted form and the variable [continue] is found in the HTTP request variable keep creating sitemap */
+        // If no posted form and the variable [continue] is found in the HTTP request variable keep creating sitemap
         } elseif (Tools::getValue('continue')) {
             $this->createSitemap();
         }
 
-        /* Empty the Shop domain cache */
+        // Empty the Shop domain cache
         if (method_exists('ShopUrl', 'resetMainDomainCache')) {
             ShopUrl::resetMainDomainCache();
         }
 
-        /* Get Meta pages and remove index page it's managed elsewhere (@see $this->getHomeLink()) */
+        // Get Meta pages and remove index page it's managed elsewhere (@see $this->getHomeLink())
         $store_metas = array_filter(Meta::getMetasByIdLang((int) $this->context->cookie->id_lang), function ($meta) {
             return $meta['page'] != 'index';
         });

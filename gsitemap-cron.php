@@ -28,8 +28,8 @@
  * This file can be called using a cron to generate Google sitemap files automatically
  */
 
-include(dirname(__FILE__) . '/../../config/config.inc.php');
-include(dirname(__FILE__) . '/../../init.php');
+include dirname(__FILE__) . '/../../config/config.inc.php';
+include dirname(__FILE__) . '/../../init.php';
 
 /* Check security token */
 if (!Tools::isPHPCLI()) {

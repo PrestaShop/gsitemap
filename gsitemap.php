@@ -390,37 +390,38 @@ class Gsitemap extends Module
 
             $url = $link->getProductLink($product, $product->link_rewrite, htmlspecialchars(strip_tags($product->category)), $product->ean13, (int) $lang['id_lang'], (int) $this->context->shop->id, 0);
 
-            $id_image = Product::getCover((int) $product_id['id_product']);
-            if (isset($id_image['id_image'])) {
-                $image_link = $this->context->link->getImageLink($product->link_rewrite, $product->id . '-' . (int) $id_image['id_image'], ImageType::getFormattedName('large'));
-                $image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace(array(
-                    'https',
-                    Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri,
-                ), array(
-                    'http',
-                    Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri . Context::getContext()->shop->virtual_uri,
-                ), $image_link) : $image_link;
+            $images_product = array();
+            foreach($product->getImages($lang) as $id_image) {
+                if (isset($id_image['id_image'])) {
+                    $image_link = $this->context->link->getImageLink($product->link_rewrite, $product->id . '-' . (int) $id_image['id_image'], ImageType::getFormattedName('large'));
+                    $image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace(array(
+                        'https',
+                        Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri,
+                    ), array(
+                        'http',
+                        Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri . Context::getContext()->shop->virtual_uri,
+                    ), $image_link) : $image_link;
+                }
+                $file_headers = (Configuration::get('GSITEMAP_CHECK_IMAGE_FILE')) ? @get_headers($image_link) : true;
+                if (isset($image_link) && ($file_headers[0] != 'HTTP/1.1 404 Not Found' || $file_headers === true)) {
+                    $images_product[] = array(
+                        'title_img' => htmlspecialchars(strip_tags($product->name)),
+                        'caption' => htmlspecialchars(strip_tags($product->meta_description)),
+                        'link' => $image_link,
+                    );
+                }
+                unset($image_link);
             }
-            $file_headers = (Configuration::get('GSITEMAP_CHECK_IMAGE_FILE')) ? @get_headers($image_link) : true;
-            $image_product = array();
-            if (isset($image_link) && ($file_headers[0] != 'HTTP/1.1 404 Not Found' || $file_headers === true)) {
-                $image_product = array(
-                    'title_img' => htmlspecialchars(strip_tags($product->name)),
-                    'caption' => htmlspecialchars(strip_tags($product->meta_description)),
-                    'link' => $image_link,
-                );
-            }
+
             if (!$this->addLinkToSitemap($link_sitemap, array(
                 'type' => 'product',
                 'page' => 'product',
                 'lastmod' => $product->date_upd,
                 'link' => $url,
-                'image' => $image_product,
+                'images' => $images_product,
             ), $lang['iso_code'], $index, $i, $product_id['id_product'])) {
                 return false;
             }
-
-            unset($image_link);
         }
 
         return true;
@@ -666,16 +667,24 @@ class Gsitemap extends Module
             fwrite($write_fd, '<url>' . PHP_EOL);
             $lastmod = (isset($file['lastmod']) && !empty($file['lastmod'])) ? date('c', strtotime($file['lastmod'])) : null;
             $this->addSitemapNode($write_fd, htmlspecialchars(strip_tags($file['link'])), $this->getPriorityPage($file['page']), Configuration::get('GSITEMAP_FREQUENCY'), $lastmod);
-            if ($file['image']) {
-                $this->addSitemapNodeImage($write_fd, htmlspecialchars(strip_tags($file['image']['link'])), isset($file['image']['title_img']) ? htmlspecialchars(str_replace(array(
+
+            $images = array();
+            if (isset($file['image']) && $file['image']) {
+                $images[] = $file['image'];
+            }
+            if (isset($file['images']) && $file['images']) {
+                $images = $images + $file['images'];
+            }
+            foreach($images as $image) {
+                $this->addSitemapNodeImage($write_fd, htmlspecialchars(strip_tags($image['link'])), isset($image['title_img']) ? htmlspecialchars(str_replace(array(
                     "\r\n",
                     "\r",
                     "\n",
-                ), '', $this->removeControlCharacters(strip_tags($file['image']['title_img'])))) : '', isset($file['image']['caption']) ? htmlspecialchars(str_replace(array(
+                ), '', $this->removeControlCharacters(strip_tags($image['title_img'])))) : '', isset($image['caption']) ? htmlspecialchars(str_replace(array(
                     "\r\n",
                     "\r",
                     "\n",
-                ), '', strip_tags($file['image']['caption']))) : '');
+                ), '', strip_tags($image['caption']))) : '');
             }
             fwrite($write_fd, '</url>' . PHP_EOL);
         }

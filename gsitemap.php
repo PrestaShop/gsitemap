@@ -673,7 +673,7 @@ class Gsitemap extends Module
                 $images[] = $file['image'];
             }
             if (isset($file['images']) && $file['images']) {
-                $images = $images + $file['images'];
+                $images = array_merge($images, $file['images']);
             }
             foreach($images as $image) {
                 $this->addSitemapNodeImage($write_fd, htmlspecialchars(strip_tags($image['link'])), isset($image['title_img']) ? htmlspecialchars(str_replace(array(

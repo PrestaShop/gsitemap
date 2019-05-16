@@ -182,11 +182,11 @@ class Gsitemap extends Module
             }
             Configuration::updateValue('GSITEMAP_DISABLE_LINKS', $meta);
             $this->emptySitemap();
-            $this->createSitemap();
+            $this->createSitemap(Tools::getValue('id_shop'), 0);
 
         /* If no posted form and the variable [continue] is found in the HTTP request variable keep creating sitemap */
         } elseif (Tools::getValue('continue')) {
-            $this->createSitemap();
+            $this->createSitemap(Tools::getValue('id_shop'), 0);
         }
 
         /* Empty the Shop domain cache */
@@ -200,7 +200,7 @@ class Gsitemap extends Module
         });
         $store_url = $this->context->link->getBaseLink();
         $this->context->smarty->assign(array(
-            'gsitemap_form' => './index.php?tab=AdminModules&configure=gsitemap&token=' . Tools::getAdminTokenLite('AdminModules') . '&tab_module=' . $this->tab . '&module_name=gsitemap',
+            'gsitemap_form' => './index.php?tab=AdminModules&configure=gsitemap&token=' . Tools::getAdminTokenLite('AdminModules') . '&tab_module=' . $this->tab . '&module_name=gsitemap&id_shop=' . $this->context->shop->id,
             'gsitemap_cron' => $store_url . 'modules/gsitemap/gsitemap-cron.php?token=' . Tools::substr(Tools::encrypt('gsitemap/cron'), 0, 10) . '&id_shop=' . $this->context->shop->id,
             'gsitemap_feed_exists' => file_exists($this->normalizeDirectory(_PS_ROOT_DIR_) . 'index_sitemap.xml'),
             'gsitemap_last_export' => Configuration::get('GSITEMAP_LAST_EXPORT'),

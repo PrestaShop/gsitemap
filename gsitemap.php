@@ -620,7 +620,7 @@ class Gsitemap extends Module
         }
 
         $this->createIndexSitemap();
-        $this->indentXml();
+        $this->indentAllXMLFiles();
         Configuration::updateValue('GSITEMAP_LAST_EXPORT', date('r'));
         Tools::file_get_contents('https://www.google.com/webmasters/sitemaps/ping?sitemap=' . urlencode($this->context->link->getBaseLink() . $this->context->shop->physical_uri . $this->context->shop->virtual_uri . $this->context->shop->id));
 
@@ -631,17 +631,19 @@ class Gsitemap extends Module
         die();
     }
 
-    public function indentXml()
+    /**
+     * Loops through created XML files and fix the indentation to comply with Google requirements
+     */
+    public function indentAllXMLFiles()
     {
         $files = Db::getInstance()->ExecuteS('SELECT * FROM `' . _DB_PREFIX_ . 'gsitemap_sitemap` WHERE id_shop = ' . (int) $this->context->shop->id);
         foreach($files as $f)
         {
             $content = file_get_contents(_PS_ROOT_DIR_.'/'.$f['link']);
             $sxe = new SimpleXMLElement($content);
-            $format = $this->formatXml($sxe);
+            $format = $this->indentXMLAndReturnAsString($sxe);
             file_put_contents(_PS_ROOT_DIR_.'/'.$f['link'],$format);
         }
-
     }
 
     /**
@@ -731,13 +733,15 @@ class Gsitemap extends Module
     {
         fwrite($fd, '<image:image>' . PHP_EOL . '<image:loc>' . (Configuration::get('PS_REWRITING_SETTINGS') ? '<![CDATA[' . $link . ']]>' : $link) . '</image:loc>' . PHP_EOL . '<image:caption><![CDATA[' . $caption . ']]></image:caption>' . PHP_EOL . '<image:title><![CDATA[' . $title . ']]></image:title>' . PHP_EOL . '</image:image>' . PHP_EOL);
     }
+
     /**
-     * Return indent XML
+     * Formats input $simpleXMLElement with proper indentation
+     * and return it as a string
      *
-     * @param [object] SimpleXMLElement
-      * @return string XML
+     * @param SimpleXMLElement SimpleXMLElement
+     * @return string
      */
-    public function formatXml($simpleXMLElement)
+    protected function indentXMLAndReturnAsString(SimpleXMLElement $simpleXMLElement)
     {
         $xmlDocument = new DOMDocument('1.0');
         $xmlDocument->preserveWhiteSpace = false;
@@ -768,7 +772,7 @@ class Gsitemap extends Module
             $sitemap->addChild('lastmod', date('c'));
         }
 
-        file_put_contents($this->normalizeDirectory(_PS_ROOT_DIR_) . $this->context->shop->id . '_index_sitemap.xml', $this->formatXml($xml_feed));
+        file_put_contents($this->normalizeDirectory(_PS_ROOT_DIR_) . $this->context->shop->id . '_index_sitemap.xml', $this->indentXMLAndReturnAsString($xml_feed));
 
         return true;
     }

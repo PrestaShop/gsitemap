@@ -28,8 +28,8 @@
  * This file can be called using a cron to generate Google sitemap files automatically
  */
 
-include(dirname(__FILE__) . '/../../config/config.inc.php');
-include(dirname(__FILE__) . '/../../init.php');
+include __DIR__ . '/../../config/config.inc.php';
+include __DIR__ . '/../../init.php';
 
 /* Check security token */
 if (!Tools::isPHPCLI()) {
@@ -44,19 +44,19 @@ $gsitemap = Module::getInstanceByName('gsitemap');
 if ($gsitemap->active) {
     /* Check if the requested shop exists */
     $shops = Db::getInstance()->ExecuteS('SELECT id_shop FROM `' . _DB_PREFIX_ . 'shop`');
-    $list_id_shop = array();
+    $list_id_shop = [];
     foreach ($shops as $shop) {
         $list_id_shop[] = (int) $shop['id_shop'];
     }
-    
-    $id_shop = (Tools::getIsset(Tools::getValue('id_shop')) && in_array(Tools::getValue('id_shop'), $list_id_shop)) ? (int) Tools::getValue('id_shop') : (int) Configuration::get('PS_SHOP_DEFAULT');
+
+    $id_shop = (Tools::getIsset('id_shop') && in_array(Tools::getValue('id_shop'), $list_id_shop)) ? (int) Tools::getValue('id_shop') : (int) Configuration::get('PS_SHOP_DEFAULT');
     $gsitemap->cron = true;
-    
+
     /* for the main run initiat the sitemap's files name stored in the database */
     if (!Tools::getIsset(Tools::getValue('continue'))) {
         $gsitemap->emptySitemap((int) $id_shop);
     }
-    
+
     /* Create the Google sitemap's files */
     $gsitemap->createSitemap((int) $id_shop);
 }

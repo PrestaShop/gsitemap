@@ -260,7 +260,7 @@ class Gsitemap extends Module
      */
     public function addLinkToSitemap(&$link_sitemap, $new_link, $lang, &$index, &$i, $id_obj)
     {
-        if ($i <= 25000 && memory_get_usage() < 100000000) {
+        if ($i <= 50000 && memory_get_usage() < 100000000) {
             $link_sitemap[] = $new_link;
             ++$i;
 

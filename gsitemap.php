@@ -388,7 +388,11 @@ class Gsitemap extends Module
         foreach ($products_id as $product_id) {
             $product = new Product((int) $product_id['id_product'], false, (int) $lang['id_lang']);
 
-            $url = $link->getProductLink($product, $product->link_rewrite, htmlspecialchars(strip_tags($product->category)), $product->ean13, (int) $lang['id_lang'], (int) $this->context->shop->id, 0);
+            $id_product_attribute = Product::getDefaultAttribute($product_id['id_product']);
+            $url = $link->getProductLink($product, $product->link_rewrite, htmlspecialchars(strip_tags($product->category)), $product->ean13, (int) $lang['id_lang'], (int) $this->context->shop->id, $id_product_attribute);
+            // Force remove of anchors
+            $url = explode('#', $url);
+            $url = $url[0];
 
             $images_product = array();
             foreach($product->getImages($lang) as $id_image) {

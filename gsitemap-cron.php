@@ -48,8 +48,8 @@ if ($gsitemap->active) {
     foreach ($shops as $shop) {
         $list_id_shop[] = (int) $shop['id_shop'];
     }
-    
-    $id_shop = (Tools::getIsset(Tools::getValue('id_shop')) && in_array(Tools::getValue('id_shop'), $list_id_shop)) ? (int) Tools::getValue('id_shop') : (int) Configuration::get('PS_SHOP_DEFAULT');
+
+    $id_shop = (Tools::getIsset('id_shop') && in_array(Tools::getValue('id_shop'), $list_id_shop)) ? (int) Tools::getValue('id_shop') : (int) Configuration::get('PS_SHOP_DEFAULT');
     $gsitemap->cron = true;
     
     /* for the main run initiat the sitemap's files name stored in the database */

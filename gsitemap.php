@@ -88,7 +88,7 @@ class Gsitemap extends Module
             'GSITEMAP_PRIORITY_PRODUCT' => 0.9,
             'GSITEMAP_PRIORITY_CATEGORY' => 0.8,
             'GSITEMAP_PRIORITY_MANUFACTURER' => 0.7,
-	        'GSITEMAP_PRIORITY_SUPPLIER' => 0.6,
+            'GSITEMAP_PRIORITY_SUPPLIER' => 0.6,
             'GSITEMAP_PRIORITY_CMS' => 0.5,
             'GSITEMAP_FREQUENCY' => 'weekly',
             'GSITEMAP_CHECK_IMAGE_FILE' => false,
@@ -134,7 +134,7 @@ class Gsitemap extends Module
             'GSITEMAP_PRIORITY_PRODUCT' => '',
             'GSITEMAP_PRIORITY_CATEGORY' => '',
             'GSITEMAP_PRIORITY_MANUFACTURER' => '',
-	        'GSITEMAP_PRIORITY_SUPPLIER' => '',
+            'GSITEMAP_PRIORITY_SUPPLIER' => '',
             'GSITEMAP_PRIORITY_CMS' => '',
             'GSITEMAP_FREQUENCY' => '',
             'GSITEMAP_CHECK_IMAGE_FILE' => '',
@@ -266,7 +266,7 @@ class Gsitemap extends Module
      */
     public function addLinkToSitemap(&$link_sitemap, $new_link, $lang, &$index, &$i, $id_obj)
     {
-        if ($i <= 49000 && memory_get_usage() < 1000000000) {
+        if ($i <= 49000 && memory_get_usage() < 2000000000) {
             $link_sitemap[] = $new_link;
             ++$i;
 

@@ -293,6 +293,7 @@ class Gsitemap extends Module
                     Tools::redirectAdmin($this->context->link->getAdminLink('AdminModules', true, array(), array(
                         'tab_module' => $this->tab,
                         'module_name' => $this->name,
+                        'configure' => $this->name,
                         'continue' => 1,
                         'type' => $new_link['type'],
                         'lang' => $lang,

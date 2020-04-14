@@ -143,8 +143,8 @@
 
 <script type="text/javascript">
   $(document).ready(function() {
-    const textCheckAll = "{l s='Check all' d='Modules.Gsitemap.Admin'}";
-    const textUnCheckAll = "{l s='Uncheck all' d='Modules.Gsitemap.Admin'}";
+    const textCheckAll = "{l s='Check all' d='Modules.Gsitemap.Admin' js=1}";
+    const textUnCheckAll = "{l s='Uncheck all' d='Modules.Gsitemap.Admin' js=1}";
     const numTotal = $('.gsitemap_metas').length;
     const numChecked = $('.gsitemap_metas:checked').length;
     const checkboxCheck = $('#check');

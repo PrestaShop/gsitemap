@@ -16,7 +16,7 @@
  *
  * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
  * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to https://www.prestashop.com for more information.
+ * needs please refer to http://www.prestashop.com for more information.
  *
  * @author    PrestaShop SA <contact@prestashop.com>
  * @copyright 2007-2020 PrestaShop SA and Contributors
@@ -49,15 +49,15 @@ if ($gsitemap->active) {
     foreach ($shops as $shop) {
         $list_id_shop[] = (int) $shop['id_shop'];
     }
-    
+
     $id_shop = (Tools::getIsset('id_shop') && in_array(Tools::getValue('id_shop'), $list_id_shop)) ? (int) Tools::getValue('id_shop') : (int) Configuration::get('PS_SHOP_DEFAULT');
     $gsitemap->cron = true;
-    
+
     /* for the main run initiat the sitemap's files name stored in the database */
     if (!Tools::getIsset('continue')) {
         $gsitemap->emptySitemap((int) $id_shop);
     }
-    
+
     /* Create the Google sitemap's files */
     $gsitemap->createSitemap((int) $id_shop);
 }

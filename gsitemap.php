@@ -16,7 +16,7 @@
  *
  * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
  * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to https://www.prestashop.com for more information.
+ * needs please refer to http://www.prestashop.com for more information.
  *
  * @author    PrestaShop SA <contact@prestashop.com>
  * @copyright 2007-2020 PrestaShop SA and Contributors
@@ -39,7 +39,7 @@ class Gsitemap extends Module
     {
         $this->name = 'gsitemap';
         $this->tab = 'seo';
-        $this->version = '4.1.0';
+        $this->version = '4.2.0';
         $this->author = 'PrestaShop';
         $this->need_instance = 0;
         $this->bootstrap = true;
@@ -469,7 +469,7 @@ class Gsitemap extends Module
             if (isset($image_link) && ($file_headers[0] != 'HTTP/1.1 404 Not Found' || $file_headers === true)) {
                 $image_category = array(
                     'title_img' => htmlspecialchars(strip_tags($category->name)),
-                    'caption' => htmlspecialchars(strip_tags($category->meta_description)),
+                    'caption' => Tools::substr(htmlspecialchars(strip_tags($category->description)), 0, 350),
                     'link' => $image_link,
                 );
             }

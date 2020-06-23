@@ -1,5 +1,10 @@
 # Google sitemap
 
+[![Build Status](https://travis-ci.com/PrestaShop/gsitemap.svg?branch=master)](https://travis-ci.com/PrestaShop/gsitemap)
+[![Latest Stable Version](https://poser.pugx.org/PrestaShop/gsitemap/v)](//packagist.org/packages/PrestaShop/gsitemap)
+[![Total Downloads](https://poser.pugx.org/PrestaShop/gsitemap/downloads)](//packagist.org/packages/PrestaShop/gsitemap)
+[![GitHub license](https://img.shields.io/github/license/PrestaShop/gsitemap)](https://github.com/PrestaShop/gsitemap/LICENSE.md)
+
 ## About
 
 Generate your Google sitemap file

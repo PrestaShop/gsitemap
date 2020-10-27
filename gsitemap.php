@@ -45,7 +45,7 @@ class Gsitemap extends Module
         $this->bootstrap = true;
         parent::__construct();
         $this->displayName = $this->trans('Google sitemap', array(), 'Modules.Gsitemap.Admin');
-        $this->description = $this->trans('Generate your Google sitemap file', array(), 'Modules.Gsitemap.Admin');
+        $this->description = $this->trans('Generate your Google sitemap file with this module, and keep it up-to-date.', array(), 'Modules.Gsitemap.Admin');
         $this->ps_versions_compliancy = array(
             'min' => '1.7.1.0',
             'max' => _PS_VERSION_,

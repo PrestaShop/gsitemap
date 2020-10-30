@@ -7,7 +7,7 @@
 
 ## About
 
-Generate your Google sitemap file
+Generate your Google sitemap file with this module, and keep it up-to-date.
 
 ## Multistore compatibility
 

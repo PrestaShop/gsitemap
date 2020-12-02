@@ -217,6 +217,7 @@ class Gsitemap extends Module
             'gsitemap_check_image_file' => Configuration::get('GSITEMAP_CHECK_IMAGE_FILE'),
             'shop' => $this->context->shop,
         ));
+        
 
         return $this->display(__FILE__, 'views/templates/admin/configuration.tpl');
     }
@@ -621,6 +622,7 @@ class Gsitemap extends Module
         }
 
         $this->createIndexSitemap();
+        $this->indentAllXMLFiles();
         Configuration::updateValue('GSITEMAP_LAST_EXPORT', date('r'));
         Tools::file_get_contents('https://www.google.com/webmasters/sitemaps/ping?sitemap=' . urlencode($this->context->link->getBaseLink() . $this->context->shop->physical_uri . $this->context->shop->virtual_uri . $this->context->shop->id));
 
@@ -629,6 +631,21 @@ class Gsitemap extends Module
         }
         Tools::redirectAdmin('index.php?tab=AdminModules&configure=gsitemap&token=' . Tools::getAdminTokenLite('AdminModules') . '&tab_module=' . $this->tab . '&module_name=gsitemap&validation');
         die();
+    }
+
+    /**
+     * Loops through created XML files and fix the indentation to comply with Google requirements
+     */
+    public function indentAllXMLFiles()
+    {
+        $files = Db::getInstance()->ExecuteS('SELECT * FROM `' . _DB_PREFIX_ . 'gsitemap_sitemap` WHERE id_shop = ' . (int) $this->context->shop->id);
+        foreach($files as $f)
+        {
+            $content = file_get_contents(_PS_ROOT_DIR_.'/'.$f['link']);
+            $sxe = new SimpleXMLElement($content);
+            $format = $this->indentXMLAndReturnAsString($sxe);
+            file_put_contents(_PS_ROOT_DIR_.'/'.$f['link'],$format);
+        }
     }
 
     /**
@@ -659,7 +676,6 @@ class Gsitemap extends Module
         if (!count($link_sitemap)) {
             return false;
         }
-
         $sitemap_link = $this->context->shop->id . '_' . $lang . '_' . $index . '_sitemap.xml';
         $write_fd = fopen($this->normalizeDirectory(_PS_ROOT_DIR_) . $sitemap_link, 'wb');
 
@@ -729,6 +745,23 @@ class Gsitemap extends Module
     }
 
     /**
+     * Formats input $simpleXMLElement with proper indentation
+     * and return it as a string
+     *
+     * @param SimpleXMLElement SimpleXMLElement
+     * @return string
+     */
+    protected function indentXMLAndReturnAsString(SimpleXMLElement $simpleXMLElement)
+    {
+        $xmlDocument = new DOMDocument('1.0');
+        $xmlDocument->preserveWhiteSpace = false;
+        $xmlDocument->formatOutput = true;
+        $xmlDocument->loadXML($simpleXMLElement->asXML());
+
+        return $xmlDocument->saveXML();
+    }
+
+    /**
      * Create the index file for all generated sitemaps
      *
      * @return bool
@@ -748,7 +781,8 @@ class Gsitemap extends Module
             $sitemap->addChild('loc', $this->context->link->getBaseLink() . $link['link']);
             $sitemap->addChild('lastmod', date('c'));
         }
-        file_put_contents($this->normalizeDirectory(_PS_ROOT_DIR_) . $this->context->shop->id . '_index_sitemap.xml', $xml_feed->asXML());
+
+        file_put_contents($this->normalizeDirectory(_PS_ROOT_DIR_) . $this->context->shop->id . '_index_sitemap.xml', $this->indentXMLAndReturnAsString($xml_feed));
 
         return true;
     }

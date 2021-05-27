@@ -1,10 +1,10 @@
 <?php
 /**
- * 2007-2018 PrestaShop.
+ * 2007-2020 PrestaShop SA and Contributors
  *
  * NOTICE OF LICENSE
  *
- * This source file is subject to the Academic Free License (AFL 3.0)
+ * This source file is subject to the Academic Free License 3.0 (AFL-3.0)
  * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
  * https://opensource.org/licenses/AFL-3.0
@@ -16,11 +16,11 @@
  *
  * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
  * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to https://www.prestashop.com for more information.
+ * needs please refer to http://www.prestashop.com for more information.
  *
  * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright 2007-2018 PrestaShop SA
- * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License (AFL 3.0)
+ * @copyright 2007-2020 PrestaShop SA and Contributors
+ * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
 
@@ -39,7 +39,7 @@ class Gsitemap extends Module
     {
         $this->name = 'gsitemap';
         $this->tab = 'seo';
-        $this->version = '4.1.0';
+        $this->version = '4.2.0';
         $this->author = 'PrestaShop';
         $this->need_instance = 0;
         $this->bootstrap = true;
@@ -55,8 +55,8 @@ class Gsitemap extends Module
             'home',
             'meta',
             'product',
-            'category',
-            'manufacturer',
+	    'category',
+	    'manufacturer',
             'supplier',
             'cms',
             'module',
@@ -86,9 +86,9 @@ class Gsitemap extends Module
         foreach (array(
             'GSITEMAP_PRIORITY_HOME' => 1.0,
             'GSITEMAP_PRIORITY_PRODUCT' => 0.9,
-            'GSITEMAP_PRIORITY_CATEGORY' => 0.8,
-            'GSITEMAP_PRIORITY_MANUFACTURER' => 0.7,
-            'GSITEMAP_PRIORITY_SUPPLIER' => 0.6,
+	    'GSITEMAP_PRIORITY_CATEGORY' => 0.8,
+	    'GSITEMAP_PRIORITY_MANUFACTURER' => 0.7,
+	    'GSITEMAP_PRIORITY_SUPPLIER' => 0.6,
             'GSITEMAP_PRIORITY_CMS' => 0.5,
             'GSITEMAP_FREQUENCY' => 'weekly',
             'GSITEMAP_CHECK_IMAGE_FILE' => false,
@@ -132,9 +132,9 @@ class Gsitemap extends Module
         foreach (array(
             'GSITEMAP_PRIORITY_HOME' => '',
             'GSITEMAP_PRIORITY_PRODUCT' => '',
-            'GSITEMAP_PRIORITY_CATEGORY' => '',
-            'GSITEMAP_PRIORITY_MANUFACTURER' => '',
-            'GSITEMAP_PRIORITY_SUPPLIER' => '',
+	    'GSITEMAP_PRIORITY_CATEGORY' => '',
+	    'GSITEMAP_PRIORITY_MANUFACTURER' => '',
+	    'GSITEMAP_PRIORITY_SUPPLIER' => '',
             'GSITEMAP_PRIORITY_CMS' => '',
             'GSITEMAP_FREQUENCY' => '',
             'GSITEMAP_CHECK_IMAGE_FILE' => '',
@@ -266,7 +266,7 @@ class Gsitemap extends Module
      */
     public function addLinkToSitemap(&$link_sitemap, $new_link, $lang, &$index, &$i, $id_obj)
     {
-        if ($i <= 49000 && memory_get_usage() < 2000000000) {
+        if ($i <= 25000 && memory_get_usage() < 100000000) {
             $link_sitemap[] = $new_link;
             ++$i;
 
@@ -299,6 +299,7 @@ class Gsitemap extends Module
                     Tools::redirectAdmin($this->context->link->getAdminLink('AdminModules', true, array(), array(
                         'tab_module' => $this->tab,
                         'module_name' => $this->name,
+                        'configure' => $this->name,
                         'continue' => 1,
                         'type' => $new_link['type'],
                         'lang' => $lang,
@@ -396,37 +397,38 @@ class Gsitemap extends Module
 
             $url = $link->getProductLink($product, $product->link_rewrite, htmlspecialchars(strip_tags($product->category)), $product->ean13, (int) $lang['id_lang'], (int) $this->context->shop->id, 0);
 
-            $id_image = Product::getCover((int) $product_id['id_product']);
-            if (isset($id_image['id_image'])) {
-                $image_link = $this->context->link->getImageLink($product->link_rewrite, $product->id . '-' . (int) $id_image['id_image'], ImageType::getFormattedName('large'));
-                $image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace(array(
-                    'https',
-                    Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri,
-                ), array(
-                    'http',
-                    Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri . Context::getContext()->shop->virtual_uri,
-                ), $image_link) : $image_link;
+            $images_product = array();
+            foreach($product->getImages($lang) as $id_image) {
+                if (isset($id_image['id_image'])) {
+                    $image_link = $this->context->link->getImageLink($product->link_rewrite, $product->id . '-' . (int) $id_image['id_image'], ImageType::getFormattedName('large'));
+                    $image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace(array(
+                        'https',
+                        Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri,
+                    ), array(
+                        'http',
+                        Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri . Context::getContext()->shop->virtual_uri,
+                    ), $image_link) : $image_link;
+                }
+                $file_headers = (Configuration::get('GSITEMAP_CHECK_IMAGE_FILE')) ? @get_headers($image_link) : true;
+                if (isset($image_link) && ($file_headers[0] != 'HTTP/1.1 404 Not Found' || $file_headers === true)) {
+                    $images_product[] = array(
+                        'title_img' => htmlspecialchars(strip_tags($product->name)),
+                        'caption' => htmlspecialchars(strip_tags($product->meta_description)),
+                        'link' => $image_link,
+                    );
+                }
+                unset($image_link);
             }
-            $file_headers = (Configuration::get('GSITEMAP_CHECK_IMAGE_FILE')) ? @get_headers($image_link) : true;
-            $image_product = array();
-            if (isset($image_link) && ($file_headers[0] != 'HTTP/1.1 404 Not Found' || $file_headers === true)) {
-                $image_product = array(
-                    'title_img' => htmlspecialchars(strip_tags($product->name)),
-                    'caption' => htmlspecialchars(strip_tags($product->description_short)),
-                    'link' => $image_link,
-                );
-            }
+
             if (!$this->addLinkToSitemap($link_sitemap, array(
                 'type' => 'product',
                 'page' => 'product',
                 'lastmod' => $product->date_upd,
                 'link' => $url,
-                'image' => $image_product,
+                'images' => $images_product,
             ), $lang['iso_code'], $index, $i, $product_id['id_product'])) {
                 return false;
             }
-
-            unset($image_link);
         }
 
         return true;
@@ -508,10 +510,8 @@ class Gsitemap extends Module
 	protected function getManufacturerLink(&$link_sitemap, $lang, &$index, &$i, $id_manufacturer = 0)
 	{
 		$link = new Link();
-		if (method_exists('ShopUrl', 'resetMainDomainCache')) {
-            ShopUrl::resetMainDomainCache();
-        }
-
+		if (method_exists('ShopUrl', 'resetMainDomainCache'))
+			ShopUrl::resetMainDomainCache();
 		$manufacturers_id = Db::getInstance()->ExecuteS(
 			'SELECT m.`id_manufacturer` FROM `'._DB_PREFIX_.'manufacturer` m
 			INNER JOIN `'._DB_PREFIX_.'manufacturer_lang` ml on m.`id_manufacturer` = ml.`id_manufacturer`'.
@@ -525,15 +525,17 @@ class Gsitemap extends Module
 		{
 			$manufacturer = new Manufacturer((int)$manufacturer_id['id_manufacturer'], $lang['id_lang']);
 			$url = $link->getManufacturerLink($manufacturer, $manufacturer->link_rewrite, $lang['id_lang']);
-            
-            $image_link = $this->context->link->getManufacturerImageLink((int) $manufacturer->id, ImageType::getFormattedName('manufacturer'));
-			$image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace(array(
-                'https',
-                Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri
-            ), array(
-                'http',
-                Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri . Context::getContext()->shop->virtual_uri
-            ), $image_link) : $image_link;
+
+			$image_link = 'http'.(Configuration::get('PS_SSL_ENABLED') && Configuration::get('PS_SSL_ENABLED_EVERYWHERE') ? 's' : '').'://'.Tools::getMediaServer(_THEME_MANU_DIR_)._THEME_MANU_DIR_.((!file_exists(_PS_MANU_IMG_DIR_.'/'.(int)$manufacturer->id.'-medium_default.jpg')) ? $lang['iso_code'].'-default' : (int)$manufacturer->id).'-medium_default.jpg';
+			$image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace(
+				array(
+					'https',
+					Context::getContext()->shop->domain.Context::getContext()->shop->physical_uri
+				), array(
+					'http',
+					Context::getContext()->shop->domain.Context::getContext()->shop->physical_uri.Context::getContext()->shop->virtual_uri
+				), $image_link
+			) : $image_link;
 
 			$file_headers = (Configuration::get('GSITEMAP_CHECK_IMAGE_FILE')) ? @get_headers($image_link) : true;
 			$manifacturer_image = array();
@@ -570,10 +572,8 @@ class Gsitemap extends Module
 	protected function getSupplierLink(&$link_sitemap, $lang, &$index, &$i, $id_supplier = 0)
 	{
 		$link = new Link();
-		if (method_exists('ShopUrl', 'resetMainDomainCache')) {
-            ShopUrl::resetMainDomainCache();
-        }
-
+		if (method_exists('ShopUrl', 'resetMainDomainCache'))
+			ShopUrl::resetMainDomainCache();
 		$suppliers_id = Db::getInstance()->ExecuteS(
 			'SELECT s.`id_supplier` FROM `'._DB_PREFIX_.'supplier` s
 			INNER JOIN `'._DB_PREFIX_.'supplier_lang` sl ON s.`id_supplier` = sl.`id_supplier` '.
@@ -588,14 +588,16 @@ class Gsitemap extends Module
 			$supplier = new Supplier((int)$supplier_id['id_supplier'], $lang['id_lang']);
 			$url = $link->getSupplierLink($supplier, $supplier->link_rewrite, $lang['id_lang']);
 
-			$image_link = $this->context->link->getSupplierImageLink((int) $supplier->id, ImageType::getFormattedName('supplier'));
-			$image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace(array(
-                'https',
-                Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri
-            ), array(
-                'http',
-                Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri . Context::getContext()->shop->virtual_uri
-            ), $image_link) : $image_link;
+			$image_link = 'http://'.Tools::getMediaServer(_THEME_SUP_DIR_)._THEME_SUP_DIR_.((!file_exists(_THEME_SUP_DIR_.'/'.(int)$supplier->id.'-medium_default.jpg')) ? $lang['iso_code'].'-default' : (int)$supplier->id).'-medium_default.jpg';
+			$image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace(
+				array(
+					'https',
+					Context::getContext()->shop->domain.Context::getContext()->shop->physical_uri
+				), array(
+					'http',
+					Context::getContext()->shop->domain.Context::getContext()->shop->physical_uri.Context::getContext()->shop->virtual_uri
+				), $image_link
+			) : $image_link;
 
 			$file_headers = (Configuration::get('GSITEMAP_CHECK_IMAGE_FILE')) ? @get_headers($image_link) : true;
 			$supplier_image = array();
@@ -618,6 +620,7 @@ class Gsitemap extends Module
 
 		return true;
 	}
+
 
     /**
      * return the link elements for the CMS object
@@ -797,16 +800,24 @@ class Gsitemap extends Module
             fwrite($write_fd, '<url>' . PHP_EOL);
             $lastmod = (isset($file['lastmod']) && !empty($file['lastmod'])) ? date('c', strtotime($file['lastmod'])) : null;
             $this->addSitemapNode($write_fd, htmlspecialchars(strip_tags($file['link'])), $this->getPriorityPage($file['page']), Configuration::get('GSITEMAP_FREQUENCY'), $lastmod);
-            if ($file['image']) {
-                $this->addSitemapNodeImage($write_fd, htmlspecialchars(strip_tags($file['image']['link'])), isset($file['image']['title_img']) ? htmlspecialchars(str_replace(array(
+
+            $images = array();
+            if (isset($file['image']) && $file['image']) {
+                $images[] = $file['image'];
+            }
+            if (isset($file['images']) && $file['images']) {
+                $images = array_merge($images, $file['images']);
+            }
+            foreach($images as $image) {
+                $this->addSitemapNodeImage($write_fd, htmlspecialchars(strip_tags($image['link'])), isset($image['title_img']) ? htmlspecialchars(str_replace(array(
                     "\r\n",
                     "\r",
                     "\n",
-                ), '', $this->removeControlCharacters(strip_tags($file['image']['title_img'])))) : '', isset($file['image']['caption']) ? htmlspecialchars(str_replace(array(
+                ), '', $this->removeControlCharacters(strip_tags($image['title_img'])))) : '', isset($image['caption']) ? htmlspecialchars(str_replace(array(
                     "\r\n",
                     "\r",
                     "\n",
-                ), '', strip_tags($file['image']['caption']))) : '');
+                ), '', strip_tags($image['caption']))) : '');
             }
             fwrite($write_fd, '</url>' . PHP_EOL);
         }

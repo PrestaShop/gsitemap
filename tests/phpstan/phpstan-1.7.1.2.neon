@@ -1,0 +1,6 @@
+includes:
+    - %currentWorkingDirectory%/tests/phpstan/phpstan.neon
+
+parameters:
+  ignoreErrors:
+    - '#Call to method assign\(\) on an unknown class Smarty_Data.#'

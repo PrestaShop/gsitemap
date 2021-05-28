@@ -3,4 +3,8 @@ includes:
 
 parameters:
   ignoreErrors:
+    - '#Access to an undefined property Cookie\:\:\$id_lang.#'
     - '#Call to method assign\(\) on an unknown class Smarty_Data.#'
+    - '#Parameter \#1 \$idCategory of class Category constructor expects null, int given.#'
+    - '#Parameter \#2 \$idLang of class Category constructor expects null, int given.#'
+    - '#Parameter \#3 \$type of method LinkCore\:\:getCatImageLink\(\) expects null, string given.#'

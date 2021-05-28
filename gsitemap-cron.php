@@ -28,24 +28,25 @@
  * This file can be called using a cron to generate Google sitemap files automatically
  */
 
-include(dirname(__FILE__) . '/../../config/config.inc.php');
+include dirname(__FILE__) . '/../../config/config.inc.php';
 
 /* Check security token */
 if (!Tools::isPHPCLI()) {
-    include(dirname(__FILE__) . '/../../init.php');
+    include dirname(__FILE__) . '/../../init.php';
 
     if (Tools::substr(Tools::encrypt('gsitemap/cron'), 0, 10) != Tools::getValue('token') || !Module::isInstalled('gsitemap')) {
-        die('Bad token');
+        exit('Bad token');
     }
 }
 
+/** @var Gsitemap $gsitemap */
 $gsitemap = Module::getInstanceByName('gsitemap');
 
 /* Check if the module is enabled */
 if ($gsitemap->active) {
     /* Check if the requested shop exists */
     $shops = Db::getInstance()->ExecuteS('SELECT id_shop FROM `' . _DB_PREFIX_ . 'shop`');
-    $list_id_shop = array();
+    $list_id_shop = [];
     foreach ($shops as $shop) {
         $list_id_shop[] = (int) $shop['id_shop'];
     }

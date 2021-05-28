@@ -49,7 +49,7 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                presta-versions: [%prestaVersions%]
+                presta-versions: ['1.7.1.2', '1.7.2.5', '1.7.3.4', '1.7.4.4', '1.7.5.1', '1.7.6.9', '1.7.7.4', 'latest']
         steps:
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
@@ -77,4 +77,4 @@ jobs:
 
             # Docker images prestashop/prestashop may be used, even if the shop remains uninstalled
             - name: Execute PHPStan on PrestaShop (Tag ${{ matrix.presta-versions }})
-              run: ./%dirPHPStan%.sh ${{ matrix.presta-versions }}
+              run: ./tests/phpstan.sh ${{ matrix.presta-versions }}

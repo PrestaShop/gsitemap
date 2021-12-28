@@ -509,22 +509,22 @@ class Gsitemap extends Module
     }
 
     /**
-	 * return the link elements for the manufacturer object
-	 *
-	 * @param array  $link_sitemap    contain all the links for the Google Sitemap file to be generated
-	 * @param string $lang            language of link to add
-	 * @param int    $index           index of the current Google Sitemap file
-	 * @param int    $i               count of elements added to sitemap main array
-	 * @param int    $id_manufacturer manufacturer object identifier
-	 *
-	 * @return bool
-	 */
-	protected function getManufacturerLink(&$link_sitemap, $lang, &$index, &$i, $id_manufacturer = 0)
-	{
-		$link = new Link();
-		if (method_exists('ShopUrl', 'resetMainDomainCache'))
-			ShopUrl::resetMainDomainCache();
-		    $manufacturers_id = Db::getInstance()->ExecuteS(
+     * return the link elements for the manufacturer object
+     *
+     * @param array  $link_sitemap    contain all the links for the Google Sitemap file to be generated
+     * @param string $lang            language of link to add
+     * @param int    $index           index of the current Google Sitemap file
+     * @param int    $i               count of elements added to sitemap main array
+     * @param int    $id_manufacturer manufacturer object identifier
+     *
+     * @return bool
+     */
+    protected function getManufacturerLink(&$link_sitemap, $lang, &$index, &$i, $id_manufacturer = 0)
+    {
+        $link = new Link();
+        if (method_exists('ShopUrl', 'resetMainDomainCache'))
+            ShopUrl::resetMainDomainCache();
+            $manufacturers_id = Db::getInstance()->ExecuteS(
                 'SELECT m.`id_manufacturer` FROM `'._DB_PREFIX_.'manufacturer` m
                 INNER JOIN `'._DB_PREFIX_.'manufacturer_lang` ml on m.`id_manufacturer` = ml.`id_manufacturer`'.
                 ($this->tableColumnExists(_DB_PREFIX_.'manufacturer_shop') ? ' INNER JOIN `'._DB_PREFIX_.'manufacturer_shop` ms ON m.`id_manufacturer` = ms.`id_manufacturer` ' : '').
@@ -534,105 +534,105 @@ class Gsitemap extends Module
                 ' ORDER BY m.`id_manufacturer` ASC'
                 );
 
-		foreach ($manufacturers_id as $manufacturer_id)
-		{
-			$manufacturer = new Manufacturer((int)$manufacturer_id['id_manufacturer'], $lang['id_lang']);
-			$url = $link->getManufacturerLink($manufacturer, $manufacturer->link_rewrite, $lang['id_lang']);
+        foreach ($manufacturers_id as $manufacturer_id)
+        {
+            $manufacturer = new Manufacturer((int)$manufacturer_id['id_manufacturer'], $lang['id_lang']);
+            $url = $link->getManufacturerLink($manufacturer, $manufacturer->link_rewrite, $lang['id_lang']);
 
-			$image_link = 'http'.(Configuration::get('PS_SSL_ENABLED') && Configuration::get('PS_SSL_ENABLED_EVERYWHERE') ? 's' : '').'://'.Tools::getMediaServer(_THEME_MANU_DIR_)._THEME_MANU_DIR_.((!file_exists(_PS_MANU_IMG_DIR_.'/'.(int)$manufacturer->id.'-medium_default.jpg')) ? $lang['iso_code'].'-default' : (int)$manufacturer->id).'-medium_default.jpg';
-			$image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace(
-				array(
-					'https',
-					Context::getContext()->shop->domain.Context::getContext()->shop->physical_uri
-				), array(
-					'http',
-					Context::getContext()->shop->domain.Context::getContext()->shop->physical_uri.Context::getContext()->shop->virtual_uri
-				), $image_link
-			) : $image_link;
+            $image_link = 'http'.(Configuration::get('PS_SSL_ENABLED') && Configuration::get('PS_SSL_ENABLED_EVERYWHERE') ? 's' : '').'://'.Tools::getMediaServer(_THEME_MANU_DIR_)._THEME_MANU_DIR_.((!file_exists(_PS_MANU_IMG_DIR_.'/'.(int)$manufacturer->id.'-medium_default.jpg')) ? $lang['iso_code'].'-default' : (int)$manufacturer->id).'-medium_default.jpg';
+            $image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace(
+                array(
+                    'https',
+                    Context::getContext()->shop->domain.Context::getContext()->shop->physical_uri
+                ), array(
+                    'http',
+                    Context::getContext()->shop->domain.Context::getContext()->shop->physical_uri.Context::getContext()->shop->virtual_uri
+                ), $image_link
+            ) : $image_link;
 
-			$file_headers = (Configuration::get('GSITEMAP_CHECK_IMAGE_FILE')) ? @get_headers($image_link) : true;
-			$manifacturer_image = array();
-			if ($file_headers[0] != 'HTTP/1.1 404 Not Found' || $file_headers === true)
-				$manifacturer_image = array(
-					'title_img' => htmlspecialchars(strip_tags($manufacturer->name)),
-					'caption' => htmlspecialchars(strip_tags($manufacturer->short_description)),
-					'link' => $image_link
-				);
-			if (!$this->addLinkToSitemap(
-				$link_sitemap, array(
-					'type' => 'manufacturer',
-					'page' => 'manufacturer',
-					'lastmod' => $manufacturer->date_upd,
-					'link' => $url,
-					'image' => $manifacturer_image
-				), $lang['iso_code'], $index, $i, $manufacturer_id['id_manufacturer']
-			))
-				return false;
-		}
+            $file_headers = (Configuration::get('GSITEMAP_CHECK_IMAGE_FILE')) ? @get_headers($image_link) : true;
+            $manifacturer_image = array();
+            if ($file_headers[0] != 'HTTP/1.1 404 Not Found' || $file_headers === true)
+                $manifacturer_image = array(
+                    'title_img' => htmlspecialchars(strip_tags($manufacturer->name)),
+                    'caption' => htmlspecialchars(strip_tags($manufacturer->short_description)),
+                    'link' => $image_link
+                );
+            if (!$this->addLinkToSitemap(
+                $link_sitemap, array(
+                    'type' => 'manufacturer',
+                    'page' => 'manufacturer',
+                    'lastmod' => $manufacturer->date_upd,
+                    'link' => $url,
+                    'image' => $manifacturer_image
+                ), $lang['iso_code'], $index, $i, $manufacturer_id['id_manufacturer']
+            ))
+                return false;
+        }
 
-		return true;
-	}
+        return true;
+    }
 
     /**
-	 * @param array  $link_sitemap contain all the links for the Google Sitemap file to be generated
-	 * @param string $lang         language of link to add
-	 * @param int    $index        index of the current Google Sitemap file
-	 * @param int    $i            count of elements added to sitemap main array
-	 * @param int    $id_supplier  supplier object identifier
-	 *
-	 * @return bool
-	 */
-	protected function getSupplierLink(&$link_sitemap, $lang, &$index, &$i, $id_supplier = 0)
-	{
-		$link = new Link();
-		if (method_exists('ShopUrl', 'resetMainDomainCache'))
-			ShopUrl::resetMainDomainCache();
-		$suppliers_id = Db::getInstance()->ExecuteS(
-			'SELECT s.`id_supplier` FROM `'._DB_PREFIX_.'supplier` s
-			INNER JOIN `'._DB_PREFIX_.'supplier_lang` sl ON s.`id_supplier` = sl.`id_supplier` '.
-			($this->tableColumnExists(_DB_PREFIX_.'supplier_shop') ? 'INNER JOIN `'._DB_PREFIX_.'supplier_shop` ss ON s.`id_supplier` = ss.`id_supplier`' : '').'
-			WHERE s.`active` = 1 AND s.`id_supplier` >= '.(int)$id_supplier.
-			($this->tableColumnExists(_DB_PREFIX_.'supplier_shop') ? ' AND ss.`id_shop` = '.(int)$this->context->shop->id : '').'
-			AND sl.`id_lang` = '.(int)$lang['id_lang'].'
-			ORDER BY s.`id_supplier` ASC'
-		);
-		foreach ($suppliers_id as $supplier_id)
-		{
-			$supplier = new Supplier((int)$supplier_id['id_supplier'], $lang['id_lang']);
-			$url = $link->getSupplierLink($supplier, $supplier->link_rewrite, $lang['id_lang']);
+     * @param array  $link_sitemap contain all the links for the Google Sitemap file to be generated
+     * @param string $lang         language of link to add
+     * @param int    $index        index of the current Google Sitemap file
+     * @param int    $i            count of elements added to sitemap main array
+     * @param int    $id_supplier  supplier object identifier
+     *
+     * @return bool
+     */
+    protected function getSupplierLink(&$link_sitemap, $lang, &$index, &$i, $id_supplier = 0)
+    {
+        $link = new Link();
+        if (method_exists('ShopUrl', 'resetMainDomainCache'))
+            ShopUrl::resetMainDomainCache();
+        $suppliers_id = Db::getInstance()->ExecuteS(
+            'SELECT s.`id_supplier` FROM `'._DB_PREFIX_.'supplier` s
+            INNER JOIN `'._DB_PREFIX_.'supplier_lang` sl ON s.`id_supplier` = sl.`id_supplier` '.
+            ($this->tableColumnExists(_DB_PREFIX_.'supplier_shop') ? 'INNER JOIN `'._DB_PREFIX_.'supplier_shop` ss ON s.`id_supplier` = ss.`id_supplier`' : '').'
+            WHERE s.`active` = 1 AND s.`id_supplier` >= '.(int)$id_supplier.
+            ($this->tableColumnExists(_DB_PREFIX_.'supplier_shop') ? ' AND ss.`id_shop` = '.(int)$this->context->shop->id : '').'
+            AND sl.`id_lang` = '.(int)$lang['id_lang'].'
+            ORDER BY s.`id_supplier` ASC'
+        );
+        foreach ($suppliers_id as $supplier_id)
+        {
+            $supplier = new Supplier((int)$supplier_id['id_supplier'], $lang['id_lang']);
+            $url = $link->getSupplierLink($supplier, $supplier->link_rewrite, $lang['id_lang']);
 
-			$image_link = 'http://'.Tools::getMediaServer(_THEME_SUP_DIR_)._THEME_SUP_DIR_.((!file_exists(_THEME_SUP_DIR_.'/'.(int)$supplier->id.'-medium_default.jpg')) ? $lang['iso_code'].'-default' : (int)$supplier->id).'-medium_default.jpg';
-			$image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace(
-				array(
-					'https',
-					Context::getContext()->shop->domain.Context::getContext()->shop->physical_uri
-				), array(
-					'http',
-					Context::getContext()->shop->domain.Context::getContext()->shop->physical_uri.Context::getContext()->shop->virtual_uri
-				), $image_link
-			) : $image_link;
+            $image_link = 'http://'.Tools::getMediaServer(_THEME_SUP_DIR_)._THEME_SUP_DIR_.((!file_exists(_THEME_SUP_DIR_.'/'.(int)$supplier->id.'-medium_default.jpg')) ? $lang['iso_code'].'-default' : (int)$supplier->id).'-medium_default.jpg';
+            $image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace(
+                array(
+                    'https',
+                    Context::getContext()->shop->domain.Context::getContext()->shop->physical_uri
+                ), array(
+                    'http',
+                    Context::getContext()->shop->domain.Context::getContext()->shop->physical_uri.Context::getContext()->shop->virtual_uri
+                ), $image_link
+            ) : $image_link;
 
-			$file_headers = (Configuration::get('GSITEMAP_CHECK_IMAGE_FILE')) ? @get_headers($image_link) : true;
-			$supplier_image = array();
-			if ($file_headers[0] != 'HTTP/1.1 404 Not Found' || $file_headers === true)
-				$supplier_image = array(
-					'title_img' => htmlspecialchars(strip_tags($supplier->name)),
-					'link' => 'http'.(Configuration::get('PS_SSL_ENABLED') ? 's' : '').'://'.Tools::getMediaServer(_THEME_SUP_DIR_)._THEME_SUP_DIR_.((!file_exists(_THEME_SUP_DIR_.'/'.(int)$supplier->id.'-medium_default.jpg')) ? $lang['iso_code'].'-default' : (int)$supplier->id).'-medium_default.jpg'
-				);
-			if (!$this->addLinkToSitemap(
-				$link_sitemap, array(
-					'type' => 'supplier',
-					'page' => 'supplier',
-					'lastmod' => $supplier->date_upd,
-					'link' => $url,
-					'image' => $supplier_image
-				), $lang['iso_code'], $index, $i, $supplier_id['id_supplier']
-			))
-				return false;
-		}
+            $file_headers = (Configuration::get('GSITEMAP_CHECK_IMAGE_FILE')) ? @get_headers($image_link) : true;
+            $supplier_image = array();
+            if ($file_headers[0] != 'HTTP/1.1 404 Not Found' || $file_headers === true)
+                $supplier_image = array(
+                    'title_img' => htmlspecialchars(strip_tags($supplier->name)),
+                    'link' => 'http'.(Configuration::get('PS_SSL_ENABLED') ? 's' : '').'://'.Tools::getMediaServer(_THEME_SUP_DIR_)._THEME_SUP_DIR_.((!file_exists(_THEME_SUP_DIR_.'/'.(int)$supplier->id.'-medium_default.jpg')) ? $lang['iso_code'].'-default' : (int)$supplier->id).'-medium_default.jpg'
+                );
+            if (!$this->addLinkToSitemap(
+                $link_sitemap, array(
+                    'type' => 'supplier',
+                    'page' => 'supplier',
+                    'lastmod' => $supplier->date_upd,
+                    'link' => $url,
+                    'image' => $supplier_image
+                ), $lang['iso_code'], $index, $i, $supplier_id['id_supplier']
+            ))
+                return false;
+        }
 
-		return true;
-	}
+        return true;
+    }
 
     /**
      * return the link elements for the CMS object
@@ -953,4 +953,3 @@ class Gsitemap extends Module
         return $text;
     }
 }
-

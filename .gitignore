@@ -1,0 +1,4 @@
+/config_*.xml
+/translations/*.php
+/vendor/
+/.php_cs.cache

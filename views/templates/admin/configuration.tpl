@@ -1,10 +1,11 @@
-{*
- * 2007-2018 PrestaShop.
+{**
+ * Copyright since 2007 PrestaShop SA and Contributors
+ * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
  *
  * NOTICE OF LICENSE
  *
- * This source file is subject to the Academic Free License (AFL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
+ * This source file is subject to the Academic Free License 3.0 (AFL-3.0)
+ * that is bundled with this package in the file LICENSE.md.
  * It is also available through the world-wide-web at this URL:
  * https://opensource.org/licenses/AFL-3.0
  * If you did not receive a copy of the license and are unable to
@@ -15,12 +16,11 @@
  *
  * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
  * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to https://www.prestashop.com for more information.
+ * needs please refer to https://devdocs.prestashop.com/ for more information.
  *
- * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright 2007-2018 PrestaShop SA
- * @license   https://opensource.org/licenses/AFL-3.0  Academic Free License (AFL 3.0)
- * International Registered Trademark & Property of PrestaShop SA
+ * @author    PrestaShop SA and Contributors <contact@prestashop.com>
+ * @copyright Since 2007 PrestaShop SA and Contributors
+ * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  *}
 
 {if isset($smarty.get.validation)}
@@ -104,7 +104,7 @@
       <label><input type="checkbox" name="gsitemap_check_image_file" value="1" {if $gsitemap_check_image_file}checked{/if}> {l s='Check this box if you wish to check the presence of the image files on the server' d='Modules.Gsitemap.Admin'}</label>
       <br>
       <p>{l s='Indicate the pages that you do not want to include in your sitemap files:' d='Modules.Gsitemap.Admin'}</p>
-      <button class="btn btn-secondary" id="check">{l s='Uncheck all' d='Modules.Gsitemap.Admin'}</button>
+      <button class="btn btn-secondary" type="button" id="check">{l s='Uncheck all' d='Modules.Gsitemap.Admin'}</button>
       <br>
       <br class="clear" />
       <ul>
@@ -142,15 +142,22 @@
 </div>
 
 <script type="text/javascript">
-   $(document).ready(function() {
-      if ($('.gsitemap_metas:checked').length == $('.gsitemap_metas').length)
-         $('#check').html("{l s='Uncheck all' d='Modules.Gsitemap.Admin'}");
-      $('#check').toggle(function() {
-         $('.gsitemap_metas').removeAttr('checked');
-         $(this).html("{l s='Check all' d='Modules.Gsitemap.Admin'}");
-      }, function() {
-         $('.gsitemap_metas').attr('checked', 'checked');
-         $(this).html("{l s='Uncheck all' d='Modules.Gsitemap.Admin'}");
-      });
-   });
+  $(document).ready(function() {
+    const textCheckAll = "{l s='Check all' d='Modules.Gsitemap.Admin' js=1}";
+    const textUnCheckAll = "{l s='Uncheck all' d='Modules.Gsitemap.Admin' js=1}";
+    const numTotal = $('.gsitemap_metas').length;
+    const numChecked = $('.gsitemap_metas:checked').length;
+    const checkboxCheck = $('#check');
+
+    if (numChecked === numTotal) {
+      checkboxCheck.html(textUnCheckAll);
+    }
+    if ((numTotal - numChecked) === numTotal) {
+      checkboxCheck.html(textCheckAll);
+    }
+    checkboxCheck.on('click', function() {
+      $('.gsitemap_metas').prop('checked', $(this).html() === textCheckAll);
+      $(this).html($(this).html() === textUnCheckAll ? textCheckAll : textUnCheckAll);
+    });
+  });
 </script>

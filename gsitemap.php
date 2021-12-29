@@ -522,17 +522,19 @@ class Gsitemap extends Module
     protected function getManufacturerLink(&$link_sitemap, $lang, &$index, &$i, $id_manufacturer = 0)
     {
         $link = new Link();
-        if (method_exists('ShopUrl', 'resetMainDomainCache'))
+        if (method_exists('ShopUrl', 'resetMainDomainCache')){
             ShopUrl::resetMainDomainCache();
-            $manufacturers_id = Db::getInstance()->ExecuteS(
-                'SELECT m.`id_manufacturer` FROM `'._DB_PREFIX_.'manufacturer` m
-                INNER JOIN `'._DB_PREFIX_.'manufacturer_lang` ml on m.`id_manufacturer` = ml.`id_manufacturer`'.
-                ($this->tableColumnExists(_DB_PREFIX_.'manufacturer_shop') ? ' INNER JOIN `'._DB_PREFIX_.'manufacturer_shop` ms ON m.`id_manufacturer` = ms.`id_manufacturer` ' : '').
-                ' WHERE m.`active` = 1  AND m.`id_manufacturer` >= '.(int)$id_manufacturer.
-                ($this->tableColumnExists(_DB_PREFIX_.'manufacturer_shop') ? ' AND ms.`id_shop` = '.(int)$this->context->shop->id : '').
-                ' AND ml.`id_lang` = '.(int)$lang['id_lang'].
-                ' ORDER BY m.`id_manufacturer` ASC'
-                );
+        }
+            
+        $manufacturers_id = Db::getInstance()->ExecuteS(
+            'SELECT m.`id_manufacturer` FROM `'._DB_PREFIX_.'manufacturer` m
+            INNER JOIN `'._DB_PREFIX_.'manufacturer_lang` ml on m.`id_manufacturer` = ml.`id_manufacturer`'.
+            ($this->tableColumnExists(_DB_PREFIX_.'manufacturer_shop') ? ' INNER JOIN `'._DB_PREFIX_.'manufacturer_shop` ms ON m.`id_manufacturer` = ms.`id_manufacturer` ' : '').
+            ' WHERE m.`active` = 1  AND m.`id_manufacturer` >= '.(int)$id_manufacturer.
+            ($this->tableColumnExists(_DB_PREFIX_.'manufacturer_shop') ? ' AND ms.`id_shop` = '.(int)$this->context->shop->id : '').
+            ' AND ml.`id_lang` = '.(int)$lang['id_lang'].
+            ' ORDER BY m.`id_manufacturer` ASC'
+            );
 
         foreach ($manufacturers_id as $manufacturer_id)
         {
@@ -565,9 +567,11 @@ class Gsitemap extends Module
                     'lastmod' => $manufacturer->date_upd,
                     'link' => $url,
                     'image' => $manifacturer_image
-                ), $lang['iso_code'], $index, $i, $manufacturer_id['id_manufacturer']
-            ))
+                    ), $lang['iso_code'], $index, $i, $manufacturer_id['id_manufacturer']
+                )){
                 return false;
+            }
+                
         }
 
         return true;
@@ -585,8 +589,10 @@ class Gsitemap extends Module
     protected function getSupplierLink(&$link_sitemap, $lang, &$index, &$i, $id_supplier = 0)
     {
         $link = new Link();
-        if (method_exists('ShopUrl', 'resetMainDomainCache'))
+        if (method_exists('ShopUrl', 'resetMainDomainCache')){
             ShopUrl::resetMainDomainCache();
+        }
+
         $suppliers_id = Db::getInstance()->ExecuteS(
             'SELECT s.`id_supplier` FROM `'._DB_PREFIX_.'supplier` s
             INNER JOIN `'._DB_PREFIX_.'supplier_lang` sl ON s.`id_supplier` = sl.`id_supplier` '.
@@ -614,11 +620,13 @@ class Gsitemap extends Module
 
             $file_headers = (Configuration::get('GSITEMAP_CHECK_IMAGE_FILE')) ? @get_headers($image_link) : true;
             $supplier_image = array();
-            if ($file_headers[0] != 'HTTP/1.1 404 Not Found' || $file_headers === true)
+            if ($file_headers[0] != 'HTTP/1.1 404 Not Found' || $file_headers === true){
                 $supplier_image = array(
                     'title_img' => htmlspecialchars(strip_tags($supplier->name)),
                     'link' => 'http'.(Configuration::get('PS_SSL_ENABLED') ? 's' : '').'://'.Tools::getMediaServer(_THEME_SUP_DIR_)._THEME_SUP_DIR_.((!file_exists(_THEME_SUP_DIR_.'/'.(int)$supplier->id.'-medium_default.jpg')) ? $lang['iso_code'].'-default' : (int)$supplier->id).'-medium_default.jpg'
                 );
+            }
+
             if (!$this->addLinkToSitemap(
                 $link_sitemap, array(
                     'type' => 'supplier',
@@ -627,8 +635,9 @@ class Gsitemap extends Module
                     'link' => $url,
                     'image' => $supplier_image
                 ), $lang['iso_code'], $index, $i, $supplier_id['id_supplier']
-            ))
+            )){
                 return false;
+            }
         }
 
         return true;

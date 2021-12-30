@@ -609,10 +609,10 @@ class Gsitemap extends Module
             $image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace(
                 [
                     'https',
-                    Context::getContext()->shop->domain.Context::getContext()->shop->physical_uri,
+                    Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri,
                 ], [
                     'http',
-                    Context::getContext()->shop->domain.Context::getContext()->shop->physical_uri.Context::getContext()->shop->virtual_uri,
+                    Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri . Context::getContext()->shop->virtual_uri,
                 ], $image_link
             ) : $image_link;
 

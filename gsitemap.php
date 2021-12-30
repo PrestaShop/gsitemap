@@ -512,7 +512,7 @@ class Gsitemap extends Module
      * return the link elements for the manufacturer object
      *
      * @param array  $link_sitemap    contain all the links for the Google Sitemap file to be generated
-     * @param string $lang            language of link to add
+     * @param array  $lang            language of link to add
      * @param int    $index           index of the current Google Sitemap file
      * @param int    $i               count of elements added to sitemap main array
      * @param int    $id_manufacturer manufacturer object identifier
@@ -579,7 +579,7 @@ class Gsitemap extends Module
 
     /**
      * @param array  $link_sitemap contain all the links for the Google Sitemap file to be generated
-     * @param string $lang         language of link to add
+     * @param array  $lang         language of link to add
      * @param int    $index        index of the current Google Sitemap file
      * @param int    $i            count of elements added to sitemap main array
      * @param int    $id_supplier  supplier object identifier

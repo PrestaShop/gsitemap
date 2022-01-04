@@ -556,7 +556,7 @@ class Gsitemap extends Module
             if ($file_headers[0] != 'HTTP/1.1 404 Not Found' || $file_headers === true) {
                 $manifacturer_image = [
                     'title_img' => htmlspecialchars(strip_tags($manufacturer->name)),
-                    'caption' => htmlspecialchars(strip_tags($manufacturer->short_description)),
+                    'caption' => Tools::substr(htmlspecialchars(strip_tags($manufacturer->short_description)), 0, 350),
                     'link' => $image_link,
                 ];
             }

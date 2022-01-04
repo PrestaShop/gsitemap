@@ -602,7 +602,7 @@ class Gsitemap extends Module
             ORDER BY s.`id_supplier` ASC'
         );
         foreach ($suppliers_id as $supplier_id) {
-            $supplier = new Supplier((int) $supplier_id['id_supplier'], $lang['id_lang']);
+            $supplier = new Supplier((int) $supplier_id['id_supplier'], $lang['id_lang']); /** @phpstan-ignore-line */
             $url = $link->getSupplierLink($supplier, $supplier->link_rewrite, $lang['id_lang']);
 
             $image_link = 'http://' . Tools::getMediaServer(_THEME_SUP_DIR_) . _THEME_SUP_DIR_ . ((!file_exists(_THEME_SUP_DIR_ . '/' . (int) $supplier->id . '-medium_default.jpg')) ? $lang['iso_code'] . '-default' : (int) $supplier->id) . '-medium_default.jpg';

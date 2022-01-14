@@ -38,7 +38,7 @@ class Gsitemap extends Module
     public function __construct()
     {
         $this->name = 'gsitemap';
-        $this->tab = 'seo';
+        $this->tab = 'checkout';
         $this->version = '4.2.0';
         $this->author = 'PrestaShop';
         $this->need_instance = 0;

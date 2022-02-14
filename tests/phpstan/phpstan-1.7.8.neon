@@ -1,0 +1,7 @@
+includes:
+    - %currentWorkingDirectory%/tests/phpstan/phpstan.neon
+
+parameters:
+  ignoreErrors:
+    - '#Access to an undefined property Cookie\:\:\$id_lang.#'
+    - '#Parameter \#3 \$type of method LinkCore\:\:getCatImageLink\(\) expects null, string given.#'

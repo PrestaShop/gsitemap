@@ -416,7 +416,7 @@ class Gsitemap extends Module
                     ], $image_link) : $image_link;
                 }
                 $file_headers = (Configuration::get('GSITEMAP_CHECK_IMAGE_FILE') && isset($image_link)) ? @get_headers($image_link) : true;
-                if (isset($image_link) && ($file_headers[0] != 'HTTP/1.1 404 Not Found' || $file_headers === true)) {
+                if (isset($image_link) && ((isset($file_headers[0]) && $file_headers[0] != 'HTTP/1.1 404 Not Found') || $file_headers === true)) {
                     $images_product[] = [
                         'title_img' => htmlspecialchars(strip_tags($product->name)),
                         'caption' => htmlspecialchars(strip_tags($product->meta_description)),

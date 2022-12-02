@@ -33,11 +33,7 @@
 {/if}
 
 <div class="panel">
-   {if isset($google_maps_error)}
-   <div class="error">
-      {$google_maps_error|escape:'htmlall':'UTF-8'}<br>
-   </div>
-   {/if}
+
    {if isset($gsitemap_refresh_page)}
    <h3><i class="icon icon-sitemap"></i> {l s='Your sitemaps' d='Modules.Gsitemap.Admin'}</h3>
    <p>{$gsitemap_number|intval} {l s='Sitemaps were already created.' d='Modules.Gsitemap.Admin'}</p>
@@ -87,7 +83,7 @@
 
 <div class="panel">
    <form action="{$gsitemap_form|escape:'htmlall':'UTF-8'}" method="post">
-      <h3><i class="icon icon-wrench"></i> {l s='Configure your sitemap' d='Modules.Gsitemap.Admin'}</h3>
+      <div class="panel-heading"><i class="icon icon-wrench"></i> {l s='Configure your sitemap' d='Modules.Gsitemap.Admin'}</div>
       <p>{l s='Several sitemap files will be generated depending on how your server is configured and on the number of activated products in your catalog.' d='Modules.Gsitemap.Admin'}<br></p>
       <div class="margin-form">
          <label for="gsitemap_frequency" >{l s='How often do you update your store?' d='Modules.Gsitemap.Admin'}
@@ -128,7 +124,7 @@
 </div>
 
 <div class="panel">
-   <h3><i class="icon icon-tags"></i> {l s='Information' d='Modules.Gsitemap.Admin'}</h3>
+   <div class="panel-heading"><i class="icon icon-tags"></i> {l s='Information' d='Modules.Gsitemap.Admin'}</div>
    <p>
       <strong>{l s='You have two ways to generate sitemaps.' d='Modules.Gsitemap.Admin'}</strong><br><br>
       1. <strong>{l s='Manually:' d='Modules.Gsitemap.Admin'}</strong> {l s='Using the form above (as often as needed)' d='Modules.Gsitemap.Admin'}<br>

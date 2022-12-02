@@ -594,6 +594,7 @@ class Gsitemap extends Module
     {
         if (@fopen($this->normalizeDirectory(_PS_ROOT_DIR_) . '/test.txt', 'wb') == false) {
             $this->context->controller->errors[] = $this->trans('An error occured while trying to check your file permissions. Please adjust your permissions to allow PrestaShop to write a file in your root directory.', [], 'Modules.Gsitemap.Admin');
+
             return false;
         } else {
             @unlink($this->normalizeDirectory(_PS_ROOT_DIR_) . 'test.txt');

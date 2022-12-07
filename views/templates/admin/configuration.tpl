@@ -33,13 +33,9 @@
 {/if}
 
 <div class="panel">
-   {if isset($google_maps_error)}
-   <div class="error">
-      {$google_maps_error|escape:'htmlall':'UTF-8'}<br>
-   </div>
-   {/if}
+   <div class="panel-heading"><i class="icon icon-sitemap"></i> {l s='Your sitemaps' d='Modules.Gsitemap.Admin'}</div>
+
    {if isset($gsitemap_refresh_page)}
-   <h3><i class="icon icon-sitemap"></i> {l s='Your sitemaps' d='Modules.Gsitemap.Admin'}</h3>
    <p>{$gsitemap_number|intval} {l s='Sitemaps were already created.' d='Modules.Gsitemap.Admin'}</p>
    <br><br>
    <form action="{$gsitemap_refresh_page|escape:'htmlall':'UTF-8'}" method="post" id="gsitemap_generate_sitmap">
@@ -48,7 +44,6 @@
    </form>
    {else}
    {if $gsitemap_links}
-   <h3><i class="icon icon-sitemap"></i> {l s='Your sitemaps' d='Modules.Gsitemap.Admin'}</h3>
    {l s='Please set up the following sitemap URL in your Google Webmaster account:' d='Modules.Gsitemap.Admin'}<br>
    <a href="{$gsitemap_store_url|escape:'htmlall':'UTF-8'}{$shop->id|intval}_index_sitemap.xml" target="_blank">{$gsitemap_store_url|escape:'htmlall':'UTF-8'}{$shop->id|intval}_index_sitemap.xml</a><br><br>
    {l s='The above URL is the master sitemap file. It refers to the following sub-sitemap files:' d='Modules.Gsitemap.Admin'}
@@ -61,9 +56,7 @@
    </div>
    <p>{l s='Your last update was made on this date:' d='Modules.Gsitemap.Admin'} {$gsitemap_last_export|escape:'htmlall':'UTF-8'}</p>
    {else}
-   <h3><i class="icon icon-sitemap"></i> {l s='Your sitemaps' d='Modules.Gsitemap.Admin'}</h3>
-   <p>{l s='This shop has no sitemap yet.' d='Modules.Gsitemap.Admin'}<br>
-   </p>
+   <p>{l s='This shop has no sitemap yet.' d='Modules.Gsitemap.Admin'}</p>
    {/if}
    {if ($gsitemap_customer_limit.max_exec_time < 30 && $gsitemap_customer_limit.max_exec_time > 0) || ($gsitemap_customer_limit.memory_limit < 128 && $gsitemap_customer_limit.memory_limit > 0)}
    <br>
@@ -87,7 +80,7 @@
 
 <div class="panel">
    <form action="{$gsitemap_form|escape:'htmlall':'UTF-8'}" method="post">
-      <h3><i class="icon icon-wrench"></i> {l s='Configure your sitemap' d='Modules.Gsitemap.Admin'}</h3>
+      <div class="panel-heading"><i class="icon icon-wrench"></i> {l s='Configure your sitemap' d='Modules.Gsitemap.Admin'}</div>
       <p>{l s='Several sitemap files will be generated depending on how your server is configured and on the number of activated products in your catalog.' d='Modules.Gsitemap.Admin'}<br></p>
       <div class="margin-form">
          <label for="gsitemap_frequency" >{l s='How often do you update your store?' d='Modules.Gsitemap.Admin'}
@@ -128,7 +121,7 @@
 </div>
 
 <div class="panel">
-   <h3><i class="icon icon-tags"></i> {l s='Information' d='Modules.Gsitemap.Admin'}</h3>
+   <div class="panel-heading"><i class="icon icon-tags"></i> {l s='Information' d='Modules.Gsitemap.Admin'}</div>
    <p>
       <strong>{l s='You have two ways to generate sitemaps.' d='Modules.Gsitemap.Admin'}</strong><br><br>
       1. <strong>{l s='Manually:' d='Modules.Gsitemap.Admin'}</strong> {l s='Using the form above (as often as needed)' d='Modules.Gsitemap.Admin'}<br>

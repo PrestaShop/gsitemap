@@ -478,7 +478,7 @@ class Gsitemap extends Module
             }
             $file_headers = (Configuration::get('GSITEMAP_CHECK_IMAGE_FILE') && isset($image_link)) ? @get_headers($image_link) : true;
             $image_category = [];
-            if (isset($image_link) && ($file_headers[0] != 'HTTP/1.1 404 Not Found' || $file_headers === true)) {
+            if (isset($image_link) && ((isset($file_headers[0]) && $file_headers[0] != 'HTTP/1.1 404 Not Found') || $file_headers === true)) {
                 $image_category = [
                     'title_img' => htmlspecialchars(strip_tags($category->name)),
                     'caption' => Tools::substr(htmlspecialchars(strip_tags($category->description)), 0, 350),
@@ -593,7 +593,7 @@ class Gsitemap extends Module
     public function createSitemap($id_shop = 0)
     {
         if (@fopen($this->normalizeDirectory(_PS_ROOT_DIR_) . '/test.txt', 'wb') == false) {
-            $this->context->smarty->assign('google_maps_error', $this->trans('An error occured while trying to check your file permissions. Please adjust your permissions to allow PrestaShop to write a file in your root directory.', [], 'Modules.Gsitemap.Admin'));
+            $this->context->controller->errors[] = $this->trans('An error occured while trying to check your file permissions. Please adjust your permissions to allow PrestaShop to write a file in your root directory.', [], 'Modules.Gsitemap.Admin');
 
             return false;
         } else {

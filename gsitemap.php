@@ -396,8 +396,28 @@ class Gsitemap extends Module
             ShopUrl::resetMainDomainCache();
         }
 
-        $products_id = Db::getInstance()->ExecuteS('SELECT `id_product` FROM `' . _DB_PREFIX_ . 'product_shop` WHERE `id_product` >= ' . (int) $id_product . ' AND `active` = 1 AND `visibility` != \'none\' AND `id_shop`=' . $this->context->shop->id . ' ORDER BY `id_product` ASC');
+        /*
+        * If group feature is enabled, we will show only publicly accessible categories in the sitemap.
+        * In the core, if there is at least one category of the product publicly accessible, the product is accessible.
+        * So, we do a subselect where we try to find at least one category accessible, then we inner join it to the product table
+        * and we are left with only accessible products.
+        */
+        if (Group::isFeatureActive() && !empty(Configuration::get('PS_UNIDENTIFIED_GROUP'))) {
+            $group_join = ' INNER JOIN (SELECT DISTINCT cp.`id_product` FROM `' . _DB_PREFIX_ . 'category_product` cp 
+            INNER JOIN `' . _DB_PREFIX_ . 'category_group` ctg ON (ctg.`id_category` = cp.`id_category`) 
+            WHERE ctg.`id_group` = ' . (int) Configuration::get('PS_UNIDENTIFIED_GROUP') . ' AND cp.`id_product` >= ' . (int) $id_product . ' 
+            ) g ON ps.`id_product` = g.`id_product`';
+        } else {
+            $group_join = ' ';
+        }
 
+        // Get product IDs
+        $products_id = Db::getInstance()->ExecuteS('SELECT ps.`id_product` FROM `' . _DB_PREFIX_ . 'product_shop` ps' . $group_join . '
+        WHERE ps.`id_product` >= ' . (int) $id_product . ' AND ps.`active` = 1 AND ps.`visibility` != \'none\' 
+        AND ps.`id_shop`=' . $this->context->shop->id . ' 
+        ORDER BY ps.`id_product` ASC');
+
+        // Process each category and add it to list of links that will be further "converted" to XML and added to the sitemap
         foreach ($products_id as $product_id) {
             $product = new Product((int) $product_id['id_product'], false, (int) $lang['id_lang']);
 
@@ -458,10 +478,24 @@ class Gsitemap extends Module
             ShopUrl::resetMainDomainCache();
         }
 
-        $categories_id = Db::getInstance()->ExecuteS('SELECT c.id_category FROM `' . _DB_PREFIX_ . 'category` c
-                INNER JOIN `' . _DB_PREFIX_ . 'category_shop` cs ON c.`id_category` = cs.`id_category`
-                WHERE c.`id_category` >= ' . (int) $id_category . ' AND c.`active` = 1 AND c.`id_category` != ' . (int) Configuration::get('PS_ROOT_CATEGORY') . ' AND c.id_category != ' . (int) Configuration::get('PS_HOME_CATEGORY') . ' AND c.id_parent > 0 AND c.`id_category` > 0 AND cs.`id_shop` = ' . (int) $this->context->shop->id . ' ORDER BY c.`id_category` ASC');
+        // If group feature is enabled, we will show only publicly accessible categories in the sitemap
+        if (Group::isFeatureActive() && !empty(Configuration::get('PS_UNIDENTIFIED_GROUP'))) {
+            $group_join = ' INNER JOIN `' . _DB_PREFIX_ . 'category_group` cg ON c.`id_category` = cg.`id_category` AND cg.`id_group` = ' . (int) Configuration::get('PS_UNIDENTIFIED_GROUP');
+        } else {
+            $group_join = ' ';
+        }
 
+        // Get category IDs
+        $categories_id = Db::getInstance()->ExecuteS('SELECT c.id_category FROM `' . _DB_PREFIX_ . 'category` c
+                INNER JOIN `' . _DB_PREFIX_ . 'category_shop` cs ON c.`id_category` = cs.`id_category`' .
+                $group_join . '
+                WHERE c.`id_category` >= ' . (int) $id_category . ' AND c.`active` = 1 
+                AND c.`id_category` != ' . (int) Configuration::get('PS_ROOT_CATEGORY') . ' 
+                AND c.id_category != ' . (int) Configuration::get('PS_HOME_CATEGORY') . ' 
+                AND c.id_parent > 0 AND c.`id_category` > 0 AND cs.`id_shop` = ' . (int) $this->context->shop->id . ' 
+                ORDER BY c.`id_category` ASC');
+
+        // Process each category and add it to list of links that will be further "converted" to XML and added to the sitemap
         foreach ($categories_id as $category_id) {
             $category = new Category((int) $category_id['id_category'], (int) $lang['id_lang']);
             $url = $link->getCategoryLink($category, urlencode($category->link_rewrite), (int) $lang['id_lang']);

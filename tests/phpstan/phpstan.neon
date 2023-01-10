@@ -1,0 +1,12 @@
+includes:
+	- %currentWorkingDirectory%/vendor/prestashop/php-dev-tools/phpstan/ps-module-extension.neon
+
+parameters:
+  paths:
+    # From PHPStan 0.12, paths to check are relative to the neon file
+    - ../../gsitemap.php
+    - ../../gsitemap-cron.php
+    - ../../translations/
+    - ../../upgrade/
+    - ../../views/
+  level: 5

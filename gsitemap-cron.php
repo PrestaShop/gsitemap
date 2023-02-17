@@ -34,7 +34,7 @@ include dirname(__FILE__) . '/../../config/config.inc.php';
 if (!Tools::isPHPCLI()) {
     include dirname(__FILE__) . '/../../init.php';
 
-    if (Tools::substr(Tools::encrypt('gsitemap/cron'), 0, 10) != Tools::getValue('token') || !Module::isInstalled('gsitemap')) {
+    if (Tools::substr(Tools::hash('gsitemap/cron'), 0, 10) != Tools::getValue('token') || !Module::isInstalled('gsitemap')) {
         exit('Bad token');
     }
 }

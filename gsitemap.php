@@ -119,7 +119,7 @@ class Gsitemap extends Module
     {
         $hook = new Hook(Hook::getIdByName(self::HOOK_ADD_URLS));
         if (Validate::isLoadedObject($hook)) {
-            return;
+            return true;
         }
 
         $hook = new Hook();

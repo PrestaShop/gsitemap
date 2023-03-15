@@ -128,7 +128,9 @@
       <br><span style="font-style: italic;">{l s='-or-' d='Modules.Gsitemap.Admin'}</span><br><br>
       2. <strong>{l s='Automatically:' d='Modules.Gsitemap.Admin'}</strong> {l s='Ask your hosting provider to setup a "Cron job" to load the following URL at the time you would like:' d='Modules.Gsitemap.Admin'}
       <a href="{$gsitemap_cron|escape:'htmlall':'UTF-8'}" target="_blank">{$gsitemap_cron|escape:'htmlall':'UTF-8'}</a><br>
-      {l s='It will automatically generate your XML sitemaps.' d='Modules.Gsitemap.Admin'}
+      {l s='It will automatically generate your XML sitemaps.' d='Modules.Gsitemap.Admin'}<br>
+      {l s='If you are using a cron job in combination with a command-line tool, such as curl, and your shop is so large to require a large amount of XML sitemap files generated, you might need to modify the tools default redirect limit.'}<br>
+      {l s='For example: curl follows up to 50 redirects by default. To increase this number further, you will have to add the parameter "-L --max-redirs 99" to the curl command line in your cron job, which increases the redirect limit to 99 redirects.'}<br>
    </p>
    {/if}
    </p>

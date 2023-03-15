@@ -277,42 +277,41 @@ class Gsitemap extends Module
             ++$i;
 
             return true;
-        } else {
-            $this->recursiveSitemapCreator($link_sitemap, $lang, $index);
-            if ($index % 20 == 0 && !$this->cron) {
-                $this->context->smarty->assign([
-                    'gsitemap_number' => (int) $index,
-                    'gsitemap_refresh_page' => $this->context->link->getAdminLink('AdminModules', true, [], [
-                        'tab_module' => $this->tab,
-                        'module_name' => $this->name,
-                        'continue' => 1,
-                        'type' => $new_link['type'],
-                        'lang' => $lang,
-                        'index' => $index,
-                        'id' => (int) $id_obj,
-                        'id_shop' => $this->context->shop->id,
-                    ]),
-                ]);
+        }
 
-                return false;
-            } else {
-                if ($this->cron) {
-                    Tools::redirect($this->context->link->getBaseLink() . 'modules/gsitemap/gsitemap-cron.php?continue=1&token=' . Tools::substr(Tools::hash('gsitemap/cron'), 0, 10) . '&type=' . $new_link['type'] . '&lang=' . $lang . '&index=' . $index . '&id=' . (int) $id_obj . '&id_shop=' . $this->context->shop->id);
-                } else {
-                    Tools::redirectAdmin($this->context->link->getAdminLink('AdminModules', true, [], [
-                        'tab_module' => $this->tab,
-                        'module_name' => $this->name,
-                        'configure' => $this->name,
-                        'continue' => 1,
-                        'type' => $new_link['type'],
-                        'lang' => $lang,
-                        'index' => $index,
-                        'id' => (int) $id_obj,
-                        'id_shop' => $this->context->shop->id,
-                    ]));
-                }
-                exit();
-            }
+        $this->recursiveSitemapCreator($link_sitemap, $lang, $index);
+        if ($index % 20 == 0 && !$this->cron) {
+            $this->context->smarty->assign([
+                'gsitemap_number' => (int) $index,
+                'gsitemap_refresh_page' => $this->context->link->getAdminLink('AdminModules', true, [], [
+                    'tab_module' => $this->tab,
+                    'module_name' => $this->name,
+                    'continue' => 1,
+                    'type' => $new_link['type'],
+                    'lang' => $lang,
+                    'index' => $index,
+                    'id' => (int) $id_obj,
+                    'id_shop' => $this->context->shop->id,
+                ]),
+            ]);
+
+            return false;
+        }
+
+        if ($this->cron) {
+            Tools::redirect($this->context->link->getBaseLink() . 'modules/gsitemap/gsitemap-cron.php?continue=1&token=' . Tools::substr(Tools::hash('gsitemap/cron'), 0, 10) . '&type=' . $new_link['type'] . '&lang=' . $lang . '&index=' . $index . '&id=' . (int) $id_obj . '&id_shop=' . $this->context->shop->id);
+        } else {
+            Tools::redirectAdmin($this->context->link->getAdminLink('AdminModules', true, [], [
+                'tab_module' => $this->tab,
+                'module_name' => $this->name,
+                'configure' => $this->name,
+                'continue' => 1,
+                'type' => $new_link['type'],
+                'lang' => $lang,
+                'index' => $index,
+                'id' => (int) $id_obj,
+                'id_shop' => $this->context->shop->id,
+            ]));
         }
     }
 

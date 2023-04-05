@@ -50,13 +50,13 @@ class Gsitemap extends Module
     {
         $this->name = 'gsitemap';
         $this->tab = 'checkout';
-        $this->version = '4.2.1';
+        $this->version = '4.3.0';
         $this->author = 'PrestaShop';
         $this->need_instance = 0;
         $this->bootstrap = true;
         parent::__construct();
         $this->displayName = $this->trans('Google sitemap', [], 'Modules.Gsitemap.Admin');
-        $this->description = $this->trans('Generate your Google sitemap file with this module, and keep it up-to-date.', [], 'Modules.Gsitemap.Admin');
+        $this->description = $this->trans('Generate your Google sitemap file and keep it up to date with this module.', [], 'Modules.Gsitemap.Admin');
         $this->ps_versions_compliancy = [
             'min' => '1.7.1.0',
             'max' => _PS_VERSION_,
@@ -213,7 +213,7 @@ class Gsitemap extends Module
         $store_url = $this->context->link->getBaseLink();
         $this->context->smarty->assign([
             'gsitemap_form' => './index.php?tab=AdminModules&configure=gsitemap&token=' . Tools::getAdminTokenLite('AdminModules') . '&tab_module=' . $this->tab . '&module_name=gsitemap',
-            'gsitemap_cron' => $store_url . 'modules/gsitemap/gsitemap-cron.php?token=' . Tools::substr(Tools::encrypt('gsitemap/cron'), 0, 10) . '&id_shop=' . $this->context->shop->id,
+            'gsitemap_cron' => $store_url . 'modules/gsitemap/gsitemap-cron.php?token=' . Tools::substr(Tools::hash('gsitemap/cron'), 0, 10) . '&id_shop=' . $this->context->shop->id,
             'gsitemap_feed_exists' => file_exists($this->normalizeDirectory(_PS_ROOT_DIR_) . 'index_sitemap.xml'),
             'gsitemap_last_export' => Configuration::get('GSITEMAP_LAST_EXPORT'),
             'gsitemap_frequency' => Configuration::get('GSITEMAP_FREQUENCY'),
@@ -296,11 +296,11 @@ class Gsitemap extends Module
 
                 return false;
             } elseif ($index % 20 == 0 && $this->cron) {
-                header('Refresh: 5; url=http' . (Configuration::get('PS_SSL_ENABLED') ? 's' : '') . '://' . Tools::getShopDomain(false, true) . __PS_BASE_URI__ . 'modules/gsitemap/gsitemap-cron.php?continue=1&token=' . Tools::substr(Tools::encrypt('gsitemap/cron'), 0, 10) . '&type=' . $new_link['type'] . '&lang=' . $lang . '&index=' . $index . '&id=' . (int) $id_obj . '&id_shop=' . $this->context->shop->id);
+                header('Refresh: 5; url=http' . (Configuration::get('PS_SSL_ENABLED') ? 's' : '') . '://' . Tools::getShopDomain(false, true) . __PS_BASE_URI__ . 'modules/gsitemap/gsitemap-cron.php?continue=1&token=' . Tools::substr(Tools::hash('gsitemap/cron'), 0, 10) . '&type=' . $new_link['type'] . '&lang=' . $lang . '&index=' . $index . '&id=' . (int) $id_obj . '&id_shop=' . $this->context->shop->id);
                 exit();
             } else {
                 if ($this->cron) {
-                    Tools::redirect($this->context->link->getBaseLink() . 'modules/gsitemap/gsitemap-cron.php?continue=1&token=' . Tools::substr(Tools::encrypt('gsitemap/cron'), 0, 10) . '&type=' . $new_link['type'] . '&lang=' . $lang . '&index=' . $index . '&id=' . (int) $id_obj . '&id_shop=' . $this->context->shop->id);
+                    Tools::redirect($this->context->link->getBaseLink() . 'modules/gsitemap/gsitemap-cron.php?continue=1&token=' . Tools::substr(Tools::hash('gsitemap/cron'), 0, 10) . '&type=' . $new_link['type'] . '&lang=' . $lang . '&index=' . $index . '&id=' . (int) $id_obj . '&id_shop=' . $this->context->shop->id);
                 } else {
                     Tools::redirectAdmin($this->context->link->getAdminLink('AdminModules', true, [], [
                         'tab_module' => $this->tab,

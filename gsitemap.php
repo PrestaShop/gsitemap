@@ -374,7 +374,6 @@ class Gsitemap extends Module
         $link = new Link();
         $metas = Db::getInstance()->ExecuteS('SELECT * FROM `' . _DB_PREFIX_ . 'meta` WHERE `configurable` > 0 AND `id_meta` >= ' . (int) $id_meta . ' AND page <> \'index\' ORDER BY `id_meta` ASC');
         foreach ($metas as $meta) {
-
             // Check if this meta is not in the list of blocked controllers in core robots.txt
             if (in_array($meta['page'], $this->disallow_controllers)) {
                 continue;

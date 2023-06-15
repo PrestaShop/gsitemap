@@ -46,6 +46,16 @@ class Gsitemap extends Module
      */
     protected $type_array = [];
 
+    /**
+     * @var array
+     */
+    protected $disallow_controllers = [
+        'addresses', 'address', 'authentication', 'cart', 'discount', 'footer',
+        'get-file', 'header', 'history', 'identity', 'images.inc', 'init', 'my-account', 'order',
+        'order-slip', 'order-detail', 'order-follow', 'order-return', 'order-confirmation', 'pagination', 'password',
+        'pdf-invoice', 'pdf-order-return', 'pdf-order-slip', 'product-sort', 'registration', 'search', 'statistics', 'attachment', 'guest-tracking',
+    ];
+
     public function __construct()
     {
         $this->name = 'gsitemap';
@@ -207,9 +217,13 @@ class Gsitemap extends Module
         }
 
         /* Get Meta pages and remove index page it's managed elsewhere (@see $this->getHomeLink()) */
-        $store_metas = array_filter(Meta::getMetasByIdLang((int) $this->context->cookie->id_lang), function ($meta) {
-            return $meta['page'] != 'index';
-        });
+        /* We also remove all pages that are blocked in core robots.txt file */
+        $store_metas = array_filter(Meta::getMetasByIdLang(
+            (int) $this->context->cookie->id_lang),
+            function ($meta) {
+                return $meta['page'] != 'index' && !in_array($meta['page'], $this->disallow_controllers);
+            }
+        );
         $store_url = $this->context->link->getBaseLink();
         $this->context->smarty->assign([
             'gsitemap_form' => './index.php?tab=AdminModules&configure=gsitemap&token=' . Tools::getAdminTokenLite('AdminModules') . '&tab_module=' . $this->tab . '&module_name=gsitemap',
@@ -360,6 +374,11 @@ class Gsitemap extends Module
         $link = new Link();
         $metas = Db::getInstance()->ExecuteS('SELECT * FROM `' . _DB_PREFIX_ . 'meta` WHERE `configurable` > 0 AND `id_meta` >= ' . (int) $id_meta . ' AND page <> \'index\' ORDER BY `id_meta` ASC');
         foreach ($metas as $meta) {
+            // Check if this meta is not in the list of blocked controllers in core robots.txt
+            if (in_array($meta['page'], $this->disallow_controllers)) {
+                continue;
+            }
+
             $url = '';
             if (!in_array($meta['id_meta'], explode(',', Configuration::get('GSITEMAP_DISABLE_LINKS')))) {
                 $url = $link->getPageLink($meta['page'], null, $lang['id_lang']);

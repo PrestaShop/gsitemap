@@ -4,3 +4,4 @@ includes:
 parameters:
   ignoreErrors:
     - '#Access to an undefined property Cookie\:\:\$id_lang.#'
+    - '~^Call to an undefined static method Store::atLeastOneStoreExists\(\)\.$~'

@@ -1,2 +1,6 @@
 includes:
     - %currentWorkingDirectory%/tests/phpstan/phpstan.neon
+
+parameters:
+  ignoreErrors:
+    - '~^Call to an undefined static method Store::atLeastOneStoreExists\(\)\.$~'

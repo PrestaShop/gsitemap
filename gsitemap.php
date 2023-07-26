@@ -379,6 +379,11 @@ class Gsitemap extends Module
                 continue;
             }
 
+            // If no store is configured, we hide this page from sitemap
+            if ($meta['page'] == 'stores' && !$this->shouldIncludeStoresLink($lang['id_lang'])) {
+                continue;
+            }
+
             $url = '';
             if (!in_array($meta['id_meta'], explode(',', Configuration::get('GSITEMAP_DISABLE_LINKS')))) {
                 $url = $link->getPageLink($meta['page'], null, $lang['id_lang']);
@@ -395,6 +400,23 @@ class Gsitemap extends Module
         }
 
         return true;
+    }
+
+    /**
+     * Checks if at least 1 store is configured and if it makes sense to include this page in the XML.
+     *
+     * @param int $idLang
+     *
+     * @return bool
+     */
+    protected function shouldIncludeStoresLink($idLang)
+    {
+        // More performant way for 9.0 and newer
+        if (method_exists(Store::class, 'atLeastOneStoreExists')) {
+            return Store::atLeastOneStoreExists();
+        }
+
+        return !empty(Store::getStores($idLang));
     }
 
     /**

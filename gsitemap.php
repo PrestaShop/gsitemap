@@ -121,12 +121,17 @@ class Gsitemap extends Module
     }
 
     /**
-     * Registers hook(s)
+     * Check if the hook is present in the system or add it
      *
      * @return bool
      */
     protected function installHook()
     {
+        $hook = new Hook(Hook::getIdByName(self::HOOK_ADD_URLS));
+        if (Validate::isLoadedObject($hook)) {
+            return true;
+        }
+
         $hook = new Hook();
         $hook->name = self::HOOK_ADD_URLS;
         $hook->title = 'GSitemap Append URLs';
@@ -159,11 +164,6 @@ class Gsitemap extends Module
             if (!Configuration::deleteByName($key)) {
                 return false;
             }
-        }
-
-        $hook = new Hook(Hook::getIdByName(self::HOOK_ADD_URLS));
-        if (Validate::isLoadedObject($hook)) {
-            $hook->delete();
         }
 
         return parent::uninstall() && $this->removeSitemap();

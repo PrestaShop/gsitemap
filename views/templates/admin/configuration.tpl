@@ -94,8 +94,6 @@
          <option{if $gsitemap_frequency == 'never'} selected="selected"{/if} value='never'>{l s='never' d='Modules.Gsitemap.Admin'}</option>
          </select></label>
       </div>
-      <label><input type="checkbox" name="gsitemap_check_image_file" value="1" {if $gsitemap_check_image_file}checked{/if}> {l s='Check this box if you wish to check the presence of the image files on the server' d='Modules.Gsitemap.Admin'}</label>
-      <br>
       <p>{l s='Indicate the pages that you do not want to include in your sitemap files:' d='Modules.Gsitemap.Admin'}</p>
       <button class="btn btn-secondary" type="button" id="check">{l s='Uncheck all' d='Modules.Gsitemap.Admin'}</button>
       <br>

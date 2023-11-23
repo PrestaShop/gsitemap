@@ -226,7 +226,7 @@ class Gsitemap extends Module
         );
         $store_url = $this->context->link->getBaseLink();
         $this->context->smarty->assign([
-            'gsitemap_form' => './index.php?tab=AdminModules&configure=gsitemap&token=' . Tools::getAdminTokenLite('AdminModules') . '&tab_module=' . $this->tab . '&module_name=gsitemap',
+            'gsitemap_form' => './index.php?controller=AdminModules&configure=gsitemap&token=' . Tools::getAdminTokenLite('AdminModules') . '&tab_module=' . $this->tab . '&module_name=gsitemap',
             'gsitemap_cron' => $store_url . 'modules/gsitemap/gsitemap-cron.php?token=' . Tools::substr(Tools::hash('gsitemap/cron'), 0, 10) . '&id_shop=' . $this->context->shop->id,
             'gsitemap_feed_exists' => file_exists($this->normalizeDirectory(_PS_ROOT_DIR_) . 'index_sitemap.xml'),
             'gsitemap_last_export' => Configuration::get('GSITEMAP_LAST_EXPORT'),
@@ -693,7 +693,7 @@ class Gsitemap extends Module
         if ($this->cron) {
             exit();
         }
-        Tools::redirectAdmin('index.php?tab=AdminModules&configure=gsitemap&token=' . Tools::getAdminTokenLite('AdminModules') . '&tab_module=' . $this->tab . '&module_name=gsitemap&validation');
+        Tools::redirectAdmin('index.php?controller=AdminModules&configure=gsitemap&token=' . Tools::getAdminTokenLite('AdminModules') . '&tab_module=' . $this->tab . '&module_name=gsitemap&validation');
         exit();
     }
 

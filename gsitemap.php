@@ -108,7 +108,6 @@ class Gsitemap extends Module
             'GSITEMAP_PRIORITY_CATEGORY' => 0.8,
             'GSITEMAP_PRIORITY_CMS' => 0.7,
             'GSITEMAP_FREQUENCY' => 'weekly',
-            'GSITEMAP_CHECK_IMAGE_FILE' => false,
             'GSITEMAP_LAST_EXPORT' => false,
         ] as $key => $val) {
             if (!Configuration::updateValue($key, $val)) {
@@ -158,7 +157,6 @@ class Gsitemap extends Module
             'GSITEMAP_PRIORITY_CATEGORY' => '',
             'GSITEMAP_PRIORITY_CMS' => '',
             'GSITEMAP_FREQUENCY' => '',
-            'GSITEMAP_CHECK_IMAGE_FILE' => '',
             'GSITEMAP_LAST_EXPORT' => '',
         ] as $key => $val) {
             if (!Configuration::deleteByName($key)) {
@@ -197,7 +195,6 @@ class Gsitemap extends Module
         if (Tools::isSubmit('SubmitGsitemap')) {
             Configuration::updateValue('GSITEMAP_FREQUENCY', pSQL(Tools::getValue('gsitemap_frequency')));
             Configuration::updateValue('GSITEMAP_INDEX_CHECK', '');
-            Configuration::updateValue('GSITEMAP_CHECK_IMAGE_FILE', pSQL(Tools::getValue('gsitemap_check_image_file')));
             $meta = '';
             if (Tools::getValue('gsitemap_meta')) {
                 $meta .= implode(', ', Tools::getValue('gsitemap_meta'));
@@ -240,7 +237,6 @@ class Gsitemap extends Module
                 'memory_limit' => (int) ini_get('memory_limit'),
             ],
             'prestashop_ssl' => Configuration::get('PS_SSL_ENABLED'),
-            'gsitemap_check_image_file' => Configuration::get('GSITEMAP_CHECK_IMAGE_FILE'),
             'shop' => $this->context->shop,
         ]);
 
@@ -453,9 +449,7 @@ class Gsitemap extends Module
                         'http',
                         Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri . Context::getContext()->shop->virtual_uri,
                     ], $image_link) : $image_link;
-                }
-                $file_headers = (Configuration::get('GSITEMAP_CHECK_IMAGE_FILE') && isset($image_link)) ? @get_headers($image_link) : true;
-                if (isset($image_link) && ((isset($file_headers[0]) && $file_headers[0] != 'HTTP/1.1 404 Not Found') || $file_headers === true)) {
+
                     $images_product[] = [
                         'title_img' => htmlspecialchars(strip_tags($product->name)),
                         'caption' => htmlspecialchars(strip_tags($product->meta_description)),
@@ -518,7 +512,7 @@ class Gsitemap extends Module
         foreach ($categories_id as $category_id) {
             $category = new Category((int) $category_id['id_category'], (int) $lang['id_lang']);
             $url = $link->getCategoryLink($category, urlencode($category->link_rewrite), (int) $lang['id_lang']);
-
+            $image_category = [];
             if ($category->id_image) {
                 $image_link = $this->context->link->getCatImageLink($category->link_rewrite, (int) $category->id_image, ImageType::getFormattedName('category'));
                 $image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace([
@@ -528,10 +522,7 @@ class Gsitemap extends Module
                     'http',
                     Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri . Context::getContext()->shop->virtual_uri,
                 ], $image_link) : $image_link;
-            }
-            $file_headers = (Configuration::get('GSITEMAP_CHECK_IMAGE_FILE') && isset($image_link)) ? @get_headers($image_link) : true;
-            $image_category = [];
-            if (isset($image_link) && ((isset($file_headers[0]) && $file_headers[0] != 'HTTP/1.1 404 Not Found') || $file_headers === true)) {
+
                 $image_category = [
                     'title_img' => htmlspecialchars(strip_tags($category->name)),
                     'caption' => Tools::substr(htmlspecialchars(strip_tags($category->description)), 0, 350),

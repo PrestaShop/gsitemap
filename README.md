@@ -9,12 +9,22 @@
 
 Generate your Google sitemap file and keep it up to date with this module.
 
+## Compatibility
+
+PrestaShop: `1.7.1.0` or later
+
 ## Multistore compatibility
 
 This module is compatible with the multistore :heavy_check_mark: <br/>
 It can be configured differently from one store to another.<br/>
 It can be configured quickly in the same way on all stores thanks to the all shops context or the group of shops.<br/>
 It can be activated on one store and deactivated on another
+
+## How to test
+
+Configure your sitemap and generate it
+Check that 1 sitemap is generated per language of shop
+xml file should be available to download
 
 ## Reporting issues
 
@@ -31,6 +41,6 @@ Just make sure to follow our [contribution guidelines][contribution-guidelines].
 This module is released under the [Academic Free License 3.0][AFL-3.0] 
 
 [report-issue]: https://github.com/PrestaShop/PrestaShop/issues/new/choose
-[prestashop]: https://www.prestashop.com/
-[contribution-guidelines]: https://devdocs.prestashop.com/1.7/contribute/contribution-guidelines/project-modules/
+[prestashop]: https://www.prestashop-project.org/
+[contribution-guidelines]: https://devdocs.prestashop-project.org/1.7/contribute/contribution-guidelines/project-modules/
 [AFL-3.0]: https://opensource.org/licenses/AFL-3.0

@@ -46,11 +46,21 @@ class Gsitemap extends Module
      */
     protected $type_array = [];
 
+    /**
+     * @var array
+     */
+    protected $disallow_controllers = [
+        'addresses', 'address', 'authentication', 'cart', 'discount', 'footer',
+        'get-file', 'header', 'history', 'identity', 'images.inc', 'init', 'my-account', 'order',
+        'order-slip', 'order-detail', 'order-follow', 'order-return', 'order-confirmation', 'pagination', 'password',
+        'pdf-invoice', 'pdf-order-return', 'pdf-order-slip', 'product-sort', 'registration', 'search', 'statistics', 'attachment', 'guest-tracking',
+    ];
+
     public function __construct()
     {
         $this->name = 'gsitemap';
         $this->tab = 'checkout';
-        $this->version = '4.3.0';
+        $this->version = '4.3.1';
         $this->author = 'PrestaShop';
         $this->need_instance = 0;
         $this->bootstrap = true;
@@ -98,7 +108,6 @@ class Gsitemap extends Module
             'GSITEMAP_PRIORITY_CATEGORY' => 0.8,
             'GSITEMAP_PRIORITY_CMS' => 0.7,
             'GSITEMAP_FREQUENCY' => 'weekly',
-            'GSITEMAP_CHECK_IMAGE_FILE' => false,
             'GSITEMAP_LAST_EXPORT' => false,
         ] as $key => $val) {
             if (!Configuration::updateValue($key, $val)) {
@@ -111,12 +120,17 @@ class Gsitemap extends Module
     }
 
     /**
-     * Registers hook(s)
+     * Check if the hook is present in the system or add it
      *
      * @return bool
      */
     protected function installHook()
     {
+        $hook = new Hook(Hook::getIdByName(self::HOOK_ADD_URLS));
+        if (Validate::isLoadedObject($hook)) {
+            return true;
+        }
+
         $hook = new Hook();
         $hook->name = self::HOOK_ADD_URLS;
         $hook->title = 'GSitemap Append URLs';
@@ -143,17 +157,11 @@ class Gsitemap extends Module
             'GSITEMAP_PRIORITY_CATEGORY' => '',
             'GSITEMAP_PRIORITY_CMS' => '',
             'GSITEMAP_FREQUENCY' => '',
-            'GSITEMAP_CHECK_IMAGE_FILE' => '',
             'GSITEMAP_LAST_EXPORT' => '',
         ] as $key => $val) {
             if (!Configuration::deleteByName($key)) {
                 return false;
             }
-        }
-
-        $hook = new Hook(Hook::getIdByName(self::HOOK_ADD_URLS));
-        if (Validate::isLoadedObject($hook)) {
-            $hook->delete();
         }
 
         return parent::uninstall() && $this->removeSitemap();
@@ -187,7 +195,6 @@ class Gsitemap extends Module
         if (Tools::isSubmit('SubmitGsitemap')) {
             Configuration::updateValue('GSITEMAP_FREQUENCY', pSQL(Tools::getValue('gsitemap_frequency')));
             Configuration::updateValue('GSITEMAP_INDEX_CHECK', '');
-            Configuration::updateValue('GSITEMAP_CHECK_IMAGE_FILE', pSQL(Tools::getValue('gsitemap_check_image_file')));
             $meta = '';
             if (Tools::getValue('gsitemap_meta')) {
                 $meta .= implode(', ', Tools::getValue('gsitemap_meta'));
@@ -207,12 +214,16 @@ class Gsitemap extends Module
         }
 
         /* Get Meta pages and remove index page it's managed elsewhere (@see $this->getHomeLink()) */
-        $store_metas = array_filter(Meta::getMetasByIdLang((int) $this->context->cookie->id_lang), function ($meta) {
-            return $meta['page'] != 'index';
-        });
+        /* We also remove all pages that are blocked in core robots.txt file */
+        $store_metas = array_filter(Meta::getMetasByIdLang(
+            (int) $this->context->cookie->id_lang),
+            function ($meta) {
+                return $meta['page'] != 'index' && !in_array($meta['page'], $this->disallow_controllers);
+            }
+        );
         $store_url = $this->context->link->getBaseLink();
         $this->context->smarty->assign([
-            'gsitemap_form' => './index.php?tab=AdminModules&configure=gsitemap&token=' . Tools::getAdminTokenLite('AdminModules') . '&tab_module=' . $this->tab . '&module_name=gsitemap',
+            'gsitemap_form' => './index.php?controller=AdminModules&configure=gsitemap&token=' . Tools::getAdminTokenLite('AdminModules') . '&tab_module=' . $this->tab . '&module_name=gsitemap',
             'gsitemap_cron' => $store_url . 'modules/gsitemap/gsitemap-cron.php?token=' . Tools::substr(Tools::hash('gsitemap/cron'), 0, 10) . '&id_shop=' . $this->context->shop->id,
             'gsitemap_feed_exists' => file_exists($this->normalizeDirectory(_PS_ROOT_DIR_) . 'index_sitemap.xml'),
             'gsitemap_last_export' => Configuration::get('GSITEMAP_LAST_EXPORT'),
@@ -226,7 +237,6 @@ class Gsitemap extends Module
                 'memory_limit' => (int) ini_get('memory_limit'),
             ],
             'prestashop_ssl' => Configuration::get('PS_SSL_ENABLED'),
-            'gsitemap_check_image_file' => Configuration::get('GSITEMAP_CHECK_IMAGE_FILE'),
             'shop' => $this->context->shop,
         ]);
 
@@ -360,6 +370,11 @@ class Gsitemap extends Module
         $link = new Link();
         $metas = Db::getInstance()->ExecuteS('SELECT * FROM `' . _DB_PREFIX_ . 'meta` WHERE `configurable` > 0 AND `id_meta` >= ' . (int) $id_meta . ' AND page <> \'index\' ORDER BY `id_meta` ASC');
         foreach ($metas as $meta) {
+            // Check if this meta is not in the list of blocked controllers in core robots.txt
+            if (in_array($meta['page'], $this->disallow_controllers)) {
+                continue;
+            }
+
             $url = '';
             if (!in_array($meta['id_meta'], explode(',', Configuration::get('GSITEMAP_DISABLE_LINKS')))) {
                 $url = $link->getPageLink($meta['page'], null, $lang['id_lang']);
@@ -434,9 +449,7 @@ class Gsitemap extends Module
                         'http',
                         Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri . Context::getContext()->shop->virtual_uri,
                     ], $image_link) : $image_link;
-                }
-                $file_headers = (Configuration::get('GSITEMAP_CHECK_IMAGE_FILE') && isset($image_link)) ? @get_headers($image_link) : true;
-                if (isset($image_link) && ((isset($file_headers[0]) && $file_headers[0] != 'HTTP/1.1 404 Not Found') || $file_headers === true)) {
+
                     $images_product[] = [
                         'title_img' => htmlspecialchars(strip_tags($product->name)),
                         'caption' => htmlspecialchars(strip_tags($product->meta_description)),
@@ -499,7 +512,7 @@ class Gsitemap extends Module
         foreach ($categories_id as $category_id) {
             $category = new Category((int) $category_id['id_category'], (int) $lang['id_lang']);
             $url = $link->getCategoryLink($category, urlencode($category->link_rewrite), (int) $lang['id_lang']);
-
+            $image_category = [];
             if ($category->id_image) {
                 $image_link = $this->context->link->getCatImageLink($category->link_rewrite, (int) $category->id_image, ImageType::getFormattedName('category'));
                 $image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace([
@@ -509,10 +522,7 @@ class Gsitemap extends Module
                     'http',
                     Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri . Context::getContext()->shop->virtual_uri,
                 ], $image_link) : $image_link;
-            }
-            $file_headers = (Configuration::get('GSITEMAP_CHECK_IMAGE_FILE') && isset($image_link)) ? @get_headers($image_link) : true;
-            $image_category = [];
-            if (isset($image_link) && ((isset($file_headers[0]) && $file_headers[0] != 'HTTP/1.1 404 Not Found') || $file_headers === true)) {
+
                 $image_category = [
                     'title_img' => htmlspecialchars(strip_tags($category->name)),
                     'caption' => Tools::substr(htmlspecialchars(strip_tags($category->description)), 0, 350),
@@ -674,7 +684,7 @@ class Gsitemap extends Module
         if ($this->cron) {
             exit();
         }
-        Tools::redirectAdmin('index.php?tab=AdminModules&configure=gsitemap&token=' . Tools::getAdminTokenLite('AdminModules') . '&tab_module=' . $this->tab . '&module_name=gsitemap&validation');
+        Tools::redirectAdmin('index.php?controller=AdminModules&configure=gsitemap&token=' . Tools::getAdminTokenLite('AdminModules') . '&tab_module=' . $this->tab . '&module_name=gsitemap&validation');
         exit();
     }
 

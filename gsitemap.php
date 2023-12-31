@@ -107,7 +107,7 @@ class Gsitemap extends Module
             'GSITEMAP_PRIORITY_HOME' => 1.0,
             'GSITEMAP_PRIORITY_PRODUCT' => 0.9,
             'GSITEMAP_PRIORITY_CATEGORY' => 0.8,
-			'GSITEMAP_PRIORITY_MANUFACTURER' => 0.7,
+            'GSITEMAP_PRIORITY_MANUFACTURER' => 0.7,
             'GSITEMAP_PRIORITY_CMS' => 0.7,
             'GSITEMAP_FREQUENCY' => 'weekly',
             'GSITEMAP_LAST_EXPORT' => false,
@@ -157,7 +157,7 @@ class Gsitemap extends Module
             'GSITEMAP_PRIORITY_HOME' => '',
             'GSITEMAP_PRIORITY_PRODUCT' => '',
             'GSITEMAP_PRIORITY_CATEGORY' => '',
-			'GSITEMAP_PRIORITY_MANUFACTURER' => '',
+            'GSITEMAP_PRIORITY_MANUFACTURER' => '',
             'GSITEMAP_PRIORITY_CMS' => '',
             'GSITEMAP_FREQUENCY' => '',
             'GSITEMAP_LAST_EXPORT' => '',
@@ -550,40 +550,40 @@ class Gsitemap extends Module
     }
 
     /**
-	 * return the link elements for the manufacturer object
-	 *
-	 * @param array  $link_sitemap    contain all the links for the Google Sitemap file to be generated
-	 * @param array  $lang            language of link to add
-	 * @param int    $index           index of the current Google Sitemap file
-	 * @param int    $i               count of elements added to sitemap main array
-	 * @param int    $id_manufacturer manufacturer object identifier
-	 *
-	 * @return bool
-	 */
-	protected function getManufacturerLink(&$link_sitemap, $lang, &$index, &$i, $id_manufacturer = 0)
-	{
-		$link = new Link();
-		if (method_exists('ShopUrl', 'resetMainDomainCache')) {
-			ShopUrl::resetMainDomainCache();
+     * return the link elements for the manufacturer object
+     *
+     * @param array  $link_sitemap    contain all the links for the Google Sitemap file to be generated
+     * @param array  $lang            language of link to add
+     * @param int    $index           index of the current Google Sitemap file
+     * @param int    $i               count of elements added to sitemap main array
+     * @param int    $id_manufacturer manufacturer object identifier
+     *
+     * @return bool
+     */
+    protected function getManufacturerLink(&$link_sitemap, $lang, &$index, &$i, $id_manufacturer = 0)
+    {
+        $link = new Link();
+        if (method_exists('ShopUrl', 'resetMainDomainCache')) {
+            ShopUrl::resetMainDomainCache();
         }
         
         // Get manufacturers IDs
-		$manufacturers_id = Db::getInstance()->ExecuteS('SELECT m.`id_manufacturer` FROM `' . _DB_PREFIX_ . 'manufacturer` m
-			INNER JOIN `' . _DB_PREFIX_ . 'manufacturer_lang` ml on m.`id_manufacturer` = ml.`id_manufacturer`' .
-			($this->tableColumnExists(_DB_PREFIX_ . 'manufacturer_shop') ? ' INNER JOIN `' . _DB_PREFIX_ . 'manufacturer_shop` ms ON m.`id_manufacturer` = ms.`id_manufacturer` ' : '').
-			' WHERE m.`active` = 1  AND m.`id_manufacturer` >= ' . (int)$id_manufacturer.
-			($this->tableColumnExists(_DB_PREFIX_ . 'manufacturer_shop') ? ' AND ms.`id_shop` = ' . (int)$this->context->shop->id : '').
-			' AND ml.`id_lang` = ' . (int)$lang['id_lang'].
-			' ORDER BY m.`id_manufacturer` ASC'
-		);
+        $manufacturers_id = Db::getInstance()->ExecuteS('SELECT m.`id_manufacturer` FROM `' . _DB_PREFIX_ . 'manufacturer` m
+            INNER JOIN `' . _DB_PREFIX_ . 'manufacturer_lang` ml on m.`id_manufacturer` = ml.`id_manufacturer`' .
+            ' INNER JOIN `' . _DB_PREFIX_ . 'manufacturer_shop` ms ON m.`id_manufacturer` = ms.`id_manufacturer`' .
+            ' WHERE m.`active` = 1  AND m.`id_manufacturer` >= ' . (int)$id_manufacturer .
+            ' AND ms.`id_shop` = ' . (int)$this->context->shop->id .
+            ' AND ml.`id_lang` = ' . (int)$lang['id_lang'] .
+            ' ORDER BY m.`id_manufacturer` ASC'
+        );
 
         // Process each manufacturer and add it to list of links that will be further "converted" to XML and added to the sitemap
-		foreach ($manufacturers_id as $manufacturer_id) {
-			$manufacturer = new Manufacturer((int) $manufacturer_id['id_manufacturer'], $lang['id_lang']);
-			$url = $link->getManufacturerLink($manufacturer, urlencode($manufacturer->link_rewrite), $lang['id_lang']);
+        foreach ($manufacturers_id as $manufacturer_id) {
+            $manufacturer = new Manufacturer((int) $manufacturer_id['id_manufacturer'], $lang['id_lang']);
+            $url = $link->getManufacturerLink($manufacturer, urlencode($manufacturer->link_rewrite), $lang['id_lang']);
 
-			$image_link = 'http'.(Configuration::get('PS_SSL_ENABLED') && Configuration::get('PS_SSL_ENABLED_EVERYWHERE') ? 's' : '').'://'.Tools::getMediaServer(_THEME_MANU_DIR_)._THEME_MANU_DIR_.((file_exists(_PS_MANU_IMG_DIR_.'/'.(int)$manufacturer->id.'-manu_default.jpg')) ? (int)$manufacturer->id.'-manu_default' : $lang['iso_code'].'-default-medium_default').'.jpg';
-			$image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace([
+            $image_link = 'http'.(Configuration::get('PS_SSL_ENABLED') && Configuration::get('PS_SSL_ENABLED_EVERYWHERE') ? 's' : '').'://'.Tools::getMediaServer(_THEME_MANU_DIR_)._THEME_MANU_DIR_.((file_exists(_PS_MANU_IMG_DIR_.'/'.(int)$manufacturer->id.'-medium_default.jpg')) ? (int)$manufacturer->id.'-medium_default' : $lang['iso_code'].'-default-medium_default').'.jpg';
+            $image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace([
                 'https',
                 Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri,
             ], [
@@ -591,30 +591,30 @@ class Gsitemap extends Module
                 Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri . Context::getContext()->shop->virtual_uri,
             ], $image_link) : $image_link;
 
-			$manifacturer_image = [];
-			if (isset($image_link)) {
-				$manifacturer_image = [
-					'title_img' => htmlspecialchars(strip_tags($manufacturer->name)),
-					'caption' => htmlspecialchars(strip_tags($manufacturer->short_description)),
-					'link' => $image_link,
-				];
+            $manifacturer_image = [];
+            if (isset($image_link)) {
+                $manifacturer_image = [
+                    'title_img' => htmlspecialchars(strip_tags($manufacturer->name)),
+                    'caption' => htmlspecialchars(strip_tags($manufacturer->short_description)),
+                    'link' => $image_link,
+                ];
             }
 
-			if (!$this->addLinkToSitemap($link_sitemap, [
+            if (!$this->addLinkToSitemap($link_sitemap, [
                 'type' => 'manufacturer',
                 'page' => 'manufacturer',
                 'lastmod' => $manufacturer->date_upd,
                 'link' => $url,
                 'image' => $manifacturer_image
             ], $lang['iso_code'], $index, $i, $manufacturer_id['id_manufacturer'])) {
-			    return false;
+                return false;
             }
 
             unset($image_link);
-		}
+        }
 
-		return true;
-	}
+        return true;
+    }
 
     /**
      * return the link elements for the CMS object
@@ -633,8 +633,8 @@ class Gsitemap extends Module
         if (method_exists('ShopUrl', 'resetMainDomainCache')) {
             ShopUrl::resetMainDomainCache();
         }
-        $cmss_id = Db::getInstance()->ExecuteS('SELECT c.`id_cms` FROM `' . _DB_PREFIX_ . 'cms` c INNER JOIN `' . _DB_PREFIX_ . 'cms_lang` cl ON c.`id_cms` = cl.`id_cms` ' . ($this->tableColumnExists(_DB_PREFIX_ . 'supplier_shop') ? 'INNER JOIN `' . _DB_PREFIX_ . 'cms_shop` cs ON c.`id_cms` = cs.`id_cms` ' : '') . 'INNER JOIN `' . _DB_PREFIX_ . 'cms_category` cc ON c.id_cms_category = cc.id_cms_category AND cc.active = 1
-            WHERE c.`active` =1 AND c.`indexation` =1 AND c.`id_cms` >= ' . (int) $id_cms . ($this->tableColumnExists(_DB_PREFIX_ . 'supplier_shop') ? ' AND cs.id_shop = ' . (int) $this->context->shop->id : '') . ' AND cl.`id_lang` = ' . (int) $lang['id_lang'] . ' GROUP BY  c.`id_cms` ORDER BY c.`id_cms` ASC');
+        $cmss_id = Db::getInstance()->ExecuteS('SELECT c.`id_cms` FROM `' . _DB_PREFIX_ . 'cms` c INNER JOIN `' . _DB_PREFIX_ . 'cms_lang` cl ON c.`id_cms` = cl.`id_cms` ' . 'INNER JOIN `' . _DB_PREFIX_ . 'cms_shop` cs ON c.`id_cms` = cs.`id_cms` ' . 'INNER JOIN `' . _DB_PREFIX_ . 'cms_category` cc ON c.id_cms_category = cc.id_cms_category AND cc.active = 1
+            WHERE c.`active` =1 AND c.`indexation` =1 AND c.`id_cms` >= ' . (int) $id_cms . ' AND cs.id_shop = ' . (int) $this->context->shop->id . ' AND cl.`id_lang` = ' . (int) $lang['id_lang'] . ' GROUP BY  c.`id_cms` ORDER BY c.`id_cms` ASC');
 
         if (is_array($cmss_id)) {
             foreach ($cmss_id as $cms_id) {

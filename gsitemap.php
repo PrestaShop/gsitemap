@@ -591,21 +591,18 @@ class Gsitemap extends Module
                 Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri . Context::getContext()->shop->virtual_uri,
             ], $image_link) : $image_link;
 
-            $manifacturer_image = [];
-            if (isset($image_link)) {
-                $manifacturer_image = [
-                    'title_img' => htmlspecialchars(strip_tags($manufacturer->name)),
-                    'caption' => htmlspecialchars(strip_tags($manufacturer->short_description)),
-                    'link' => $image_link,
-                ];
-            }
+            $manufacturer_image = [
+                'title_img' => htmlspecialchars(strip_tags($manufacturer->name)),
+                'caption' => htmlspecialchars(strip_tags($manufacturer->short_description)),
+                'link' => $image_link,
+            ];
 
             if (!$this->addLinkToSitemap($link_sitemap, [
                 'type' => 'manufacturer',
                 'page' => 'manufacturer',
                 'lastmod' => $manufacturer->date_upd,
                 'link' => $url,
-                'image' => $manifacturer_image
+                'image' => $manufacturer_image
             ], $lang['iso_code'], $index, $i, $manufacturer_id['id_manufacturer'])) {
                 return false;
             }

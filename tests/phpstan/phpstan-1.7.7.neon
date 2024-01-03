@@ -5,3 +5,4 @@ parameters:
   ignoreErrors:
     - '#Access to an undefined property Cookie\:\:\$id_lang.#'
     - '#Parameter \#3 \$type of method LinkCore\:\:getCatImageLink\(\) expects null, string given.#'
+    - '#Parameter \#2 \$type of method LinkCore\:\:getManufacturerImageLink\(\) expects null, string given.#'

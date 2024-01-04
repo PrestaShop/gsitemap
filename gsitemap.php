@@ -441,7 +441,7 @@ class Gsitemap extends Module
             $images_product = [];
             foreach ($product->getImages((int) $lang['id_lang']) as $id_image) {
                 if (isset($id_image['id_image'])) {
-                    $image_link = $this->context->link->getImageLink($product->link_rewrite, $product->id . '-' . (int) $id_image['id_image'], ImageType::getFormattedName('large'));
+                    $image_link = $this->context->link->getImageLink($product->link_rewrite, (string) $id_image['id_image'], ImageType::getFormattedName('large'));
                     $image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace([
                         'https',
                         Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri,

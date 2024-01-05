@@ -60,7 +60,7 @@ class Gsitemap extends Module
     {
         $this->name = 'gsitemap';
         $this->tab = 'checkout';
-        $this->version = '4.3.1';
+        $this->version = '4.4.0';
         $this->author = 'PrestaShop';
         $this->need_instance = 0;
         $this->bootstrap = true;
@@ -77,6 +77,7 @@ class Gsitemap extends Module
             'meta',
             'product',
             'category',
+            'manufacturer',
             'cms',
             'module',
         ];
@@ -106,6 +107,7 @@ class Gsitemap extends Module
             'GSITEMAP_PRIORITY_HOME' => 1.0,
             'GSITEMAP_PRIORITY_PRODUCT' => 0.9,
             'GSITEMAP_PRIORITY_CATEGORY' => 0.8,
+            'GSITEMAP_PRIORITY_MANUFACTURER' => 0.7,
             'GSITEMAP_PRIORITY_CMS' => 0.7,
             'GSITEMAP_FREQUENCY' => 'weekly',
             'GSITEMAP_LAST_EXPORT' => false,
@@ -155,6 +157,7 @@ class Gsitemap extends Module
             'GSITEMAP_PRIORITY_HOME' => '',
             'GSITEMAP_PRIORITY_PRODUCT' => '',
             'GSITEMAP_PRIORITY_CATEGORY' => '',
+            'GSITEMAP_PRIORITY_MANUFACTURER' => '',
             'GSITEMAP_PRIORITY_CMS' => '',
             'GSITEMAP_FREQUENCY' => '',
             'GSITEMAP_LAST_EXPORT' => '',
@@ -547,6 +550,70 @@ class Gsitemap extends Module
     }
 
     /**
+     * return the link elements for the manufacturer object
+     *
+     * @param array $link_sitemap contain all the links for the Google Sitemap file to be generated
+     * @param array $lang language of link to add
+     * @param int $index index of the current Google Sitemap file
+     * @param int $i count of elements added to sitemap main array
+     * @param int $id_manufacturer manufacturer object identifier
+     *
+     * @return bool
+     */
+    protected function getManufacturerLink(&$link_sitemap, $lang, &$index, &$i, $id_manufacturer = 0)
+    {
+        $link = new Link();
+        if (method_exists('ShopUrl', 'resetMainDomainCache')) {
+            ShopUrl::resetMainDomainCache();
+        }
+
+        // Get manufacturers IDs
+        $manufacturers_id = Db::getInstance()->ExecuteS('SELECT m.`id_manufacturer` FROM `' . _DB_PREFIX_ . 'manufacturer` m
+            INNER JOIN `' . _DB_PREFIX_ . 'manufacturer_lang` ml on m.`id_manufacturer` = ml.`id_manufacturer`' .
+            ' INNER JOIN `' . _DB_PREFIX_ . 'manufacturer_shop` ms ON m.`id_manufacturer` = ms.`id_manufacturer`' .
+            ' WHERE m.`active` = 1  AND m.`id_manufacturer` >= ' . (int) $id_manufacturer .
+            ' AND ms.`id_shop` = ' . (int) $this->context->shop->id .
+            ' AND ml.`id_lang` = ' . (int) $lang['id_lang'] .
+            ' ORDER BY m.`id_manufacturer` ASC'
+        );
+
+        // Process each manufacturer and add it to list of links that will be further "converted" to XML and added to the sitemap
+        foreach ($manufacturers_id as $manufacturer_id) {
+            $manufacturer = new Manufacturer((int) $manufacturer_id['id_manufacturer'], $lang['id_lang']);
+            $url = $link->getManufacturerLink($manufacturer, urlencode($manufacturer->link_rewrite), $lang['id_lang']);
+
+            $image_link = $this->context->link->getManufacturerImageLink((int) $manufacturer->id, ImageType::getFormattedName('medium'));
+            $image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace([
+                'https',
+                Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri,
+            ], [
+                'http',
+                Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri . Context::getContext()->shop->virtual_uri,
+            ], $image_link) : $image_link;
+
+            $manufacturer_image = [
+                'title_img' => htmlspecialchars(strip_tags($manufacturer->name)),
+                'caption' => htmlspecialchars(strip_tags($manufacturer->short_description)),
+                'link' => $image_link,
+            ];
+
+            if (!$this->addLinkToSitemap($link_sitemap, [
+                'type' => 'manufacturer',
+                'page' => 'manufacturer',
+                'lastmod' => $manufacturer->date_upd,
+                'link' => $url,
+                'image' => $manufacturer_image,
+            ], $lang['iso_code'], $index, $i, $manufacturer_id['id_manufacturer'])) {
+                return false;
+            }
+
+            unset($image_link);
+        }
+
+        return true;
+    }
+
+    /**
      * return the link elements for the CMS object
      *
      * @param array $link_sitemap contain all the links for the Google sitemap file to be generated
@@ -563,8 +630,8 @@ class Gsitemap extends Module
         if (method_exists('ShopUrl', 'resetMainDomainCache')) {
             ShopUrl::resetMainDomainCache();
         }
-        $cmss_id = Db::getInstance()->ExecuteS('SELECT c.`id_cms` FROM `' . _DB_PREFIX_ . 'cms` c INNER JOIN `' . _DB_PREFIX_ . 'cms_lang` cl ON c.`id_cms` = cl.`id_cms` ' . ($this->tableColumnExists(_DB_PREFIX_ . 'supplier_shop') ? 'INNER JOIN `' . _DB_PREFIX_ . 'cms_shop` cs ON c.`id_cms` = cs.`id_cms` ' : '') . 'INNER JOIN `' . _DB_PREFIX_ . 'cms_category` cc ON c.id_cms_category = cc.id_cms_category AND cc.active = 1
-            WHERE c.`active` =1 AND c.`indexation` =1 AND c.`id_cms` >= ' . (int) $id_cms . ($this->tableColumnExists(_DB_PREFIX_ . 'supplier_shop') ? ' AND cs.id_shop = ' . (int) $this->context->shop->id : '') . ' AND cl.`id_lang` = ' . (int) $lang['id_lang'] . ' GROUP BY  c.`id_cms` ORDER BY c.`id_cms` ASC');
+        $cmss_id = Db::getInstance()->ExecuteS('SELECT c.`id_cms` FROM `' . _DB_PREFIX_ . 'cms` c INNER JOIN `' . _DB_PREFIX_ . 'cms_lang` cl ON c.`id_cms` = cl.`id_cms` ' . 'INNER JOIN `' . _DB_PREFIX_ . 'cms_shop` cs ON c.`id_cms` = cs.`id_cms` ' . 'INNER JOIN `' . _DB_PREFIX_ . 'cms_category` cc ON c.id_cms_category = cc.id_cms_category AND cc.active = 1
+            WHERE c.`active` =1 AND c.`indexation` =1 AND c.`id_cms` >= ' . (int) $id_cms . ' AND cs.id_shop = ' . (int) $this->context->shop->id . ' AND cl.`id_lang` = ' . (int) $lang['id_lang'] . ' GROUP BY  c.`id_cms` ORDER BY c.`id_cms` ASC');
 
         if (is_array($cmss_id)) {
             foreach ($cmss_id as $cms_id) {

@@ -111,6 +111,7 @@ class Gsitemap extends Module
             'GSITEMAP_PRIORITY_CMS' => 0.7,
             'GSITEMAP_FREQUENCY' => 'weekly',
             'GSITEMAP_LAST_EXPORT' => false,
+            'GSITEMAP_DISABLE_LINKS' => '',
         ] as $key => $val) {
             if (!Configuration::updateValue($key, $val)) {
                 return false;
@@ -154,15 +155,16 @@ class Gsitemap extends Module
     public function uninstall()
     {
         foreach ([
-            'GSITEMAP_PRIORITY_HOME' => '',
-            'GSITEMAP_PRIORITY_PRODUCT' => '',
-            'GSITEMAP_PRIORITY_CATEGORY' => '',
-            'GSITEMAP_PRIORITY_MANUFACTURER' => '',
-            'GSITEMAP_PRIORITY_CMS' => '',
-            'GSITEMAP_FREQUENCY' => '',
-            'GSITEMAP_LAST_EXPORT' => '',
-        ] as $key => $val) {
-            if (!Configuration::deleteByName($key)) {
+            'GSITEMAP_PRIORITY_HOME',
+            'GSITEMAP_PRIORITY_PRODUCT',
+            'GSITEMAP_PRIORITY_CATEGORY',
+            'GSITEMAP_PRIORITY_MANUFACTURER',
+            'GSITEMAP_PRIORITY_CMS',
+            'GSITEMAP_FREQUENCY',
+            'GSITEMAP_LAST_EXPORT',
+            'GSITEMAP_DISABLE_LINKS',
+        ] as $configurationKey) {
+            if (!Configuration::deleteByName($configurationKey)) {
                 return false;
             }
         }
@@ -197,7 +199,6 @@ class Gsitemap extends Module
         /* Store the posted parameters and generate a new Google sitemap files for the current Shop */
         if (Tools::isSubmit('SubmitGsitemap')) {
             Configuration::updateValue('GSITEMAP_FREQUENCY', pSQL(Tools::getValue('gsitemap_frequency')));
-            Configuration::updateValue('GSITEMAP_INDEX_CHECK', '');
             $meta = '';
             if (Tools::getValue('gsitemap_meta')) {
                 $meta .= implode(', ', Tools::getValue('gsitemap_meta'));
@@ -227,7 +228,14 @@ class Gsitemap extends Module
         $store_url = $this->context->link->getBaseLink();
         $this->context->smarty->assign([
             'gsitemap_form' => './index.php?controller=AdminModules&configure=gsitemap&token=' . Tools::getAdminTokenLite('AdminModules') . '&tab_module=' . $this->tab . '&module_name=gsitemap',
-            'gsitemap_cron' => $store_url . 'modules/gsitemap/gsitemap-cron.php?token=' . Tools::substr(Tools::hash('gsitemap/cron'), 0, 10) . '&id_shop=' . $this->context->shop->id,
+            'gsitemap_cron' => $this->context->link->getModuleLink(
+                'gsitemap',
+                'cron',
+                [
+                    'token' => Tools::substr(Tools::hash('gsitemap/cron'), 0, 10),
+                    'id_shop' => $this->context->shop->id,
+                ]
+            ),
             'gsitemap_feed_exists' => file_exists($this->normalizeDirectory(_PS_ROOT_DIR_) . 'index_sitemap.xml'),
             'gsitemap_last_export' => Configuration::get('GSITEMAP_LAST_EXPORT'),
             'gsitemap_frequency' => Configuration::get('GSITEMAP_FREQUENCY'),
@@ -313,7 +321,19 @@ class Gsitemap extends Module
                 exit();
             } else {
                 if ($this->cron) {
-                    Tools::redirect($this->context->link->getBaseLink() . 'modules/gsitemap/gsitemap-cron.php?continue=1&token=' . Tools::substr(Tools::hash('gsitemap/cron'), 0, 10) . '&type=' . $new_link['type'] . '&lang=' . $lang . '&index=' . $index . '&id=' . (int) $id_obj . '&id_shop=' . $this->context->shop->id);
+                    Tools::redirect($this->context->link->getModuleLink(
+                        'gsitemap',
+                        'cron',
+                        [
+                            'continue' => '1',
+                            'token' => Tools::substr(Tools::hash('gsitemap/cron'), 0, 10),
+                            'type' => $new_link['type'],
+                            'lang' => $lang,
+                            'index' => $index,
+                            'id' => (int) $id_obj,
+                            'id_shop' => $this->context->shop->id,
+                        ]
+                    ));
                 } else {
                     Tools::redirectAdmin($this->context->link->getAdminLink('AdminModules', true, [], [
                         'tab_module' => $this->tab,
@@ -740,7 +760,6 @@ class Gsitemap extends Module
                 }
             }
             $this->recursiveSitemapCreator($link_sitemap, $lang['iso_code'], $index);
-            $page = '';
             $index = 0;
         }
 
@@ -788,7 +807,7 @@ class Gsitemap extends Module
         $write_fd = fopen($this->normalizeDirectory(_PS_ROOT_DIR_) . $sitemap_link, 'wb');
 
         fwrite($write_fd, '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">' . PHP_EOL);
-        foreach ($link_sitemap as $key => $file) {
+        foreach ($link_sitemap as $file) {
             fwrite($write_fd, '<url>' . PHP_EOL);
             $lastmod = (isset($file['lastmod']) && !empty($file['lastmod'])) ? date('c', strtotime($file['lastmod'])) : null;
             $this->addSitemapNode($write_fd, htmlspecialchars(strip_tags($file['link'])), $this->getPriorityPage($file['page']), Configuration::get('GSITEMAP_FREQUENCY'), $lastmod);
@@ -822,7 +841,8 @@ class Gsitemap extends Module
     }
 
     /**
-     * return the priority value set in the configuration parameters
+     * Returns the priority value set in the configuration parameters.
+     * Falls back to 0.1 for things that don't have priority.
      *
      * @param string $page
      *
@@ -876,32 +896,6 @@ class Gsitemap extends Module
             $sitemap->addChild('lastmod', date('c'));
         }
         file_put_contents($this->normalizeDirectory(_PS_ROOT_DIR_) . $this->context->shop->id . '_index_sitemap.xml', $xml_feed->asXML());
-
-        return true;
-    }
-
-    protected function tableColumnExists($table_name, $column = null)
-    {
-        if (array_key_exists($table_name, $this->sql_checks)) {
-            if (!empty($column) && array_key_exists($column, $this->sql_checks[$table_name])) {
-                return $this->sql_checks[$table_name][$column];
-            } else {
-                return $this->sql_checks[$table_name];
-            }
-        }
-
-        $table = Db::getInstance()->ExecuteS('SHOW TABLES LIKE \'' . $table_name . '\'');
-        if (empty($column)) {
-            if (count($table) < 1) {
-                return $this->sql_checks[$table_name] = false;
-            } else {
-                $this->sql_checks[$table_name] = true;
-            }
-        } else {
-            $table = Db::getInstance()->ExecuteS('SELECT * FROM `' . $table_name . '` LIMIT 1');
-
-            return $this->sql_checks[$table_name][$column] = array_key_exists($column, current($table));
-        }
 
         return true;
     }

@@ -60,7 +60,7 @@ class Gsitemap extends Module
     {
         $this->name = 'gsitemap';
         $this->tab = 'checkout';
-        $this->version = '4.3.1';
+        $this->version = '4.4.0';
         $this->author = 'PrestaShop';
         $this->need_instance = 0;
         $this->bootstrap = true;
@@ -77,6 +77,7 @@ class Gsitemap extends Module
             'meta',
             'product',
             'category',
+            'manufacturer',
             'cms',
             'module',
         ];
@@ -106,9 +107,11 @@ class Gsitemap extends Module
             'GSITEMAP_PRIORITY_HOME' => 1.0,
             'GSITEMAP_PRIORITY_PRODUCT' => 0.9,
             'GSITEMAP_PRIORITY_CATEGORY' => 0.8,
+            'GSITEMAP_PRIORITY_MANUFACTURER' => 0.7,
             'GSITEMAP_PRIORITY_CMS' => 0.7,
             'GSITEMAP_FREQUENCY' => 'weekly',
             'GSITEMAP_LAST_EXPORT' => false,
+            'GSITEMAP_DISABLE_LINKS' => '',
         ] as $key => $val) {
             if (!Configuration::updateValue($key, $val)) {
                 return false;
@@ -152,14 +155,16 @@ class Gsitemap extends Module
     public function uninstall()
     {
         foreach ([
-            'GSITEMAP_PRIORITY_HOME' => '',
-            'GSITEMAP_PRIORITY_PRODUCT' => '',
-            'GSITEMAP_PRIORITY_CATEGORY' => '',
-            'GSITEMAP_PRIORITY_CMS' => '',
-            'GSITEMAP_FREQUENCY' => '',
-            'GSITEMAP_LAST_EXPORT' => '',
-        ] as $key => $val) {
-            if (!Configuration::deleteByName($key)) {
+            'GSITEMAP_PRIORITY_HOME',
+            'GSITEMAP_PRIORITY_PRODUCT',
+            'GSITEMAP_PRIORITY_CATEGORY',
+            'GSITEMAP_PRIORITY_MANUFACTURER',
+            'GSITEMAP_PRIORITY_CMS',
+            'GSITEMAP_FREQUENCY',
+            'GSITEMAP_LAST_EXPORT',
+            'GSITEMAP_DISABLE_LINKS',
+        ] as $configurationKey) {
+            if (!Configuration::deleteByName($configurationKey)) {
                 return false;
             }
         }
@@ -194,7 +199,6 @@ class Gsitemap extends Module
         /* Store the posted parameters and generate a new Google sitemap files for the current Shop */
         if (Tools::isSubmit('SubmitGsitemap')) {
             Configuration::updateValue('GSITEMAP_FREQUENCY', pSQL(Tools::getValue('gsitemap_frequency')));
-            Configuration::updateValue('GSITEMAP_INDEX_CHECK', '');
             $meta = '';
             if (Tools::getValue('gsitemap_meta')) {
                 $meta .= implode(', ', Tools::getValue('gsitemap_meta'));
@@ -224,7 +228,14 @@ class Gsitemap extends Module
         $store_url = $this->context->link->getBaseLink();
         $this->context->smarty->assign([
             'gsitemap_form' => './index.php?controller=AdminModules&configure=gsitemap&token=' . Tools::getAdminTokenLite('AdminModules') . '&tab_module=' . $this->tab . '&module_name=gsitemap',
-            'gsitemap_cron' => $store_url . 'modules/gsitemap/gsitemap-cron.php?token=' . Tools::substr(Tools::hash('gsitemap/cron'), 0, 10) . '&id_shop=' . $this->context->shop->id,
+            'gsitemap_cron' => $this->context->link->getModuleLink(
+                'gsitemap',
+                'cron',
+                [
+                    'token' => Tools::substr(Tools::hash('gsitemap/cron'), 0, 10),
+                    'id_shop' => $this->context->shop->id,
+                ]
+            ),
             'gsitemap_feed_exists' => file_exists($this->normalizeDirectory(_PS_ROOT_DIR_) . 'index_sitemap.xml'),
             'gsitemap_last_export' => Configuration::get('GSITEMAP_LAST_EXPORT'),
             'gsitemap_frequency' => Configuration::get('GSITEMAP_FREQUENCY'),
@@ -310,7 +321,19 @@ class Gsitemap extends Module
                 exit();
             } else {
                 if ($this->cron) {
-                    Tools::redirect($this->context->link->getBaseLink() . 'modules/gsitemap/gsitemap-cron.php?continue=1&token=' . Tools::substr(Tools::hash('gsitemap/cron'), 0, 10) . '&type=' . $new_link['type'] . '&lang=' . $lang . '&index=' . $index . '&id=' . (int) $id_obj . '&id_shop=' . $this->context->shop->id);
+                    Tools::redirect($this->context->link->getModuleLink(
+                        'gsitemap',
+                        'cron',
+                        [
+                            'continue' => '1',
+                            'token' => Tools::substr(Tools::hash('gsitemap/cron'), 0, 10),
+                            'type' => $new_link['type'],
+                            'lang' => $lang,
+                            'index' => $index,
+                            'id' => (int) $id_obj,
+                            'id_shop' => $this->context->shop->id,
+                        ]
+                    ));
                 } else {
                     Tools::redirectAdmin($this->context->link->getAdminLink('AdminModules', true, [], [
                         'tab_module' => $this->tab,
@@ -441,7 +464,7 @@ class Gsitemap extends Module
             $images_product = [];
             foreach ($product->getImages((int) $lang['id_lang']) as $id_image) {
                 if (isset($id_image['id_image'])) {
-                    $image_link = $this->context->link->getImageLink($product->link_rewrite, $product->id . '-' . (int) $id_image['id_image'], ImageType::getFormattedName('large'));
+                    $image_link = $this->context->link->getImageLink($product->link_rewrite, (string) $id_image['id_image'], ImageType::getFormattedName('large'));
                     $image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace([
                         'https',
                         Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri,
@@ -547,6 +570,70 @@ class Gsitemap extends Module
     }
 
     /**
+     * return the link elements for the manufacturer object
+     *
+     * @param array $link_sitemap contain all the links for the Google Sitemap file to be generated
+     * @param array $lang language of link to add
+     * @param int $index index of the current Google Sitemap file
+     * @param int $i count of elements added to sitemap main array
+     * @param int $id_manufacturer manufacturer object identifier
+     *
+     * @return bool
+     */
+    protected function getManufacturerLink(&$link_sitemap, $lang, &$index, &$i, $id_manufacturer = 0)
+    {
+        $link = new Link();
+        if (method_exists('ShopUrl', 'resetMainDomainCache')) {
+            ShopUrl::resetMainDomainCache();
+        }
+
+        // Get manufacturers IDs
+        $manufacturers_id = Db::getInstance()->ExecuteS('SELECT m.`id_manufacturer` FROM `' . _DB_PREFIX_ . 'manufacturer` m
+            INNER JOIN `' . _DB_PREFIX_ . 'manufacturer_lang` ml on m.`id_manufacturer` = ml.`id_manufacturer`' .
+            ' INNER JOIN `' . _DB_PREFIX_ . 'manufacturer_shop` ms ON m.`id_manufacturer` = ms.`id_manufacturer`' .
+            ' WHERE m.`active` = 1  AND m.`id_manufacturer` >= ' . (int) $id_manufacturer .
+            ' AND ms.`id_shop` = ' . (int) $this->context->shop->id .
+            ' AND ml.`id_lang` = ' . (int) $lang['id_lang'] .
+            ' ORDER BY m.`id_manufacturer` ASC'
+        );
+
+        // Process each manufacturer and add it to list of links that will be further "converted" to XML and added to the sitemap
+        foreach ($manufacturers_id as $manufacturer_id) {
+            $manufacturer = new Manufacturer((int) $manufacturer_id['id_manufacturer'], $lang['id_lang']);
+            $url = $link->getManufacturerLink($manufacturer, urlencode($manufacturer->link_rewrite), $lang['id_lang']);
+
+            $image_link = $this->context->link->getManufacturerImageLink((int) $manufacturer->id, ImageType::getFormattedName('medium'));
+            $image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace([
+                'https',
+                Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri,
+            ], [
+                'http',
+                Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri . Context::getContext()->shop->virtual_uri,
+            ], $image_link) : $image_link;
+
+            $manufacturer_image = [
+                'title_img' => htmlspecialchars(strip_tags($manufacturer->name)),
+                'caption' => htmlspecialchars(strip_tags($manufacturer->short_description)),
+                'link' => $image_link,
+            ];
+
+            if (!$this->addLinkToSitemap($link_sitemap, [
+                'type' => 'manufacturer',
+                'page' => 'manufacturer',
+                'lastmod' => $manufacturer->date_upd,
+                'link' => $url,
+                'image' => $manufacturer_image,
+            ], $lang['iso_code'], $index, $i, $manufacturer_id['id_manufacturer'])) {
+                return false;
+            }
+
+            unset($image_link);
+        }
+
+        return true;
+    }
+
+    /**
      * return the link elements for the CMS object
      *
      * @param array $link_sitemap contain all the links for the Google sitemap file to be generated
@@ -563,8 +650,8 @@ class Gsitemap extends Module
         if (method_exists('ShopUrl', 'resetMainDomainCache')) {
             ShopUrl::resetMainDomainCache();
         }
-        $cmss_id = Db::getInstance()->ExecuteS('SELECT c.`id_cms` FROM `' . _DB_PREFIX_ . 'cms` c INNER JOIN `' . _DB_PREFIX_ . 'cms_lang` cl ON c.`id_cms` = cl.`id_cms` ' . ($this->tableColumnExists(_DB_PREFIX_ . 'supplier_shop') ? 'INNER JOIN `' . _DB_PREFIX_ . 'cms_shop` cs ON c.`id_cms` = cs.`id_cms` ' : '') . 'INNER JOIN `' . _DB_PREFIX_ . 'cms_category` cc ON c.id_cms_category = cc.id_cms_category AND cc.active = 1
-            WHERE c.`active` =1 AND c.`indexation` =1 AND c.`id_cms` >= ' . (int) $id_cms . ($this->tableColumnExists(_DB_PREFIX_ . 'supplier_shop') ? ' AND cs.id_shop = ' . (int) $this->context->shop->id : '') . ' AND cl.`id_lang` = ' . (int) $lang['id_lang'] . ' GROUP BY  c.`id_cms` ORDER BY c.`id_cms` ASC');
+        $cmss_id = Db::getInstance()->ExecuteS('SELECT c.`id_cms` FROM `' . _DB_PREFIX_ . 'cms` c INNER JOIN `' . _DB_PREFIX_ . 'cms_lang` cl ON c.`id_cms` = cl.`id_cms` ' . 'INNER JOIN `' . _DB_PREFIX_ . 'cms_shop` cs ON c.`id_cms` = cs.`id_cms` ' . 'INNER JOIN `' . _DB_PREFIX_ . 'cms_category` cc ON c.id_cms_category = cc.id_cms_category AND cc.active = 1
+            WHERE c.`active` =1 AND c.`indexation` =1 AND c.`id_cms` >= ' . (int) $id_cms . ' AND cs.id_shop = ' . (int) $this->context->shop->id . ' AND cl.`id_lang` = ' . (int) $lang['id_lang'] . ' GROUP BY  c.`id_cms` ORDER BY c.`id_cms` ASC');
 
         if (is_array($cmss_id)) {
             foreach ($cmss_id as $cms_id) {
@@ -673,7 +760,6 @@ class Gsitemap extends Module
                 }
             }
             $this->recursiveSitemapCreator($link_sitemap, $lang['iso_code'], $index);
-            $page = '';
             $index = 0;
         }
 
@@ -721,7 +807,7 @@ class Gsitemap extends Module
         $write_fd = fopen($this->normalizeDirectory(_PS_ROOT_DIR_) . $sitemap_link, 'wb');
 
         fwrite($write_fd, '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">' . PHP_EOL);
-        foreach ($link_sitemap as $key => $file) {
+        foreach ($link_sitemap as $file) {
             fwrite($write_fd, '<url>' . PHP_EOL);
             $lastmod = (isset($file['lastmod']) && !empty($file['lastmod'])) ? date('c', strtotime($file['lastmod'])) : null;
             $this->addSitemapNode($write_fd, htmlspecialchars(strip_tags($file['link'])), $this->getPriorityPage($file['page']), Configuration::get('GSITEMAP_FREQUENCY'), $lastmod);
@@ -755,7 +841,8 @@ class Gsitemap extends Module
     }
 
     /**
-     * return the priority value set in the configuration parameters
+     * Returns the priority value set in the configuration parameters.
+     * Falls back to 0.1 for things that don't have priority.
      *
      * @param string $page
      *
@@ -809,32 +896,6 @@ class Gsitemap extends Module
             $sitemap->addChild('lastmod', date('c'));
         }
         file_put_contents($this->normalizeDirectory(_PS_ROOT_DIR_) . $this->context->shop->id . '_index_sitemap.xml', $xml_feed->asXML());
-
-        return true;
-    }
-
-    protected function tableColumnExists($table_name, $column = null)
-    {
-        if (array_key_exists($table_name, $this->sql_checks)) {
-            if (!empty($column) && array_key_exists($column, $this->sql_checks[$table_name])) {
-                return $this->sql_checks[$table_name][$column];
-            } else {
-                return $this->sql_checks[$table_name];
-            }
-        }
-
-        $table = Db::getInstance()->ExecuteS('SHOW TABLES LIKE \'' . $table_name . '\'');
-        if (empty($column)) {
-            if (count($table) < 1) {
-                return $this->sql_checks[$table_name] = false;
-            } else {
-                $this->sql_checks[$table_name] = true;
-            }
-        } else {
-            $table = Db::getInstance()->ExecuteS('SELECT * FROM `' . $table_name . '` LIMIT 1');
-
-            return $this->sql_checks[$table_name][$column] = array_key_exists($column, current($table));
-        }
 
         return true;
     }

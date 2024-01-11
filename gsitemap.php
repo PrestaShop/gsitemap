@@ -60,7 +60,7 @@ class Gsitemap extends Module
     {
         $this->name = 'gsitemap';
         $this->tab = 'checkout';
-        $this->version = '4.4.0';
+        $this->version = '4.4.1';
         $this->author = 'PrestaShop';
         $this->need_instance = 0;
         $this->bootstrap = true;

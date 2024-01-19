@@ -474,8 +474,6 @@ class Gsitemap extends Module
                     ], $image_link) : $image_link;
 
                     $images_product[] = [
-                        'title_img' => htmlspecialchars(strip_tags($product->name)),
-                        'caption' => htmlspecialchars(strip_tags($product->meta_description)),
                         'link' => $image_link,
                     ];
                 }
@@ -547,8 +545,6 @@ class Gsitemap extends Module
                 ], $image_link) : $image_link;
 
                 $image_category = [
-                    'title_img' => htmlspecialchars(strip_tags($category->name)),
-                    'caption' => Tools::substr(htmlspecialchars(strip_tags($category->description)), 0, 350),
                     'link' => $image_link,
                 ];
             }
@@ -612,8 +608,6 @@ class Gsitemap extends Module
             ], $image_link) : $image_link;
 
             $manufacturer_image = [
-                'title_img' => htmlspecialchars(strip_tags($manufacturer->name)),
-                'caption' => htmlspecialchars(strip_tags($manufacturer->short_description)),
                 'link' => $image_link,
             ];
 
@@ -820,15 +814,7 @@ class Gsitemap extends Module
                 $images = array_merge($images, $file['images']);
             }
             foreach ($images as $image) {
-                $this->addSitemapNodeImage($write_fd, htmlspecialchars(strip_tags($image['link'])), isset($image['title_img']) ? htmlspecialchars(str_replace([
-                    "\r\n",
-                    "\r",
-                    "\n",
-                ], '', $this->removeControlCharacters(strip_tags($image['title_img'])))) : '', isset($image['caption']) ? htmlspecialchars(str_replace([
-                    "\r\n",
-                    "\r",
-                    "\n",
-                ], '', strip_tags($image['caption']))) : '');
+                $this->addSitemapNodeImage($write_fd, htmlspecialchars(strip_tags($image['link'])));
             }
             fwrite($write_fd, '</url>' . PHP_EOL);
         }
@@ -870,9 +856,9 @@ class Gsitemap extends Module
         );
     }
 
-    protected function addSitemapNodeImage($fd, $link, $title, $caption)
+    protected function addSitemapNodeImage($fd, $link)
     {
-        fwrite($fd, '<image:image>' . PHP_EOL . '<image:loc>' . (Configuration::get('PS_REWRITING_SETTINGS') ? '<![CDATA[' . $link . ']]>' : $link) . '</image:loc>' . PHP_EOL . '<image:caption><![CDATA[' . $caption . ']]></image:caption>' . PHP_EOL . '<image:title><![CDATA[' . $title . ']]></image:title>' . PHP_EOL . '</image:image>' . PHP_EOL);
+        fwrite($fd, '<image:image>' . PHP_EOL . '<image:loc>' . (Configuration::get('PS_REWRITING_SETTINGS') ? '<![CDATA[' . $link . ']]>' : $link) . '</image:loc>' . PHP_EOL . '</image:image>' . PHP_EOL);
     }
 
     /**

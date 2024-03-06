@@ -60,7 +60,7 @@ class Gsitemap extends Module
     {
         $this->name = 'gsitemap';
         $this->tab = 'checkout';
-        $this->version = '4.4.0';
+        $this->version = '4.4.1';
         $this->author = 'PrestaShop';
         $this->need_instance = 0;
         $this->bootstrap = true;
@@ -78,6 +78,7 @@ class Gsitemap extends Module
             'product',
             'category',
             'manufacturer',
+            'supplier',
             'cms',
             'module',
         ];
@@ -108,6 +109,7 @@ class Gsitemap extends Module
             'GSITEMAP_PRIORITY_PRODUCT' => 0.9,
             'GSITEMAP_PRIORITY_CATEGORY' => 0.8,
             'GSITEMAP_PRIORITY_MANUFACTURER' => 0.7,
+            'GSITEMAP_PRIORITY_SUPPLIER' => 0.7,
             'GSITEMAP_PRIORITY_CMS' => 0.7,
             'GSITEMAP_FREQUENCY' => 'weekly',
             'GSITEMAP_LAST_EXPORT' => false,
@@ -207,7 +209,7 @@ class Gsitemap extends Module
             $this->emptySitemap();
             $this->createSitemap();
 
-        /* If no posted form and the variable [continue] is found in the HTTP request variable keep creating sitemap */
+            /* If no posted form and the variable [continue] is found in the HTTP request variable keep creating sitemap */
         } elseif (Tools::getValue('continue')) {
             $this->createSitemap();
         }
@@ -219,8 +221,10 @@ class Gsitemap extends Module
 
         /* Get Meta pages and remove index page it's managed elsewhere (@see $this->getHomeLink()) */
         /* We also remove all pages that are blocked in core robots.txt file */
-        $store_metas = array_filter(Meta::getMetasByIdLang(
-            (int) $this->context->cookie->id_lang),
+        $store_metas = array_filter(
+            Meta::getMetasByIdLang(
+                (int) $this->context->cookie->id_lang
+            ),
             function ($meta) {
                 return $meta['page'] != 'index' && !in_array($meta['page'], $this->disallow_controllers);
             }
@@ -474,8 +478,6 @@ class Gsitemap extends Module
                     ], $image_link) : $image_link;
 
                     $images_product[] = [
-                        'title_img' => htmlspecialchars(strip_tags($product->name)),
-                        'caption' => htmlspecialchars(strip_tags($product->meta_description)),
                         'link' => $image_link,
                     ];
                 }
@@ -547,8 +549,6 @@ class Gsitemap extends Module
                 ], $image_link) : $image_link;
 
                 $image_category = [
-                    'title_img' => htmlspecialchars(strip_tags($category->name)),
-                    'caption' => Tools::substr(htmlspecialchars(strip_tags($category->description)), 0, 350),
                     'link' => $image_link,
                 ];
             }
@@ -588,7 +588,8 @@ class Gsitemap extends Module
         }
 
         // Get manufacturers IDs
-        $manufacturers_id = Db::getInstance()->ExecuteS('SELECT m.`id_manufacturer` FROM `' . _DB_PREFIX_ . 'manufacturer` m
+        $manufacturers_id = Db::getInstance()->ExecuteS(
+            'SELECT m.`id_manufacturer` FROM `' . _DB_PREFIX_ . 'manufacturer` m
             INNER JOIN `' . _DB_PREFIX_ . 'manufacturer_lang` ml on m.`id_manufacturer` = ml.`id_manufacturer`' .
             ' INNER JOIN `' . _DB_PREFIX_ . 'manufacturer_shop` ms ON m.`id_manufacturer` = ms.`id_manufacturer`' .
             ' WHERE m.`active` = 1  AND m.`id_manufacturer` >= ' . (int) $id_manufacturer .
@@ -612,8 +613,6 @@ class Gsitemap extends Module
             ], $image_link) : $image_link;
 
             $manufacturer_image = [
-                'title_img' => htmlspecialchars(strip_tags($manufacturer->name)),
-                'caption' => htmlspecialchars(strip_tags($manufacturer->short_description)),
                 'link' => $image_link,
             ];
 
@@ -624,6 +623,58 @@ class Gsitemap extends Module
                 'link' => $url,
                 'image' => $manufacturer_image,
             ], $lang['iso_code'], $index, $i, $manufacturer_id['id_manufacturer'])) {
+                return false;
+            }
+
+            unset($image_link);
+        }
+
+        return true;
+    }
+
+    protected function getSupplierLink(&$link_sitemap, $lang, &$index, &$i, $id_supplier = 0)
+    {
+        $link = new Link();
+        if (method_exists('ShopUrl', 'resetMainDomainCache')) {
+            ShopUrl::resetMainDomainCache();
+        }
+
+        // Get suppliers IDs
+        $suppliers_id = Db::getInstance()->ExecuteS(
+            'SELECT m.`id_supplier` FROM `' . _DB_PREFIX_ . 'supplier` m
+            INNER JOIN `' . _DB_PREFIX_ . 'supplier_lang` ml on m.`id_supplier` = ml.`id_supplier`' .
+            ' INNER JOIN `' . _DB_PREFIX_ . 'supplier_shop` ms ON m.`id_supplier` = ms.`id_supplier`' .
+            ' WHERE m.`active` = 1  AND m.`id_supplier` >= ' . (int) $id_supplier .
+            ' AND ms.`id_shop` = ' . (int) $this->context->shop->id .
+            ' AND ml.`id_lang` = ' . (int) $lang['id_lang'] .
+            ' ORDER BY m.`id_supplier` ASC'
+        );
+
+        // Process each supplier and add it to list of links that will be further "converted" to XML and added to the sitemap
+        foreach ($suppliers_id as $supplier_id) {
+            $supplier = new Supplier((int) $supplier_id['id_supplier'], $lang['id_lang']);
+            $url = $link->getSupplierLink($supplier, urlencode($supplier->link_rewrite), $lang['id_lang']);
+
+            $image_link = $this->context->link->getSupplierImageLink((int) $supplier->id, ImageType::getFormattedName('medium'));
+            $image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace([
+                'https',
+                Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri,
+            ], [
+                'http',
+                Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri . Context::getContext()->shop->virtual_uri,
+            ], $image_link) : $image_link;
+
+            $supplier_image = [
+                'link' => $image_link,
+            ];
+
+            if (!$this->addLinkToSitemap($link_sitemap, [
+                'type' => 'supplier',
+                'page' => 'supplier',
+                'lastmod' => $supplier->date_upd,
+                'link' => $url,
+                'image' => $supplier_image,
+            ], $lang['iso_code'], $index, $i, $supplier_id['id_supplier'])) {
                 return false;
             }
 
@@ -820,15 +871,7 @@ class Gsitemap extends Module
                 $images = array_merge($images, $file['images']);
             }
             foreach ($images as $image) {
-                $this->addSitemapNodeImage($write_fd, htmlspecialchars(strip_tags($image['link'])), isset($image['title_img']) ? htmlspecialchars(str_replace([
-                    "\r\n",
-                    "\r",
-                    "\n",
-                ], '', $this->removeControlCharacters(strip_tags($image['title_img'])))) : '', isset($image['caption']) ? htmlspecialchars(str_replace([
-                    "\r\n",
-                    "\r",
-                    "\n",
-                ], '', strip_tags($image['caption']))) : '');
+                $this->addSitemapNodeImage($write_fd, htmlspecialchars(strip_tags($image['link'])));
             }
             fwrite($write_fd, '</url>' . PHP_EOL);
         }
@@ -870,9 +913,9 @@ class Gsitemap extends Module
         );
     }
 
-    protected function addSitemapNodeImage($fd, $link, $title, $caption)
+    protected function addSitemapNodeImage($fd, $link)
     {
-        fwrite($fd, '<image:image>' . PHP_EOL . '<image:loc>' . (Configuration::get('PS_REWRITING_SETTINGS') ? '<![CDATA[' . $link . ']]>' : $link) . '</image:loc>' . PHP_EOL . '<image:caption><![CDATA[' . $caption . ']]></image:caption>' . PHP_EOL . '<image:title><![CDATA[' . $title . ']]></image:title>' . PHP_EOL . '</image:image>' . PHP_EOL);
+        fwrite($fd, '<image:image>' . PHP_EOL . '<image:loc>' . (Configuration::get('PS_REWRITING_SETTINGS') ? '<![CDATA[' . $link . ']]>' : $link) . '</image:loc>' . PHP_EOL . '</image:image>' . PHP_EOL);
     }
 
     /**

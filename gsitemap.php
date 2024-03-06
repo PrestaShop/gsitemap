@@ -209,7 +209,7 @@ class Gsitemap extends Module
             $this->emptySitemap();
             $this->createSitemap();
 
-            /* If no posted form and the variable [continue] is found in the HTTP request variable keep creating sitemap */
+        /* If no posted form and the variable [continue] is found in the HTTP request variable keep creating sitemap */
         } elseif (Tools::getValue('continue')) {
             $this->createSitemap();
         }
@@ -221,10 +221,8 @@ class Gsitemap extends Module
 
         /* Get Meta pages and remove index page it's managed elsewhere (@see $this->getHomeLink()) */
         /* We also remove all pages that are blocked in core robots.txt file */
-        $store_metas = array_filter(
-            Meta::getMetasByIdLang(
-                (int) $this->context->cookie->id_lang
-            ),
+        $store_metas = array_filter(Meta::getMetasByIdLang(
+            (int) $this->context->cookie->id_lang),
             function ($meta) {
                 return $meta['page'] != 'index' && !in_array($meta['page'], $this->disallow_controllers);
             }
@@ -592,8 +590,7 @@ class Gsitemap extends Module
         }
 
         // Get manufacturers IDs
-        $manufacturers_id = Db::getInstance()->ExecuteS(
-            'SELECT m.`id_manufacturer` FROM `' . _DB_PREFIX_ . 'manufacturer` m
+        $manufacturers_id = Db::getInstance()->ExecuteS('SELECT m.`id_manufacturer` FROM `' . _DB_PREFIX_ . 'manufacturer` m
             INNER JOIN `' . _DB_PREFIX_ . 'manufacturer_lang` ml on m.`id_manufacturer` = ml.`id_manufacturer`' .
             ' INNER JOIN `' . _DB_PREFIX_ . 'manufacturer_shop` ms ON m.`id_manufacturer` = ms.`id_manufacturer`' .
             ' WHERE m.`active` = 1  AND m.`id_manufacturer` >= ' . (int) $id_manufacturer .
@@ -637,7 +634,18 @@ class Gsitemap extends Module
 
         return true;
     }
-
+    
+    /**
+     * return the link elements for the supplier object
+     *
+     * @param array $link_sitemap contain all the links for the Google Sitemap file to be generated
+     * @param array $lang language of link to add
+     * @param int $index index of the current Google Sitemap file
+     * @param int $i count of elements added to sitemap main array
+     * @param int $id_supplier supplier object identifier
+     *
+     * @return bool
+     */
     protected function getSupplierLink(&$link_sitemap, $lang, &$index, &$i, $id_supplier = 0)
     {
         $link = new Link();

@@ -4,4 +4,3 @@ includes:
 parameters:
   ignoreErrors:
     - '#Access to an undefined property Cookie\:\:\$id_lang.#'
-    - '#Parameter \#1 \$str of function strip_tags expects string, array<string> given.#'

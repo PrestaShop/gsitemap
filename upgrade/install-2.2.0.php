@@ -26,7 +26,7 @@
 if (!defined('_PS_VERSION_')) {
     exit;
 }
-function upgrade_module_2_2($object, $install = false)
+function upgrade_module_2_2_0($object, $install = false)
 {
     if ($object->active || $install) {
         Configuration::updateValue('GSITEMAP_PRIORITY_HOME', 1.0);

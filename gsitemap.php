@@ -78,6 +78,7 @@ class Gsitemap extends Module
             'product',
             'category',
             'manufacturer',
+            'supplier',
             'cms',
             'module',
         ];
@@ -108,6 +109,7 @@ class Gsitemap extends Module
             'GSITEMAP_PRIORITY_PRODUCT' => 0.9,
             'GSITEMAP_PRIORITY_CATEGORY' => 0.8,
             'GSITEMAP_PRIORITY_MANUFACTURER' => 0.7,
+            'GSITEMAP_PRIORITY_SUPPLIER' => 0.7,
             'GSITEMAP_PRIORITY_CMS' => 0.7,
             'GSITEMAP_FREQUENCY' => 'weekly',
             'GSITEMAP_LAST_EXPORT' => false,
@@ -622,6 +624,69 @@ class Gsitemap extends Module
                 'link' => $url,
                 'image' => $manufacturer_image,
             ], $lang['iso_code'], $index, $i, $manufacturer_id['id_manufacturer'])) {
+                return false;
+            }
+
+            unset($image_link);
+        }
+
+        return true;
+    }
+
+    /**
+     * return the link elements for the supplier object
+     *
+     * @param array $link_sitemap contain all the links for the Google Sitemap file to be generated
+     * @param array $lang language of link to add
+     * @param int $index index of the current Google Sitemap file
+     * @param int $i count of elements added to sitemap main array
+     * @param int $id_supplier supplier object identifier
+     *
+     * @return bool
+     */
+    protected function getSupplierLink(&$link_sitemap, $lang, &$index, &$i, $id_supplier = 0)
+    {
+        $link = new Link();
+        if (method_exists('ShopUrl', 'resetMainDomainCache')) {
+            ShopUrl::resetMainDomainCache();
+        }
+
+        // Get suppliers IDs
+        $suppliers_id = Db::getInstance()->ExecuteS(
+            'SELECT m.`id_supplier` FROM `' . _DB_PREFIX_ . 'supplier` m
+            INNER JOIN `' . _DB_PREFIX_ . 'supplier_lang` ml on m.`id_supplier` = ml.`id_supplier`' .
+            ' INNER JOIN `' . _DB_PREFIX_ . 'supplier_shop` ms ON m.`id_supplier` = ms.`id_supplier`' .
+            ' WHERE m.`active` = 1  AND m.`id_supplier` >= ' . (int) $id_supplier .
+            ' AND ms.`id_shop` = ' . (int) $this->context->shop->id .
+            ' AND ml.`id_lang` = ' . (int) $lang['id_lang'] .
+            ' ORDER BY m.`id_supplier` ASC'
+        );
+
+        // Process each supplier and add it to list of links that will be further "converted" to XML and added to the sitemap
+        foreach ($suppliers_id as $supplier_id) {
+            $supplier = new Supplier((int) $supplier_id['id_supplier'], $lang['id_lang']);
+            $url = $link->getSupplierLink($supplier, urlencode($supplier->link_rewrite), $lang['id_lang']);
+
+            $image_link = $this->context->link->getSupplierImageLink((int) $supplier->id, ImageType::getFormattedName('medium'));
+            $image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace([
+                'https',
+                Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri,
+            ], [
+                'http',
+                Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri . Context::getContext()->shop->virtual_uri,
+            ], $image_link) : $image_link;
+
+            $supplier_image = [
+                'link' => $image_link,
+            ];
+
+            if (!$this->addLinkToSitemap($link_sitemap, [
+                'type' => 'supplier',
+                'page' => 'supplier',
+                'lastmod' => $supplier->date_upd,
+                'link' => $url,
+                'image' => $supplier_image,
+            ], $lang['iso_code'], $index, $i, $supplier_id['id_supplier'])) {
                 return false;
             }
 

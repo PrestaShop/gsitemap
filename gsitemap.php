@@ -226,8 +226,12 @@ class Gsitemap extends Module
             }
         );
         $store_url = $this->context->link->getBaseLink();
+        $gsitemap_form = '';
+        if (version_compare(_PS_VERSION_, '9.0.0', '<')) {
+            $gsitemap_form = './index.php?controller=AdminModules&configure=gsitemap&token=' . Tools::getAdminTokenLite('AdminModules') . '&tab_module=' . $this->tab . '&module_name=gsitemap';
+        }
         $this->context->smarty->assign([
-            'gsitemap_form' => './index.php?controller=AdminModules&configure=gsitemap&token=' . Tools::getAdminTokenLite('AdminModules') . '&tab_module=' . $this->tab . '&module_name=gsitemap',
+            'gsitemap_form' => $gsitemap_form,
             'gsitemap_cron' => $this->context->link->getModuleLink(
                 'gsitemap',
                 'cron',

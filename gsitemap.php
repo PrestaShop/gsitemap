@@ -759,7 +759,6 @@ class Gsitemap extends Module
 
         $this->createIndexSitemap();
         Configuration::updateValue('GSITEMAP_LAST_EXPORT', date('r'));
-        Tools::file_get_contents('https://www.google.com/webmasters/sitemaps/ping?sitemap=' . urlencode($this->context->link->getBaseLink() . $this->context->shop->physical_uri . $this->context->shop->virtual_uri . $this->context->shop->id));
 
         if ($this->cron) {
             exit();

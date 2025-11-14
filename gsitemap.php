@@ -227,7 +227,11 @@ class Gsitemap extends Module
         );
         $store_url = $this->context->link->getBaseLink();
         $this->context->smarty->assign([
-            'gsitemap_form' => './index.php?controller=AdminModules&configure=gsitemap&token=' . Tools::getAdminTokenLite('AdminModules') . '&tab_module=' . $this->tab . '&module_name=gsitemap',
+            'gsitemap_form' => $this->context->link->getAdminLink('AdminModules', true, [], [
+                'configure' => $this->name,
+                'tab_module' => $this->tab,
+                'module_name' => $this->name,
+            ]),
             'gsitemap_cron' => $this->context->link->getModuleLink(
                 'gsitemap',
                 'cron',
@@ -763,7 +767,12 @@ class Gsitemap extends Module
         if ($this->cron) {
             exit();
         }
-        Tools::redirectAdmin('index.php?controller=AdminModules&configure=gsitemap&token=' . Tools::getAdminTokenLite('AdminModules') . '&tab_module=' . $this->tab . '&module_name=gsitemap&validation');
+        Tools::redirectAdmin($this->context->link->getAdminLink('AdminModules', true, [], [
+            'configure' => $this->name,
+            'tab_module' => $this->tab,
+            'module_name' => $this->name,
+            'validation' => 1,
+        ]));
         exit();
     }
 

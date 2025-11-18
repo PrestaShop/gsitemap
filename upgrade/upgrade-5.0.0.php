@@ -30,10 +30,7 @@ if (!defined('_PS_VERSION_')) {
 function upgrade_module_5_0_0($object)
 {
     // Remove old cron file
-    $cronFilePath = _PS_MODULE_DIR_ . $object->name . '/gsitemap-cron.php';
-    if (file_exists($cronFilePath)) {
-        unlink($cronFilePath);
-    }
+    Tools::deleteFile(_PS_MODULE_DIR_ . $object->name . '/gsitemap-cron.php');
 
     return true;
 }

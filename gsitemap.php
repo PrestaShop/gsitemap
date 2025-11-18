@@ -584,6 +584,11 @@ class Gsitemap extends Module
      */
     protected function getManufacturerLink(&$link_sitemap, $lang, &$index, &$i, $id_manufacturer = 0)
     {
+        // If the manufacturer listing is disabled in the back office, we won't generate this element.
+        if (!Configuration::get('PS_DISPLAY_MANUFACTURERS')) {
+            return true;
+        }
+
         $link = new Link();
         if (method_exists('ShopUrl', 'resetMainDomainCache')) {
             ShopUrl::resetMainDomainCache();
@@ -646,6 +651,11 @@ class Gsitemap extends Module
      */
     protected function getSupplierLink(&$link_sitemap, $lang, &$index, &$i, $id_supplier = 0)
     {
+        // If supplier listing is disabled in the back office, we won't generate this element.
+        if (!Configuration::get('PS_DISPLAY_SUPPLIERS')) {
+            return true;
+        }
+
         $link = new Link();
         if (method_exists('ShopUrl', 'resetMainDomainCache')) {
             ShopUrl::resetMainDomainCache();

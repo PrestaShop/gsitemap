@@ -7,7 +7,7 @@
 
 ## About
 
-Generate your Google sitemap file and keep it up to date with this module.
+Generates an XML sitemap for your shop and keeps it up to date. Compatible with all major search engines.
 
 ## Compatibility
 

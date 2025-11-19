@@ -66,7 +66,7 @@ class Gsitemap extends Module
         $this->bootstrap = true;
         parent::__construct();
         $this->displayName = $this->trans('Google sitemap', [], 'Modules.Gsitemap.Admin');
-        $this->description = $this->trans('Generate your Google sitemap file and keep it up to date with this module.', [], 'Modules.Gsitemap.Admin');
+        $this->description = $this->trans('Generates an XML sitemap for your shop and keeps it up to date. Compatible with all major search engines.', [], 'Modules.Gsitemap.Admin');
         $this->ps_versions_compliancy = [
             'min' => '1.7.1.0',
             'max' => _PS_VERSION_,
@@ -94,10 +94,10 @@ class Gsitemap extends Module
     }
 
     /**
-     * Google sitemap installation process:
+     * Installation process:
      *
      * Step 1 - Pre-set Configuration option values
-     * Step 2 - Install the Addon and create a database table to store sitemap files name by shop
+     * Step 2 - Install the module and create a database table to store sitemap files name by shop
      *
      * @return bool Installation result
      */
@@ -144,11 +144,11 @@ class Gsitemap extends Module
     }
 
     /**
-     * Google sitemap uninstallation process:
+     * Uninstallation process:
      *
      * Step 1 - Remove Configuration option values from database
      * Step 2 - Remove the database containing the generated sitemap files names
-     * Step 3 - Uninstallation of the Addon itself
+     * Step 3 - Uninstallation of the module itself
      *
      * @return bool Uninstallation result
      */
@@ -173,7 +173,7 @@ class Gsitemap extends Module
     }
 
     /**
-     * Delete all the generated sitemap files  and drop the addon table.
+     * Delete all the generated sitemap files  and drop the module table.
      *
      * @return bool
      */
@@ -196,7 +196,7 @@ class Gsitemap extends Module
 
     public function getContent()
     {
-        /* Store the posted parameters and generate a new Google sitemap files for the current Shop */
+        /* Store the posted parameters and generate a new XML sitemap files for the current Shop */
         if (Tools::isSubmit('SubmitGsitemap')) {
             Configuration::updateValue('GSITEMAP_FREQUENCY', pSQL(Tools::getValue('gsitemap_frequency')));
             $meta = '';
@@ -286,10 +286,10 @@ class Gsitemap extends Module
     }
 
     /**
-     * @param array $link_sitemap contain all the links for the Google sitemap file to be generated
+     * @param array $link_sitemap contain all the links for the XML sitemap file to be generated
      * @param array $new_link contain the link elements
      * @param string $lang language of link to add
-     * @param int $index index of the current Google sitemap file
+     * @param int $index index of the current XML sitemap file
      * @param int $i count of elements added to sitemap main array
      * @param int $id_obj identifier of the object of the link to be added to the Gogle sitemap file
      *
@@ -359,9 +359,9 @@ class Gsitemap extends Module
     /**
      * Hydrate $link_sitemap with home link
      *
-     * @param array $link_sitemap contain all the links for the Google sitemap file to be generated
+     * @param array $link_sitemap contain all the links for the XML sitemap file to be generated
      * @param array $lang language of link to add
-     * @param int $index index of the current Google sitemap file
+     * @param int $index index of the current XML sitemap file
      * @param int $i count of elements added to sitemap main array
      *
      * @return bool
@@ -381,9 +381,9 @@ class Gsitemap extends Module
     /**
      * Hydrate $link_sitemap with meta link
      *
-     * @param array $link_sitemap contain all the links for the Google sitemap file to be generated
+     * @param array $link_sitemap contain all the links for the XML sitemap file to be generated
      * @param array $lang language of link to add
-     * @param int $index index of the current Google sitemap file
+     * @param int $index index of the current XML sitemap file
      * @param int $i count of elements added to sitemap main array
      * @param int $id_meta meta object identifier
      *
@@ -423,9 +423,9 @@ class Gsitemap extends Module
     /**
      * Hydrate $link_sitemap with products link
      *
-     * @param array $link_sitemap contain all the links for the Google sitemap file to be generated
+     * @param array $link_sitemap contain all the links for the XML sitemap file to be generated
      * @param array $lang language of link to add
-     * @param int $index index of the current Google sitemap file
+     * @param int $index index of the current XML sitemap file
      * @param int $i count of elements added to sitemap main array
      * @param int $id_product product object identifier
      *
@@ -501,9 +501,9 @@ class Gsitemap extends Module
     /**
      * Hydrate $link_sitemap with categories link
      *
-     * @param array $link_sitemap contain all the links for the Google sitemap file to be generated
+     * @param array $link_sitemap contain all the links for the XML sitemap file to be generated
      * @param array $lang language of link to add
-     * @param int $index index of the current Google sitemap file
+     * @param int $index index of the current XML sitemap file
      * @param int $i count of elements added to sitemap main array
      * @param int $id_category category object identifier
      *
@@ -572,9 +572,9 @@ class Gsitemap extends Module
     /**
      * return the link elements for the manufacturer object
      *
-     * @param array $link_sitemap contain all the links for the Google Sitemap file to be generated
+     * @param array $link_sitemap contain all the links for the XML sitemap file to be generated
      * @param array $lang language of link to add
-     * @param int $index index of the current Google Sitemap file
+     * @param int $index index of the current XML sitemap file
      * @param int $i count of elements added to sitemap main array
      * @param int $id_manufacturer manufacturer object identifier
      *
@@ -634,9 +634,9 @@ class Gsitemap extends Module
     /**
      * return the link elements for the CMS object
      *
-     * @param array $link_sitemap contain all the links for the Google sitemap file to be generated
+     * @param array $link_sitemap contain all the links for the XML sitemap file to be generated
      * @param array $lang the language of link to add
-     * @param int $index the index of the current Google sitemap file
+     * @param int $index the index of the current XML sitemap file
      * @param int $i the count of elements added to sitemap main array
      * @param int $id_cms the CMS object identifier
      *
@@ -678,9 +678,9 @@ class Gsitemap extends Module
      *   the gsitemap::_addLinkToSitemap() second attribute (minus the 'type' index).
      * The 'type' index is automatically set to 'module' (not sure here, should we be safe or trust modules?).
      *
-     * @param array $link_sitemap by ref. accumulator for all the links for the Google sitemap file to be generated
+     * @param array $link_sitemap by ref. accumulator for all the links for the XML sitemap file to be generated
      * @param array $lang the language being processed
-     * @param int $index the index of the current Google sitemap file
+     * @param int $index the index of the current XML sitemap file
      * @param int $i the count of elements added to sitemap main array
      * @param int $num_link restart at link number #$num_link
      *
@@ -713,7 +713,7 @@ class Gsitemap extends Module
     }
 
     /**
-     * Create the Google sitemap by Shop
+     * Create the XML sitemap by Shop
      *
      * @param int $id_shop Shop identifier
      *
@@ -779,7 +779,7 @@ class Gsitemap extends Module
     /**
      * Store the generated sitemap file to the database
      *
-     * @param string $sitemap the name of the generated Google sitemap file
+     * @param string $sitemap the name of the generated XML sitemap file
      *
      * @return bool
      */
@@ -793,9 +793,9 @@ class Gsitemap extends Module
     }
 
     /**
-     * @param array $link_sitemap contain all the links for the Google sitemap file to be generated
+     * @param array $link_sitemap contain all the links for the XML sitemap file to be generated
      * @param string $lang the language of link to add
-     * @param int $index the index of the current Google sitemap file
+     * @param int $index the index of the current XML sitemap file
      *
      * @return bool
      */

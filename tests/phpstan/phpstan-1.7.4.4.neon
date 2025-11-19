@@ -8,3 +8,5 @@ parameters:
     - '#Parameter \#2 \$idLang of class Category constructor expects null, int given.#'
     - '#Parameter \#3 \$type of method LinkCore\:\:getCatImageLink\(\) expects null, string given.#'
     - '#Parameter \#2 \$type of method LinkCore\:\:getManufacturerImageLink\(\) expects null, string given.#'
+    - '#Parameter \#1 \$id of class Supplier constructor expects null, int given.#'
+    - '#Parameter \#2 \$type of method LinkCore\:\:getSupplierImageLink\(\) expects null, string given.#'

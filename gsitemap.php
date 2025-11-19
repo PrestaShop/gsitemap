@@ -133,7 +133,7 @@ class Gsitemap extends Module
     {
         $disabled_metas = array_filter(explode(',', Configuration::get('GSITEMAP_DISABLE_LINKS')));
         $metas = Meta::getMetasByIdLang($this->context->language->id);
-        
+
         $pagesToDisable = [];
         if (!$this->isManufacturerListingEnabled()) {
             $pagesToDisable[] = 'manufacturer';
@@ -288,7 +288,7 @@ class Gsitemap extends Module
             }
         );
         $store_url = $this->context->link->getBaseLink();
-        
+
         $this->context->smarty->assign([
             'gsitemap_form' => $this->context->link->getAdminLink('AdminModules', true, [], [
                 'configure' => $this->name,

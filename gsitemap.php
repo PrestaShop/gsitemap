@@ -584,8 +584,15 @@ class Gsitemap extends Module
      */
     protected function getManufacturerLink(&$link_sitemap, $lang, &$index, &$i, $id_manufacturer = 0)
     {
-        // If the manufacturer listing is disabled in the back office, we won't generate this element.
-        if (!Configuration::get('PS_DISPLAY_MANUFACTURERS')) {
+        /*
+         * If manufacturer listing is disabled in backoffice, we won't generate this element.
+         *
+         * We need to check different configuration keys depending on PrestaShop versions,
+         * it changed in https://github.com/PrestaShop/PrestaShop/pull/14665 to allow
+         * independent control of manufacturers and suppliers. before, there was only
+         * PS_DISPLAY_SUPPLIERS for both.
+         */
+        if (!Configuration::get(version_compare(_PS_VERSION_, '1.7.7.0', '>=') ? 'PS_DISPLAY_MANUFACTURERS' : 'PS_DISPLAY_SUPPLIERS')) {
             return true;
         }
 

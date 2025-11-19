@@ -95,6 +95,66 @@ class Gsitemap extends Module
     }
 
     /**
+     * Check if manufacturer listing is enabled in back office.
+     *
+     * @return bool
+     */
+    protected function isManufacturerListingEnabled()
+    {
+        return (bool) Configuration::get(version_compare(_PS_VERSION_, '1.7.7.0', '>=') ? 'PS_DISPLAY_MANUFACTURERS' : 'PS_DISPLAY_SUPPLIERS');
+    }
+
+    /**
+     * Check if supplier listing is enabled in back office.
+     *
+     * @return bool
+     */
+    protected function isSupplierListingEnabled()
+    {
+        return (bool) Configuration::get('PS_DISPLAY_SUPPLIERS');
+    }
+
+    /**
+     * Check if best-sellers listing is enabled in back office.
+     *
+     * @return bool
+     */
+    protected function isBestSellersListingEnabled()
+    {
+        return (bool) Configuration::get('PS_DISPLAY_BEST_SELLERS');
+    }
+
+    /**
+     * Get all disabled meta IDs including those from configuration and feature settings.
+     *
+     * @return array
+     */
+    protected function getDisabledMetas()
+    {
+        $disabled_metas = array_filter(explode(',', Configuration::get('GSITEMAP_DISABLE_LINKS')));
+        $metas = Meta::getMetasByIdLang($this->context->language->id);
+        
+        $pagesToDisable = [];
+        if (!$this->isManufacturerListingEnabled()) {
+            $pagesToDisable[] = 'manufacturer';
+        }
+        if (!$this->isSupplierListingEnabled()) {
+            $pagesToDisable[] = 'supplier';
+        }
+        if (!$this->isBestSellersListingEnabled()) {
+            $pagesToDisable[] = 'best-sales';
+        }
+
+        foreach ($metas as $meta) {
+            if (in_array($meta['page'], $pagesToDisable)) {
+                $disabled_metas[] = $meta['id_meta'];
+            }
+        }
+
+        return array_unique($disabled_metas);
+    }
+
+    /**
      * Installation process:
      *
      * Step 1 - Pre-set Configuration option values
@@ -228,6 +288,7 @@ class Gsitemap extends Module
             }
         );
         $store_url = $this->context->link->getBaseLink();
+        
         $this->context->smarty->assign([
             'gsitemap_form' => $this->context->link->getAdminLink('AdminModules', true, [], [
                 'configure' => $this->name,
@@ -248,7 +309,7 @@ class Gsitemap extends Module
             'gsitemap_store_url' => $store_url,
             'gsitemap_links' => Db::getInstance()->ExecuteS('SELECT * FROM `' . _DB_PREFIX_ . 'gsitemap_sitemap` WHERE id_shop = ' . (int) $this->context->shop->id),
             'store_metas' => $store_metas,
-            'gsitemap_disable_metas' => explode(',', Configuration::get('GSITEMAP_DISABLE_LINKS')),
+            'gsitemap_disable_metas' => $this->getDisabledMetas(),
             'gsitemap_customer_limit' => [
                 'max_exec_time' => (int) ini_get('max_execution_time'),
                 'memory_limit' => (int) ini_get('memory_limit'),
@@ -401,6 +462,11 @@ class Gsitemap extends Module
         foreach ($metas as $meta) {
             // Check if this meta is not in the list of blocked controllers in core robots.txt
             if (in_array($meta['page'], $this->disallow_controllers)) {
+                continue;
+            }
+
+            // Skip best-sales if the feature is disabled
+            if ($meta['page'] === 'best-sales' && !$this->isBestSellersListingEnabled()) {
                 continue;
             }
 
@@ -584,15 +650,7 @@ class Gsitemap extends Module
      */
     protected function getManufacturerLink(&$link_sitemap, $lang, &$index, &$i, $id_manufacturer = 0)
     {
-        /*
-         * If manufacturer listing is disabled in backoffice, we won't generate this element.
-         *
-         * We need to check different configuration keys depending on PrestaShop versions,
-         * it changed in https://github.com/PrestaShop/PrestaShop/pull/14665 to allow
-         * independent control of manufacturers and suppliers. before, there was only
-         * PS_DISPLAY_SUPPLIERS for both.
-         */
-        if (!Configuration::get(version_compare(_PS_VERSION_, '1.7.7.0', '>=') ? 'PS_DISPLAY_MANUFACTURERS' : 'PS_DISPLAY_SUPPLIERS')) {
+        if (!$this->isManufacturerListingEnabled()) {
             return true;
         }
 
@@ -658,8 +716,7 @@ class Gsitemap extends Module
      */
     protected function getSupplierLink(&$link_sitemap, $lang, &$index, &$i, $id_supplier = 0)
     {
-        // If supplier listing is disabled in the back office, we won't generate this element.
-        if (!Configuration::get('PS_DISPLAY_SUPPLIERS')) {
+        if (!$this->isSupplierListingEnabled()) {
             return true;
         }
 

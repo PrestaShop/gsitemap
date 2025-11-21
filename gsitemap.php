@@ -78,19 +78,89 @@ class Gsitemap extends Module
             'product',
             'category',
             'manufacturer',
+            'supplier',
             'cms',
             'module',
         ];
+    }
 
-        $metas = Db::getInstance()->ExecuteS('SELECT * FROM `' . _DB_PREFIX_ . 'meta` ORDER BY `id_meta` ASC');
-        $disabled_metas = explode(',', Configuration::get('GSITEMAP_DISABLE_LINKS'));
-        foreach ($metas as $meta) {
-            if (in_array($meta['id_meta'], $disabled_metas)) {
-                if (($key = array_search($meta['page'], $this->type_array)) !== false) {
-                    unset($this->type_array[$key]);
-                }
-            }
+    /**
+     * Check if manufacturer listing is enabled in back office.
+     *
+     * @return bool
+     */
+    protected function isManufacturerListingEnabled()
+    {
+        return (bool) Configuration::get(version_compare(_PS_VERSION_, '1.7.7.0', '>=') ? 'PS_DISPLAY_MANUFACTURERS' : 'PS_DISPLAY_SUPPLIERS');
+    }
+
+    /**
+     * Check if supplier listing is enabled in back office.
+     *
+     * @return bool
+     */
+    protected function isSupplierListingEnabled()
+    {
+        return (bool) Configuration::get('PS_DISPLAY_SUPPLIERS');
+    }
+
+    /**
+     * Check if best-sellers listing is enabled in back office.
+     *
+     * @return bool
+     */
+    protected function isBestSellersListingEnabled()
+    {
+        return (bool) Configuration::get('PS_DISPLAY_BEST_SELLERS');
+    }
+
+    /**
+     * Get all disabled meta IDs in the settings of this module
+     *
+     * @return array
+     */
+    protected function getDisabledMetas()
+    {
+        // Get the pages from configuration
+        $disabledMetaConfiguration = Configuration::get('GSITEMAP_DISABLE_LINKS');
+        if (empty($disabledMetaConfiguration)) {
+            return [];
         }
+
+        return explode(',', $disabledMetaConfiguration);
+    }
+
+    /*
+     * Gets all existing pages that the user can configure in this module.
+     * We do not return all of them, because some are managed automatically.
+     */
+    protected function getMetasForConfiguration()
+    {
+        // Get all metas
+        $existingMetas = Meta::getMetasByIdLang((int) $this->context->cookie->id_lang);
+
+        $metasForConfiguration = [];
+        foreach ($existingMetas as $meta) {
+            // We do not want to manage index page here, because it's managed elsewhere
+            if ($meta['page'] === 'index') {
+                continue;
+            }
+
+            // We also remove all pages that are blocked in core robots.txt file
+            if (in_array($meta['page'], $this->disallow_controllers)) {
+                continue;
+            }
+
+            // We also remove best-sales, manufacturer and supplier,
+            // because they are managed automatically depending on back office settings
+            if ($meta['page'] === 'best-sales' || $meta['page'] === 'manufacturer' || $meta['page'] === 'supplier') {
+                continue;
+            }
+
+            $metasForConfiguration[] = $meta;
+        }
+
+        return $metasForConfiguration;
     }
 
     /**
@@ -108,6 +178,7 @@ class Gsitemap extends Module
             'GSITEMAP_PRIORITY_PRODUCT' => 0.9,
             'GSITEMAP_PRIORITY_CATEGORY' => 0.8,
             'GSITEMAP_PRIORITY_MANUFACTURER' => 0.7,
+            'GSITEMAP_PRIORITY_SUPPLIER' => 0.7,
             'GSITEMAP_PRIORITY_CMS' => 0.7,
             'GSITEMAP_FREQUENCY' => 'weekly',
             'GSITEMAP_LAST_EXPORT' => false,
@@ -217,15 +288,6 @@ class Gsitemap extends Module
             ShopUrl::resetMainDomainCache();
         }
 
-        /* Get Meta pages and remove index page it's managed elsewhere (@see $this->getHomeLink()) */
-        /* We also remove all pages that are blocked in core robots.txt file */
-        $store_metas = array_filter(Meta::getMetasByIdLang(
-            (int) $this->context->cookie->id_lang),
-            function ($meta) {
-                return $meta['page'] != 'index' && !in_array($meta['page'], $this->disallow_controllers);
-            }
-        );
-        $store_url = $this->context->link->getBaseLink();
         $this->context->smarty->assign([
             'gsitemap_form' => $this->context->link->getAdminLink('AdminModules', true, [], [
                 'configure' => $this->name,
@@ -243,10 +305,10 @@ class Gsitemap extends Module
             'gsitemap_feed_exists' => file_exists($this->normalizeDirectory(_PS_ROOT_DIR_) . 'index_sitemap.xml'),
             'gsitemap_last_export' => Configuration::get('GSITEMAP_LAST_EXPORT'),
             'gsitemap_frequency' => Configuration::get('GSITEMAP_FREQUENCY'),
-            'gsitemap_store_url' => $store_url,
+            'gsitemap_store_url' => $this->context->link->getBaseLink(),
             'gsitemap_links' => Db::getInstance()->ExecuteS('SELECT * FROM `' . _DB_PREFIX_ . 'gsitemap_sitemap` WHERE id_shop = ' . (int) $this->context->shop->id),
-            'store_metas' => $store_metas,
-            'gsitemap_disable_metas' => explode(',', Configuration::get('GSITEMAP_DISABLE_LINKS')),
+            'store_metas' => $this->getMetasForConfiguration(),
+            'gsitemap_disable_metas' => $this->getDisabledMetas(),
             'gsitemap_customer_limit' => [
                 'max_exec_time' => (int) ini_get('max_execution_time'),
                 'memory_limit' => (int) ini_get('memory_limit'),
@@ -399,6 +461,21 @@ class Gsitemap extends Module
         foreach ($metas as $meta) {
             // Check if this meta is not in the list of blocked controllers in core robots.txt
             if (in_array($meta['page'], $this->disallow_controllers)) {
+                continue;
+            }
+
+            // Skip best-sales if the feature is disabled
+            if ($meta['page'] === 'best-sales' && !$this->isBestSellersListingEnabled()) {
+                continue;
+            }
+
+            // Skip manufacturer page if the feature is disabled
+            if ($meta['page'] === 'manufacturer' && !$this->isManufacturerListingEnabled()) {
+                continue;
+            }
+
+            // Skip supplier page if the feature is disabled
+            if ($meta['page'] === 'supplier' && !$this->isSupplierListingEnabled()) {
                 continue;
             }
 
@@ -582,6 +659,10 @@ class Gsitemap extends Module
      */
     protected function getManufacturerLink(&$link_sitemap, $lang, &$index, &$i, $id_manufacturer = 0)
     {
+        if (!$this->isManufacturerListingEnabled()) {
+            return true;
+        }
+
         $link = new Link();
         if (method_exists('ShopUrl', 'resetMainDomainCache')) {
             ShopUrl::resetMainDomainCache();
@@ -622,6 +703,73 @@ class Gsitemap extends Module
                 'link' => $url,
                 'image' => $manufacturer_image,
             ], $lang['iso_code'], $index, $i, $manufacturer_id['id_manufacturer'])) {
+                return false;
+            }
+
+            unset($image_link);
+        }
+
+        return true;
+    }
+
+    /**
+     * return the link elements for the supplier object
+     *
+     * @param array $link_sitemap contain all the links for the Google Sitemap file to be generated
+     * @param array $lang language of link to add
+     * @param int $index index of the current Google Sitemap file
+     * @param int $i count of elements added to sitemap main array
+     * @param int $id_supplier supplier object identifier
+     *
+     * @return bool
+     */
+    protected function getSupplierLink(&$link_sitemap, $lang, &$index, &$i, $id_supplier = 0)
+    {
+        if (!$this->isSupplierListingEnabled()) {
+            return true;
+        }
+
+        $link = new Link();
+        if (method_exists('ShopUrl', 'resetMainDomainCache')) {
+            ShopUrl::resetMainDomainCache();
+        }
+
+        // Get suppliers IDs
+        $suppliers_id = Db::getInstance()->ExecuteS(
+            'SELECT m.`id_supplier` FROM `' . _DB_PREFIX_ . 'supplier` m
+            INNER JOIN `' . _DB_PREFIX_ . 'supplier_lang` ml on m.`id_supplier` = ml.`id_supplier`' .
+            ' INNER JOIN `' . _DB_PREFIX_ . 'supplier_shop` ms ON m.`id_supplier` = ms.`id_supplier`' .
+            ' WHERE m.`active` = 1  AND m.`id_supplier` >= ' . (int) $id_supplier .
+            ' AND ms.`id_shop` = ' . (int) $this->context->shop->id .
+            ' AND ml.`id_lang` = ' . (int) $lang['id_lang'] .
+            ' ORDER BY m.`id_supplier` ASC'
+        );
+
+        // Process each supplier and add it to list of links that will be further "converted" to XML and added to the sitemap
+        foreach ($suppliers_id as $supplier_id) {
+            $supplier = new Supplier((int) $supplier_id['id_supplier'], $lang['id_lang']);
+            $url = $link->getSupplierLink($supplier, urlencode($supplier->link_rewrite), $lang['id_lang']);
+
+            $image_link = $this->context->link->getSupplierImageLink((int) $supplier->id, ImageType::getFormattedName('medium'));
+            $image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace([
+                'https',
+                Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri,
+            ], [
+                'http',
+                Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri . Context::getContext()->shop->virtual_uri,
+            ], $image_link) : $image_link;
+
+            $supplier_image = [
+                'link' => $image_link,
+            ];
+
+            if (!$this->addLinkToSitemap($link_sitemap, [
+                'type' => 'supplier',
+                'page' => 'supplier',
+                'lastmod' => $supplier->date_upd,
+                'link' => $url,
+                'image' => $supplier_image,
+            ], $lang['iso_code'], $index, $i, $supplier_id['id_supplier'])) {
                 return false;
             }
 

@@ -2,8 +2,8 @@
 <module>
     <name>gsitemap</name>
     <displayName><![CDATA[Google sitemap]]></displayName>
-    <version><![CDATA[4.4.0]]></version>
-    <description><![CDATA[Generate your Google sitemap file]]></description>
+    <version><![CDATA[5.0.0]]></version>
+    <description><![CDATA[Generates an XML sitemap for your shop and keeps it up to date. Compatible with all major search engines.]]></description>
     <author><![CDATA[PrestaShop]]></author>
     <tab><![CDATA[seo]]></tab>
     <is_configurable>1</is_configurable>

@@ -481,7 +481,15 @@ class Gsitemap extends Module
 
             $url = '';
             if (!in_array($meta['id_meta'], explode(',', Configuration::get('GSITEMAP_DISABLE_LINKS')))) {
-                $url = $link->getPageLink($meta['page'], null, $lang['id_lang']);
+                try {
+                    $url = $link->getPageLink($meta['page'], null, $lang['id_lang']);
+                } catch (PrestaShopException $e) {
+                    // Some meta pages map to routes that require mandatory parameters
+                    // (e.g. a module search route needing an id). Such routes cannot be
+                    // represented in a sitemap without a specific value, so we skip them
+                    // instead of aborting the whole sitemap generation.
+                    continue;
+                }
 
                 if (!$this->addLinkToSitemap($link_sitemap, [
                     'type' => 'meta',

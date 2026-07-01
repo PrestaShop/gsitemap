@@ -1,7 +1,0 @@
-includes:
-    - %currentWorkingDirectory%/tests/phpstan/phpstan.neon
-
-parameters:
-  ignoreErrors:
-    - '#Access to an undefined property Cookie\:\:\$id_lang.#'
-    - '#Parameter \#1 \$id of class Supplier constructor expects null, int given.#'

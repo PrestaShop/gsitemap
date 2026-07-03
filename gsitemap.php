@@ -329,9 +329,6 @@ class Gsitemap extends Module
      */
     public function emptySitemap($id_shop = 0)
     {
-        if (!isset($this->context)) {
-            $this->context = new Context();
-        }
         if ($id_shop != 0) {
             $this->context->shop = new Shop((int) $id_shop);
         }

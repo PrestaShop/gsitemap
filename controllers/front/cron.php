@@ -35,15 +35,18 @@ class GsitemapCronModuleFrontController extends ModuleFrontController
 
         $id_shop = (Tools::getIsset('id_shop') && in_array(Tools::getValue('id_shop'), $list_id_shop)) ? (int) Tools::getValue('id_shop') : (int) Configuration::get('PS_SHOP_DEFAULT');
 
+        /** @var Gsitemap $module */
+        $module = $this->module;
+
         // Mark a flag that we are in cron context
-        $this->module->cron = true;
+        $module->cron = true;
 
         // If this is the first request to generate, we delete all previous sitemaps
         if (!Tools::getIsset('continue')) {
-            $this->module->emptySitemap((int) $id_shop);
+            $module->emptySitemap((int) $id_shop);
         }
 
         // Run generation
-        $this->module->createSitemap((int) $id_shop);
+        $module->createSitemap((int) $id_shop);
     }
 }

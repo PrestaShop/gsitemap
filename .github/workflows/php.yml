@@ -32,25 +32,10 @@ jobs:
     name: PHP-CS-Fixer
     runs-on: ubuntu-latest
     steps:
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+      - name: Run PHP-CS-Fixer
+        uses: PrestaShop/.github/.github/actions/php-ci/php-cs@master
         with:
           php-version: '7.4'
-
-      - name: Checkout
-        uses: actions/checkout@v2.0.0
-
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        with:
-          path: vendor
-          key: php-${{ hashFiles('composer.lock') }}
-
-      - name: Install dependencies
-        run: composer install
-
-      - name: Run PHP-CS-Fixer
-        run: ./vendor/bin/php-cs-fixer fix --dry-run --diff --using-cache=no --diff-format udiff
 
   # Run PHPStan against the module (PHP 7.4 – PS 8.2)
   phpstan-74-81:

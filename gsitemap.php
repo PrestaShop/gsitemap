@@ -68,7 +68,7 @@ class Gsitemap extends Module
         $this->displayName = $this->trans('Google sitemap', [], 'Modules.Gsitemap.Admin');
         $this->description = $this->trans('Generates an XML sitemap for your shop and keeps it up to date. Compatible with all major search engines.', [], 'Modules.Gsitemap.Admin');
         $this->ps_versions_compliancy = [
-            'min' => '1.7.1.0',
+            'min' => '8.2.0',
             'max' => _PS_VERSION_,
         ];
         $this->confirmUninstall = $this->trans('Are you sure you want to uninstall this module?', [], 'Admin.Notifications.Warning');
@@ -91,7 +91,7 @@ class Gsitemap extends Module
      */
     protected function isManufacturerListingEnabled()
     {
-        return (bool) Configuration::get(version_compare(_PS_VERSION_, '1.7.7.0', '>=') ? 'PS_DISPLAY_MANUFACTURERS' : 'PS_DISPLAY_SUPPLIERS');
+        return (bool) Configuration::get('PS_DISPLAY_MANUFACTURERS');
     }
 
     /**

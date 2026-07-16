@@ -11,7 +11,7 @@ Generates an XML sitemap for your shop and keeps it up to date. Compatible with 
 
 ## Compatibility
 
-PrestaShop: `1.7.1.0` or later
+PrestaShop: `8.2.0` or later
 
 ## Multistore compatibility
 
@@ -42,5 +42,5 @@ This module is released under the [Academic Free License 3.0][AFL-3.0]
 
 [report-issue]: https://github.com/PrestaShop/PrestaShop/issues/new/choose
 [prestashop]: https://www.prestashop-project.org/
-[contribution-guidelines]: https://devdocs.prestashop-project.org/1.7/contribute/contribution-guidelines/project-modules/
+[contribution-guidelines]: https://devdocs.prestashop-project.org/8/contribute/contribution-guidelines/project-modules/
 [AFL-3.0]: https://opensource.org/licenses/AFL-3.0

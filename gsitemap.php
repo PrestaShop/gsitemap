@@ -322,11 +322,12 @@ class Gsitemap extends Module
     }
 
     /**
-     * Declares the sitemaps of the remaining shops in robots.txt.
+     * Declares the sitemap of every shop in robots.txt.
      *
-     * The core writes a Sitemap line for the shop currently in context only, while a
-     * multistore installation serves one robots.txt file to every domain. Without this,
-     * the sitemaps of the other shops are not declared anywhere.
+     * The core writes a single Sitemap line, built from the domain the back office is opened
+     * on and from the base URI of the default shop, while a multistore installation serves the
+     * same robots.txt file on every domain. Without this, the sitemaps of the other shops are
+     * not declared anywhere.
      *
      * @param array $params
      *
@@ -342,11 +343,6 @@ class Gsitemap extends Module
 
         foreach (array_keys(Shop::getShops(true)) as $idShop) {
             $idShop = (int) $idShop;
-
-            // The core already declared this one.
-            if ($idShop === $idShopInContext) {
-                continue;
-            }
 
             $filename = $idShop . '_index_sitemap.xml';
             $sitemapFile = $this->normalizeDirectory(_PS_ROOT_DIR_) . $filename;
@@ -366,10 +362,22 @@ class Gsitemap extends Module
                 continue;
             }
 
-            fwrite(
-                $params['write_fd'],
-                'Sitemap: ' . Tools::getProtocol($useSsl) . $domain . $shop->getBaseURI() . $filename . PHP_EOL
-            );
+            $url = Tools::getProtocol($useSsl) . $domain . $shop->getBaseURI() . $filename;
+
+            if ($idShop === $idShopInContext) {
+                // The core has just declared this sitemap, but always under the domain the back
+                // office is opened on and under the base URI of the default shop. That is the
+                // same URL only when both happen to belong to this shop, so the line is rebuilt
+                // and compared instead of skipping the shop in context unconditionally.
+                $urlWrittenByCore = Tools::getProtocol((bool) Configuration::get('PS_SSL_ENABLED'))
+                    . $_SERVER['SERVER_NAME'] . __PS_BASE_URI__ . $filename;
+
+                if ($url === $urlWrittenByCore) {
+                    continue;
+                }
+            }
+
+            fwrite($params['write_fd'], 'Sitemap: ' . $url . PHP_EOL);
         }
     }
 

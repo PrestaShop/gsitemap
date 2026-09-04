@@ -335,7 +335,7 @@ class Gsitemap extends Module
     public function emptySitemap($id_shop = 0)
     {
         if (!isset($this->context)) {
-            $this->context = new Context();
+            $this->context = Context::getContext();
         }
         if ($id_shop != 0) {
             $this->context->shop = new Shop((int) $id_shop);
@@ -959,7 +959,9 @@ class Gsitemap extends Module
         if (is_array($old_sitemaps)) {
             foreach ($old_sitemaps as $old) {
                 if (!in_array($old['link'], $this->generated_sitemaps)) {
-                    @unlink($this->normalizeDirectory(_PS_ROOT_DIR_) . $old['link']);
+                    if (basename($old['link']) === $old['link'] && preg_match('/^[0-9]+_[a-z0-9_-]+_[0-9]+_sitemap\.xml$/i', $old['link'])) {
+                        @unlink($this->normalizeDirectory(_PS_ROOT_DIR_) . $old['link']);
+                    }
                     Db::getInstance()->Execute('DELETE FROM `' . _DB_PREFIX_ . 'gsitemap_sitemap` WHERE `link` = \'' . pSQL($old['link']) . '\' AND id_shop = ' . (int) $this->context->shop->id);
                 }
             }
@@ -969,9 +971,7 @@ class Gsitemap extends Module
         Configuration::updateValue('GSITEMAP_LAST_EXPORT', date('r'));
 
         if ($this->cron) {
-            header('HTTP/1.1 200 OK');
-            echo 'Sitemap generated successfully';
-            exit();
+            return true;
         }
         Tools::redirectAdmin($this->context->link->getAdminLink('AdminModules', true, [], [
             'configure' => $this->name,

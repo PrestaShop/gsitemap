@@ -35,18 +35,26 @@ class GsitemapCronModuleFrontController extends ModuleFrontController
 
         $id_shop = (Tools::getIsset('id_shop') && in_array(Tools::getValue('id_shop'), $list_id_shop)) ? (int) Tools::getValue('id_shop') : (int) Configuration::get('PS_SHOP_DEFAULT');
 
-        /** @var Gsitemap $module */
-        $module = $this->module;
-
         // Mark a flag that we are in cron context
-        $module->cron = true;
+        $this->module->cron = true;
 
-        // If this is the first request to generate, we delete all previous sitemaps
-        if (!Tools::getIsset('continue')) {
-            $module->emptySitemap((int) $id_shop);
+        try {
+            // Run generation (atomic: existing sitemaps are preserved until generation finishes)
+            $this->module->createSitemap((int) $id_shop);
+            header('HTTP/1.1 200 OK');
+            echo 'Sitemap generated successfully';
+            exit;
+        } catch (\Throwable $e) {
+            PrestaShopLogger::addLog(
+                'Gsitemap cron error: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine(),
+                3,
+                null,
+                'Gsitemap',
+                (int) $id_shop
+            );
+            header('HTTP/1.1 500 Internal Server Error');
+            echo 'Error: ' . $e->getMessage();
+            exit;
         }
-
-        // Run generation
-        $module->createSitemap((int) $id_shop);
     }
 }

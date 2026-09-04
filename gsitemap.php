@@ -47,6 +47,11 @@ class Gsitemap extends Module
     protected $type_array = [];
 
     /**
+     * @var array<int, string>
+     */
+    public $generated_sitemaps = [];
+
+    /**
      * @var array
      */
     protected $disallow_controllers = [
@@ -329,6 +334,9 @@ class Gsitemap extends Module
      */
     public function emptySitemap($id_shop = 0)
     {
+        if (!isset($this->context)) {
+            $this->context = Context::getContext();
+        }
         if ($id_shop != 0) {
             $this->context->shop = new Shop((int) $id_shop);
         }
@@ -379,9 +387,6 @@ class Gsitemap extends Module
                 ]);
 
                 return false;
-            } elseif ($index % 20 == 0 && $this->cron) {
-                header('Refresh: 5; url=http' . (Configuration::get('PS_SSL_ENABLED') ? 's' : '') . '://' . Tools::getShopDomain(false, true) . __PS_BASE_URI__ . 'modules/gsitemap/gsitemap-cron.php?continue=1&token=' . Tools::substr(Tools::hash('gsitemap/cron'), 0, 10) . '&type=' . $new_link['type'] . '&lang=' . $lang . '&index=' . $index . '&id=' . (int) $id_obj . '&id_shop=' . $this->context->shop->id);
-                exit();
             } else {
                 if ($this->cron) {
                     Tools::redirect($this->context->link->getModuleLink(
@@ -455,6 +460,10 @@ class Gsitemap extends Module
         }
         $link = new Link();
         $metas = Db::getInstance()->ExecuteS('SELECT * FROM `' . _DB_PREFIX_ . 'meta` WHERE `configurable` > 0 AND `id_meta` >= ' . (int) $id_meta . ' AND page <> \'index\' ORDER BY `id_meta` ASC');
+        if (!is_array($metas)) {
+            return true;
+        }
+        $disabledMetas = explode(',', (string) Configuration::get('GSITEMAP_DISABLE_LINKS'));
         foreach ($metas as $meta) {
             // Check if this meta is not in the list of blocked controllers in core robots.txt
             if (in_array($meta['page'], $this->disallow_controllers)) {
@@ -477,15 +486,21 @@ class Gsitemap extends Module
             }
 
             $url = '';
-            if (!in_array($meta['id_meta'], explode(',', Configuration::get('GSITEMAP_DISABLE_LINKS')))) {
-                $url = $link->getPageLink($meta['page'], null, $lang['id_lang']);
+            if (!in_array($meta['id_meta'], $disabledMetas)) {
+                try {
+                    $url = $link->getPageLink($meta['page'], null, (int) $lang['id_lang']);
+                } catch (\Throwable $e) {
+                    // Some meta pages map to routes that require mandatory parameters
+                    // (e.g. module routes or parameter-based core routes). Skip them safely.
+                    continue;
+                }
 
                 if (!$this->addLinkToSitemap($link_sitemap, [
                     'type' => 'meta',
                     'page' => $meta['page'],
                     'link' => $url,
                     'image' => false,
-                ], $lang['iso_code'], $index, $i, $meta['id_meta'])) {
+                ], $lang['iso_code'], $index, $i, (int) $meta['id_meta'])) {
                     return false;
                 }
             }
@@ -535,37 +550,47 @@ class Gsitemap extends Module
 
         // Process each category and add it to list of links that will be further "converted" to XML and added to the sitemap
         foreach ($products_id as $product_id) {
-            $product = new Product((int) $product_id['id_product'], false, (int) $lang['id_lang']);
-
-            $url = $link->getProductLink($product, $product->link_rewrite, htmlspecialchars(strip_tags($product->category)), $product->ean13, (int) $lang['id_lang'], (int) $this->context->shop->id, 0);
-
-            $images_product = [];
-            foreach ($product->getImages((int) $lang['id_lang']) as $id_image) {
-                if (isset($id_image['id_image'])) {
-                    $image_link = $this->context->link->getImageLink($product->link_rewrite, (string) $id_image['id_image'], ImageType::getFormattedName('large'));
-                    $image_link = (!in_array(rtrim(Context::getContext()->shop->virtual_uri, '/'), explode('/', $image_link))) ? str_replace([
-                        'https',
-                        Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri,
-                    ], [
-                        'http',
-                        Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri . Context::getContext()->shop->virtual_uri,
-                    ], $image_link) : $image_link;
-
-                    $images_product[] = [
-                        'link' => $image_link,
-                    ];
+            try {
+                $product = new Product((int) $product_id['id_product'], false, (int) $lang['id_lang']);
+                if (!Validate::isLoadedObject($product)) {
+                    continue;
                 }
-                unset($image_link);
-            }
 
-            if (!$this->addLinkToSitemap($link_sitemap, [
-                'type' => 'product',
-                'page' => 'product',
-                'lastmod' => $product->date_upd,
-                'link' => $url,
-                'images' => $images_product,
-            ], $lang['iso_code'], $index, $i, $product_id['id_product'])) {
-                return false;
+                $categoryRewrite = is_string($product->category) ? htmlspecialchars(strip_tags($product->category)) : '';
+                $url = $link->getProductLink($product, $product->link_rewrite, $categoryRewrite, $product->ean13, (int) $lang['id_lang'], (int) $this->context->shop->id, 0);
+
+                $images_product = [];
+                $productImages = $product->getImages((int) $lang['id_lang']);
+                if (is_array($productImages)) {
+                    foreach ($productImages as $id_image) {
+                        if (isset($id_image['id_image'])) {
+                            $image_link = $this->context->link->getImageLink((string) $product->link_rewrite, (string) $id_image['id_image'], ImageType::getFormattedName('large'));
+                            $image_link = (!in_array(rtrim((string) Context::getContext()->shop->virtual_uri, '/'), explode('/', (string) $image_link))) ? str_replace([
+                                'https',
+                                Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri,
+                            ], [
+                                'http',
+                                Context::getContext()->shop->domain . Context::getContext()->shop->physical_uri . Context::getContext()->shop->virtual_uri,
+                            ], (string) $image_link) : (string) $image_link;
+
+                            $images_product[] = [
+                                'link' => $image_link,
+                            ];
+                        }
+                    }
+                }
+
+                if (!$this->addLinkToSitemap($link_sitemap, [
+                    'type' => 'product',
+                    'page' => 'product',
+                    'lastmod' => $product->date_upd,
+                    'link' => $url,
+                    'images' => $images_product,
+                ], $lang['iso_code'], $index, $i, (int) $product_id['id_product'])) {
+                    return false;
+                }
+            } catch (\Throwable $e) {
+                continue;
             }
         }
 
@@ -798,17 +823,25 @@ class Gsitemap extends Module
 
         if (is_array($cmss_id)) {
             foreach ($cmss_id as $cms_id) {
-                $cms = new CMS((int) $cms_id['id_cms'], $lang['id_lang']);
-                $cms->link_rewrite = urlencode((is_array($cms->link_rewrite) ? $cms->link_rewrite[(int) $lang['id_lang']] : $cms->link_rewrite));
-                $url = $link->getCMSLink($cms, null, null, $lang['id_lang']);
+                try {
+                    $cms = new CMS((int) $cms_id['id_cms'], (int) $lang['id_lang']);
+                    if (!Validate::isLoadedObject($cms)) {
+                        continue;
+                    }
+                    $linkRewrite = is_array($cms->link_rewrite) ? ($cms->link_rewrite[(int) $lang['id_lang']] ?? reset($cms->link_rewrite)) : $cms->link_rewrite;
+                    $cms->link_rewrite = urlencode((string) $linkRewrite);
+                    $url = $link->getCMSLink($cms, null, null, (int) $lang['id_lang']);
 
-                if (!$this->addLinkToSitemap($link_sitemap, [
-                    'type' => 'cms',
-                    'page' => 'cms',
-                    'link' => $url,
-                    'image' => false,
-                ], $lang['iso_code'], $index, $i, $cms_id['id_cms'])) {
-                    return false;
+                    if (!$this->addLinkToSitemap($link_sitemap, [
+                        'type' => 'cms',
+                        'page' => 'cms',
+                        'link' => $url,
+                        'image' => false,
+                    ], $lang['iso_code'], $index, $i, (int) $cms_id['id_cms'])) {
+                        return false;
+                    }
+                } catch (\Throwable $e) {
+                    continue;
                 }
             }
         }
@@ -833,19 +866,28 @@ class Gsitemap extends Module
      */
     protected function getModuleLink(&$link_sitemap, $lang, &$index, &$i, $num_link = 0)
     {
-        /** @var array|string $modules_links */
-        $modules_links = Hook::exec(self::HOOK_ADD_URLS, [
-            'lang' => $lang,
-        ], null, true);
+        try {
+            /** @var array|string $modules_links */
+            $modules_links = Hook::exec(self::HOOK_ADD_URLS, [
+                'lang' => $lang,
+            ], null, true);
+        } catch (\Throwable $e) {
+            $modules_links = [];
+        }
         if (empty($modules_links) || !is_array($modules_links)) {
             return true;
         }
         $links = [];
         foreach ($modules_links as $module_links) {
-            $links = array_merge($links, $module_links);
+            if (is_array($module_links)) {
+                $links = array_merge($links, $module_links);
+            }
         }
         foreach ($links as $n => $link) {
             if ($num_link > $n) {
+                continue;
+            }
+            if (!is_array($link) || empty($link['link'])) {
                 continue;
             }
             $link['type'] = 'module';
@@ -866,18 +908,24 @@ class Gsitemap extends Module
      */
     public function createSitemap($id_shop = 0)
     {
-        if (@fopen($this->normalizeDirectory(_PS_ROOT_DIR_) . '/test.txt', 'wb') == false) {
-            $this->context->controller->errors[] = $this->trans('An error occured while trying to check your file permissions. Please adjust your permissions to allow PrestaShop to write a file in your root directory.', [], 'Modules.Gsitemap.Admin');
+        $testFile = $this->normalizeDirectory(_PS_ROOT_DIR_) . 'test.txt';
+        $testHandle = @fopen($testFile, 'wb');
+        if ($testHandle === false) {
+            if (isset($this->context->controller) && isset($this->context->controller->errors)) {
+                $this->context->controller->errors[] = $this->trans('An error occured while trying to check your file permissions. Please adjust your permissions to allow PrestaShop to write a file in your root directory.', [], 'Modules.Gsitemap.Admin');
+            }
 
             return false;
         } else {
-            @unlink($this->normalizeDirectory(_PS_ROOT_DIR_) . 'test.txt');
+            @fclose($testHandle);
+            @unlink($testFile);
         }
 
         if ($id_shop != 0) {
             $this->context->shop = new Shop((int) $id_shop);
         }
 
+        $this->generated_sitemaps = [];
         $type = Tools::getValue('type') ? Tools::getValue('type') : '';
         $languages = Language::getLanguages(true, $this->context->shop->id);
         $lang_stop = Tools::getValue('lang') ? true : false;
@@ -906,11 +954,24 @@ class Gsitemap extends Module
             $index = 0;
         }
 
+        // Clean up obsolete sitemap files for this shop that were not re-generated
+        $old_sitemaps = Db::getInstance()->ExecuteS('SELECT `link` FROM `' . _DB_PREFIX_ . 'gsitemap_sitemap` WHERE id_shop = ' . (int) $this->context->shop->id);
+        if (is_array($old_sitemaps)) {
+            foreach ($old_sitemaps as $old) {
+                if (!in_array($old['link'], $this->generated_sitemaps)) {
+                    if (basename($old['link']) === $old['link'] && preg_match('/^[0-9]+_[a-z0-9_-]+_[0-9]+_sitemap\.xml$/i', $old['link'])) {
+                        @unlink($this->normalizeDirectory(_PS_ROOT_DIR_) . $old['link']);
+                    }
+                    Db::getInstance()->Execute('DELETE FROM `' . _DB_PREFIX_ . 'gsitemap_sitemap` WHERE `link` = \'' . pSQL($old['link']) . '\' AND id_shop = ' . (int) $this->context->shop->id);
+                }
+            }
+        }
+
         $this->createIndexSitemap();
         Configuration::updateValue('GSITEMAP_LAST_EXPORT', date('r'));
 
         if ($this->cron) {
-            exit();
+            return true;
         }
         Tools::redirectAdmin($this->context->link->getAdminLink('AdminModules', true, [], [
             'configure' => $this->name,
@@ -931,7 +992,13 @@ class Gsitemap extends Module
     protected function saveSitemapLink($sitemap)
     {
         if ($sitemap) {
-            return Db::getInstance()->Execute('INSERT INTO `' . _DB_PREFIX_ . 'gsitemap_sitemap` (`link`, id_shop) VALUES (\'' . pSQL($sitemap) . '\', ' . (int) $this->context->shop->id . ')');
+            $this->generated_sitemaps[] = $sitemap;
+            $exists = (int) Db::getInstance()->getValue('SELECT COUNT(*) FROM `' . _DB_PREFIX_ . 'gsitemap_sitemap` WHERE `link` = \'' . pSQL($sitemap) . '\' AND id_shop = ' . (int) $this->context->shop->id);
+            if ($exists === 0) {
+                return Db::getInstance()->Execute('INSERT INTO `' . _DB_PREFIX_ . 'gsitemap_sitemap` (`link`, id_shop) VALUES (\'' . pSQL($sitemap) . '\', ' . (int) $this->context->shop->id . ')');
+            }
+
+            return true;
         }
 
         return false;
@@ -957,17 +1024,21 @@ class Gsitemap extends Module
         foreach ($link_sitemap as $file) {
             fwrite($write_fd, '<url>' . PHP_EOL);
             $lastmod = (isset($file['lastmod']) && !empty($file['lastmod'])) ? date('c', strtotime($file['lastmod'])) : null;
-            $this->addSitemapNode($write_fd, htmlspecialchars(strip_tags($file['link'])), $this->getPriorityPage($file['page']), Configuration::get('GSITEMAP_FREQUENCY'), $lastmod);
+            $loc = htmlspecialchars($this->removeControlCharacters(strip_tags((string) $file['link'])));
+            $this->addSitemapNode($write_fd, $loc, $this->getPriorityPage($file['page']), Configuration::get('GSITEMAP_FREQUENCY'), $lastmod);
 
             $images = [];
             if (isset($file['image']) && $file['image']) {
                 $images[] = $file['image'];
             }
-            if (isset($file['images']) && $file['images']) {
+            if (isset($file['images']) && $file['images'] && is_array($file['images'])) {
                 $images = array_merge($images, $file['images']);
             }
             foreach ($images as $image) {
-                $this->addSitemapNodeImage($write_fd, htmlspecialchars(strip_tags($image['link'])));
+                if (!empty($image['link'])) {
+                    $imgLoc = htmlspecialchars($this->removeControlCharacters(strip_tags((string) $image['link'])));
+                    $this->addSitemapNodeImage($write_fd, $imgLoc);
+                }
             }
             fwrite($write_fd, '</url>' . PHP_EOL);
         }

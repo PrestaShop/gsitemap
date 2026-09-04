@@ -26,19 +26,23 @@
 if (!defined('_PS_VERSION_')) {
     exit;
 }
-function upgrade_module_2_2_0($object, $install = false)
+
+/**
+ * @param Module $module
+ *
+ * @return bool
+ */
+function upgrade_module_5_0_1($module)
 {
-    if ($object->active || $install) {
-        Configuration::updateValue('GSITEMAP_PRIORITY_HOME', 1.0);
-        Configuration::updateValue('GSITEMAP_PRIORITY_PRODUCT', 0.9);
-        Configuration::updateValue('GSITEMAP_PRIORITY_CATEGORY', 0.8);
-        Configuration::updateValue('GSITEMAP_PRIORITY_CMS', 0.7);
-        Configuration::updateValue('GSITEMAP_FREQUENCY', 'weekly');
-        Configuration::updateValue('GSITEMAP_LAST_EXPORT', false);
+    $index = Db::getInstance()->getRow(
+        'SHOW INDEX FROM `' . _DB_PREFIX_ . 'gsitemap_sitemap` WHERE Key_name = \'id_shop\''
+    );
 
-        return Db::getInstance()->Execute('DROP TABLE IF  EXISTS `' . _DB_PREFIX_ . 'gsitemap_sitemap`') && Db::getInstance()->Execute('CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'gsitemap_sitemap` (`link` varchar(255) DEFAULT NULL, `id_shop` int(11) DEFAULT 0, KEY `id_shop` (`id_shop`)) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;');
+    if (!empty($index)) {
+        return true;
     }
-    $object->upgrade_detail['2.2'][] = 'GSitemap upgrade error !';
 
-    return false;
+    return Db::getInstance()->execute(
+        'ALTER TABLE `' . _DB_PREFIX_ . 'gsitemap_sitemap` ADD KEY `id_shop` (`id_shop`)'
+    );
 }

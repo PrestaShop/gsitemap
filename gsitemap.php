@@ -60,7 +60,7 @@ class Gsitemap extends Module
     {
         $this->name = 'gsitemap';
         $this->tab = 'checkout';
-        $this->version = '5.0.0';
+        $this->version = '5.0.1';
         $this->author = 'PrestaShop';
         $this->need_instance = 0;
         $this->bootstrap = true;
@@ -190,7 +190,7 @@ class Gsitemap extends Module
         }
 
         return parent::install()
-            && Db::getInstance()->Execute('CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'gsitemap_sitemap` (`link` varchar(255) DEFAULT NULL, `id_shop` int(11) DEFAULT 0) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;') && $this->installHook();
+            && Db::getInstance()->Execute('CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'gsitemap_sitemap` (`link` varchar(255) DEFAULT NULL, `id_shop` int(11) DEFAULT 0, KEY `id_shop` (`id_shop`)) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;') && $this->installHook();
     }
 
     /**

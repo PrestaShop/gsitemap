@@ -34,14 +34,6 @@ if (!defined('_PS_VERSION_')) {
  */
 function upgrade_module_5_0_1($module)
 {
-    $index = Db::getInstance()->getRow(
-        'SHOW INDEX FROM `' . _DB_PREFIX_ . 'gsitemap_sitemap` WHERE Key_name = \'id_shop\''
-    );
-
-    if (!empty($index)) {
-        return true;
-    }
-
     return Db::getInstance()->execute(
         'ALTER TABLE `' . _DB_PREFIX_ . 'gsitemap_sitemap` ADD KEY `id_shop` (`id_shop`)'
     );

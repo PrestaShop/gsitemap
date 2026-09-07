@@ -60,7 +60,7 @@ class Gsitemap extends Module
     {
         $this->name = 'gsitemap';
         $this->tab = 'checkout';
-        $this->version = '5.0.0';
+        $this->version = '5.1.0';
         $this->author = 'PrestaShop';
         $this->need_instance = 0;
         $this->bootstrap = true;
@@ -190,7 +190,8 @@ class Gsitemap extends Module
         }
 
         return parent::install()
-            && Db::getInstance()->Execute('CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'gsitemap_sitemap` (`link` varchar(255) DEFAULT NULL, `id_shop` int(11) DEFAULT 0) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;') && $this->installHook();
+            && Db::getInstance()->Execute('CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'gsitemap_sitemap` (`link` varchar(255) DEFAULT NULL, `id_shop` int(11) DEFAULT 0) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;') && $this->installHook()
+            && $this->registerHook('actionAdminMetaAfterWriteRobotsFile');
     }
 
     /**
@@ -318,6 +319,66 @@ class Gsitemap extends Module
         ]);
 
         return $this->display(__FILE__, 'views/templates/admin/configuration.tpl');
+    }
+
+    /**
+     * Declares the sitemap of every shop in robots.txt.
+     *
+     * The core writes a single Sitemap line, built from the domain the back office is opened
+     * on and from the base URI of the default shop, while a multistore installation serves the
+     * same robots.txt file on every domain. Without this, the sitemaps of the other shops are
+     * not declared anywhere.
+     *
+     * @param array $params
+     *
+     * @return void
+     */
+    public function hookActionAdminMetaAfterWriteRobotsFile($params)
+    {
+        if (!Shop::isFeatureActive() || empty($params['write_fd']) || !is_resource($params['write_fd'])) {
+            return;
+        }
+
+        $idShopInContext = (int) $this->context->shop->id;
+
+        foreach (array_keys(Shop::getShops(true)) as $idShop) {
+            $idShop = (int) $idShop;
+
+            $filename = $idShop . '_index_sitemap.xml';
+            $sitemapFile = $this->normalizeDirectory(_PS_ROOT_DIR_) . $filename;
+            if (!file_exists($sitemapFile) || !filesize($sitemapFile)) {
+                continue;
+            }
+
+            $shop = new Shop($idShop);
+            if (!Validate::isLoadedObject($shop)) {
+                continue;
+            }
+
+            // Each shop has its own domain and can have its own SSL setting.
+            $useSsl = (bool) Configuration::get('PS_SSL_ENABLED', null, null, $idShop);
+            $domain = $useSsl ? $shop->domain_ssl : $shop->domain;
+            if (empty($domain)) {
+                continue;
+            }
+
+            $url = Tools::getProtocol($useSsl) . $domain . $shop->getBaseURI() . $filename;
+
+            if ($idShop === $idShopInContext) {
+                // The core has just declared this sitemap, but always under the domain the back
+                // office is opened on and under the base URI of the default shop. That is the
+                // same URL only when both happen to belong to this shop, so the line is rebuilt
+                // and compared instead of skipping the shop in context unconditionally.
+                $urlWrittenByCore = Tools::getProtocol((bool) Configuration::get('PS_SSL_ENABLED'))
+                    . $_SERVER['SERVER_NAME'] . __PS_BASE_URI__ . $filename;
+
+                if ($url === $urlWrittenByCore) {
+                    continue;
+                }
+            }
+
+            fwrite($params['write_fd'], 'Sitemap: ' . $url . PHP_EOL);
+        }
     }
 
     /**

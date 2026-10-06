@@ -30,6 +30,7 @@ if (!defined('_PS_VERSION_')) {
 class Gsitemap extends Module
 {
     const HOOK_ADD_URLS = 'gSitemapAppendUrls';
+    const HOOK_MODIFY_LINK = 'actionGsitemapModifyLink';
 
     /**
      * @var bool
@@ -60,7 +61,7 @@ class Gsitemap extends Module
     {
         $this->name = 'gsitemap';
         $this->tab = 'checkout';
-        $this->version = '5.0.0';
+        $this->version = '5.1.0';
         $this->author = 'PrestaShop';
         $this->need_instance = 0;
         $this->bootstrap = true;
@@ -194,24 +195,41 @@ class Gsitemap extends Module
     }
 
     /**
-     * Check if the hook is present in the system or add it
+     * Check if the hooks are present in the system or add them
      *
      * @return bool
      */
     protected function installHook()
     {
-        $hook = new Hook(Hook::getIdByName(self::HOOK_ADD_URLS));
-        if (Validate::isLoadedObject($hook)) {
-            return true;
+        $hooks = [
+            self::HOOK_ADD_URLS => [
+                'title' => 'GSitemap Append URLs',
+                'description' => 'This hook allows a module to add URLs to a generated sitemap',
+            ],
+            self::HOOK_MODIFY_LINK => [
+                'title' => 'GSitemap Modify link',
+                'description' => 'This hook allows a module to modify or exclude a link before it is added to a generated sitemap',
+            ],
+        ];
+
+        foreach ($hooks as $name => $infos) {
+            $hook = new Hook(Hook::getIdByName($name));
+            if (Validate::isLoadedObject($hook)) {
+                continue;
+            }
+
+            $hook = new Hook();
+            $hook->name = $name;
+            $hook->title = $infos['title'];
+            $hook->description = $infos['description'];
+            $hook->position = true;
+
+            if (!$hook->save()) {
+                return false;
+            }
         }
 
-        $hook = new Hook();
-        $hook->name = self::HOOK_ADD_URLS;
-        $hook->title = 'GSitemap Append URLs';
-        $hook->description = 'This hook allows a module to add URLs to a generated sitemap';
-        $hook->position = true;
-
-        return $hook->save();
+        return true;
     }
 
     /**
@@ -356,6 +374,19 @@ class Gsitemap extends Module
      */
     public function addLinkToSitemap(&$link_sitemap, $new_link, $lang, &$index, &$i, $id_obj)
     {
+        // Allow modules to modify the link (e.g. its URL) or to exclude it from the sitemap
+        $exclude = false;
+        Hook::exec(self::HOOK_MODIFY_LINK, [
+            'link' => &$new_link,
+            'exclude' => &$exclude,
+            'iso_code' => $lang,
+            'id_lang' => (int) Language::getIdByIso($lang),
+            'id_object' => (int) $id_obj,
+        ]);
+        if ($exclude) {
+            return true;
+        }
+
         if ($i <= 25000 && memory_get_usage() < 100000000) {
             $link_sitemap[] = $new_link;
             ++$i;

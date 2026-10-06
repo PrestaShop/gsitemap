@@ -478,7 +478,12 @@ class Gsitemap extends Module
 
             $url = '';
             if (!in_array($meta['id_meta'], explode(',', Configuration::get('GSITEMAP_DISABLE_LINKS')))) {
-                $url = $link->getPageLink($meta['page'], null, $lang['id_lang']);
+                try {
+                    $url = $this->getMetaPageLink($link, $meta['page'], (int) $lang['id_lang']);
+                } catch (PrestaShopException $e) {
+                    // The route of this page requires parameters (e.g. an order reference), it cannot be in the sitemap
+                    continue;
+                }
 
                 if (!$this->addLinkToSitemap($link_sitemap, [
                     'type' => 'meta',
@@ -492,6 +497,29 @@ class Gsitemap extends Module
         }
 
         return true;
+    }
+
+    /**
+     * Get the URL of a meta page
+     *
+     * Module front controllers are stored in the meta table as "module-{module_name}-{controller}".
+     * When no custom URL rewrite is set for them, Link::getPageLink() returns a non rewritten URL
+     * (index.php?controller=module-...), so they must be built with Link::getModuleLink().
+     * The page name is parsed the same way as in Dispatcher::getController().
+     *
+     * @param Link $link
+     * @param string $page meta page name
+     * @param int $id_lang language identifier
+     *
+     * @return string
+     */
+    protected function getMetaPageLink(Link $link, $page, $id_lang)
+    {
+        if (preg_match('#^module-([a-z0-9_-]+)-([a-z0-9_]+)$#i', $page, $matches)) {
+            return $link->getModuleLink($matches[1], $matches[2], [], null, $id_lang);
+        }
+
+        return $link->getPageLink($page, null, $id_lang);
     }
 
     /**

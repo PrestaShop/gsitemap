@@ -39,7 +39,7 @@
    <p>{$gsitemap_number|intval} {l s='Sitemaps were already created.' d='Modules.Gsitemap.Admin'}</p>
    <br><br>
    <form action="{$gsitemap_refresh_page|escape:'htmlall':'UTF-8'}" method="post" id="gsitemap_generate_sitmap">
-      <img src="../img/loader.gif" alt=""/>
+      <img src="{$smarty.const.__PS_BASE_URI__}img/loader.gif" alt=""/>
       <input type="submit" class="button" value="{l s='Continue' d='Admin.Actions'}" style="display: none;"/>
    </form>
    {else}
@@ -114,7 +114,7 @@
             {l s='Generating a sitemap can take several minutes' d='Modules.Gsitemap.Admin'}</p>
          </div>
       </div>
-      <p id="gsitemap_loader" style="text-align: center; display: none;"><img src="../img/loader.gif" alt=""/></p>
+      <p id="gsitemap_loader" style="text-align: center; display: none;"><img src="{$smarty.const.__PS_BASE_URI__}img/loader.gif" alt=""/></p>
    </form>
 </div>
 

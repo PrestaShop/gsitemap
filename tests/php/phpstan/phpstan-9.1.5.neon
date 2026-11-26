@@ -1,2 +1,6 @@
 includes:
     - %currentWorkingDirectory%/tests/php/phpstan/phpstan.neon
+
+parameters:
+    # Analyse the minimum supported PHP version, including when running on PHP 8.5.
+    phpVersion: 80100

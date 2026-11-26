@@ -284,9 +284,7 @@ class Gsitemap extends Module
         }
 
         /* Empty the Shop domain cache */
-        if (method_exists('ShopUrl', 'resetMainDomainCache')) {
-            ShopUrl::resetMainDomainCache();
-        }
+        ShopUrl::resetMainDomainCache();
 
         $this->context->smarty->assign([
             'gsitemap_form' => $this->context->link->getAdminLink('AdminModules', true, [], [
@@ -450,9 +448,7 @@ class Gsitemap extends Module
      */
     protected function getMetaLink(&$link_sitemap, $lang, &$index, &$i, $id_meta = 0)
     {
-        if (method_exists('ShopUrl', 'resetMainDomainCache')) {
-            ShopUrl::resetMainDomainCache();
-        }
+        ShopUrl::resetMainDomainCache();
         $link = new Link();
         $metas = Db::getInstance()->ExecuteS('SELECT * FROM `' . _DB_PREFIX_ . 'meta` WHERE `configurable` > 0 AND `id_meta` >= ' . (int) $id_meta . ' AND page <> \'index\' ORDER BY `id_meta` ASC');
         foreach ($metas as $meta) {
@@ -508,9 +504,7 @@ class Gsitemap extends Module
     protected function getProductLink(&$link_sitemap, $lang, &$index, &$i, $id_product = 0)
     {
         $link = new Link();
-        if (method_exists('ShopUrl', 'resetMainDomainCache')) {
-            ShopUrl::resetMainDomainCache();
-        }
+        ShopUrl::resetMainDomainCache();
 
         /*
         * If group feature is enabled, we will show only publicly accessible categories in the sitemap.
@@ -586,9 +580,7 @@ class Gsitemap extends Module
     protected function getCategoryLink(&$link_sitemap, $lang, &$index, &$i, $id_category = 0)
     {
         $link = new Link();
-        if (method_exists('ShopUrl', 'resetMainDomainCache')) {
-            ShopUrl::resetMainDomainCache();
-        }
+        ShopUrl::resetMainDomainCache();
 
         // If group feature is enabled, we will show only publicly accessible categories in the sitemap
         if (Group::isFeatureActive() && !empty(Configuration::get('PS_UNIDENTIFIED_GROUP'))) {
@@ -661,9 +653,7 @@ class Gsitemap extends Module
         }
 
         $link = new Link();
-        if (method_exists('ShopUrl', 'resetMainDomainCache')) {
-            ShopUrl::resetMainDomainCache();
-        }
+        ShopUrl::resetMainDomainCache();
 
         // Get manufacturers IDs
         $manufacturers_id = Db::getInstance()->ExecuteS('SELECT m.`id_manufacturer` FROM `' . _DB_PREFIX_ . 'manufacturer` m
@@ -727,9 +717,7 @@ class Gsitemap extends Module
         }
 
         $link = new Link();
-        if (method_exists('ShopUrl', 'resetMainDomainCache')) {
-            ShopUrl::resetMainDomainCache();
-        }
+        ShopUrl::resetMainDomainCache();
 
         // Get suppliers IDs
         $suppliers_id = Db::getInstance()->ExecuteS(
@@ -790,9 +778,7 @@ class Gsitemap extends Module
     protected function getCmsLink(&$link_sitemap, $lang, &$index, &$i, $id_cms = 0)
     {
         $link = new Link();
-        if (method_exists('ShopUrl', 'resetMainDomainCache')) {
-            ShopUrl::resetMainDomainCache();
-        }
+        ShopUrl::resetMainDomainCache();
         $cmss_id = Db::getInstance()->ExecuteS('SELECT c.`id_cms` FROM `' . _DB_PREFIX_ . 'cms` c INNER JOIN `' . _DB_PREFIX_ . 'cms_lang` cl ON c.`id_cms` = cl.`id_cms` ' . 'INNER JOIN `' . _DB_PREFIX_ . 'cms_shop` cs ON c.`id_cms` = cs.`id_cms` ' . 'INNER JOIN `' . _DB_PREFIX_ . 'cms_category` cc ON c.id_cms_category = cc.id_cms_category AND cc.active = 1
             WHERE c.`active` =1 AND c.`indexation` =1 AND c.`id_cms` >= ' . (int) $id_cms . ' AND cs.id_shop = ' . (int) $this->context->shop->id . ' AND cl.`id_lang` = ' . (int) $lang['id_lang'] . ' GROUP BY  c.`id_cms` ORDER BY c.`id_cms` ASC');
 
